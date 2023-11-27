@@ -13,6 +13,7 @@
                 <ItemSelect v-if="isMelee" :items="leftHandItems" label="Left Hand" @update:model-value="onUpdate" v-model="equippedItems.leftHand" />
                 <ItemSelect v-if="isMagic" :items="magicBagItems" label="Magic Bag" @update:model-value="onUpdate" v-model="equippedItems.magicBag" :empty-equipment="false" />
                 <ItemSelect v-if="isRanged" :items="quiverItems" label="Quiver" @update:model-value="onUpdate" v-model="equippedItems.quiver" disabled :empty-equipment="false" />
+                <ItemSelect :items="foodItems" label="Food" @update:model-value="onUpdate" v-model="equippedItems.food" />
             </div>
         </div>
     </div>
@@ -42,6 +43,7 @@ const feetItems = computed(() => itemStore.getItemsForSlotAndXP(EquipPosition.FE
 const armItems = computed(() => itemStore.getItemsForSlotAndXP(EquipPosition.ARMS))
 const quiverItems = computed(() => itemStore.getItemsForSlotAndXP(EquipPosition.QUIVER))
 const magicBagItems = computed(() => itemStore.getMagicActionChoicesForXP)
+const foodItems = computed(() => itemStore.getItemsForSlotAndXP(EquipPosition.FOOD))
 
 const onUpdate = async () => {
     await nextTick() // wait for the model to update

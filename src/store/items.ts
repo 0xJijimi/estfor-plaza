@@ -30,6 +30,7 @@ export interface EquippedItems {
     leftHand: number | undefined,
     magicBag: number | undefined,
     quiver: number | undefined,
+    food: number | undefined,
 }
 
 export interface ItemState {

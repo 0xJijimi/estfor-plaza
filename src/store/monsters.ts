@@ -20,6 +20,7 @@ export interface MonsterRank {
     meleeDamagePerMinute: number,
     rangedDamagePerMinute: number,
     magicDamagePerMinute: number,
+    fishRequiredPerHour: number,
     combatStats: CombatStats,
 }
 
@@ -106,6 +107,7 @@ export const useMonsterStore = defineStore({
                 const magicDamagePerMinute = calculateDamage(m.combatStats.magic, combatStats.magicDefence)
                 const damageTakenPerMinute = meleeDamagePerMinute + rangedDamagePerMinute + magicDamagePerMinute
 
+                // Calculate kills per hour
                 const numSpawned = m.info.numSpawned / 1000
                 const xpPerKill = m.info.xpPerHour / numSpawned
                 
@@ -116,6 +118,10 @@ export const useMonsterStore = defineStore({
                     killsPerHour = numSpawned
                 }
                 const xpPerHour = killsPerHour * xpPerKill
+
+                // Calculate health restored per hour
+                const fishHealthRestored = itemStore.items.find(x => x.tokenId === itemStore.equippedItems.food)?.healthRestored || 0
+                const remainingHealth = combatStats.health - damageTakenPerHour
                 
                 monsterRankings.push({
                     name: monsterNames[m.actionId] || 'Unknown',
@@ -126,6 +132,7 @@ export const useMonsterStore = defineStore({
                     magicDamagePerMinute,
                     xpPerHour,
                     combatStats: m.combatStats,
+                    fishRequiredPerHour: remainingHealth < 0 ? Math.ceil((remainingHealth * -1) / fishHealthRestored) : 0,
                     imgSource: `${MEDIA_URL}/monsters/${monsterImageMap[m.actionId] || 'monster_1_9zp1zn5o.jpg'}`,
                 })
             }

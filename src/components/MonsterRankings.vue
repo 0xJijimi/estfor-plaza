@@ -43,8 +43,21 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="text-right">{{ m.damagePerMinute }}</td>
-                            <td class="text-right">{{ m.damageTakenPerHour }}</td>
+                            <td class="text-right">
+                                <div>
+                                    <div>{{ m.damagePerMinute }}</div>
+                                    <div class="text-xs max-md:hidden text-gray-300">{{ (m.combatStats.health / m.damagePerMinute).toFixed(2) }} minutes to kill</div>
+                                </div>
+                            </td>
+                            <td class="text-right">                                
+                                <div>
+                                    <div>{{ m.damageTakenPerHour }}</div>
+                                    <div class="text-xs max-md:hidden text-gray-300">
+                                        <span v-if="m.fishRequiredPerHour > 0">{{ m.fishRequiredPerHour }} {{ equippedFishName }}</span>
+                                        <span v-else class="text-success">Hero health > Damage received</span>
+                                    </div>
+                                </div>
+                            </td>
                             <td class="text-right">{{ m.xpPerHour.toFixed(0) }}</td>
                         </tr>
                     </tbody>
@@ -58,7 +71,9 @@
 import { useMonsterStore } from '../store/monsters'
 import { computed, ref } from 'vue'
 import { ChevronUpDownIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/vue/24/solid'
+import { useItemStore } from '../store/items';
 
+const itemStore = useItemStore()
 const monsterStore = useMonsterStore()
 const monsterRankings = computed(() => {
     const storeRankings = [...monsterStore.getMonsterRankings]
@@ -75,6 +90,8 @@ const monsterRankings = computed(() => {
     }
     return storeRankings.slice(0, 10)
 })
+
+const equippedFishName = computed(() => itemStore.items.find(x => x.tokenId === itemStore.equippedItems.food)?.name)
 
 const currentSort = ref<string | null>(null)
 const currentDirection = ref('desc')
