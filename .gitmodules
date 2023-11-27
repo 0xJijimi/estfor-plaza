@@ -1,4 +1,4 @@
 [submodule "estfor-contracts"]
 	path = estfor-contracts
-	url = https://github.com:PaintSwap/estfor-contracts.git
+	url = https://github.com/PaintSwap/estfor-contracts.git
 	branch = main
