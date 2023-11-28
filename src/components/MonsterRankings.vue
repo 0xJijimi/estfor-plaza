@@ -54,7 +54,7 @@
                                     <div>{{ m.damageTakenPerHour }}</div>
                                     <div class="text-xs max-md:hidden text-gray-300">
                                         <span v-if="m.fishRequiredPerHour > 0 && m.fishRequiredPerHour !== Infinity">{{ m.fishRequiredPerHour }} {{ equippedFishName }}</span>
-                                        <span v-else-if="m.fishRequiredPerHour === Infinity" class="text-error">Hero died (equip food)</span>
+                                        <span v-else-if="m.fishRequiredPerHour === Infinity" class="text-error">Hero will die (equip food)</span>
                                         <span v-else class="text-success">Hero health > Damage received</span>
                                     </div>
                                 </div>
