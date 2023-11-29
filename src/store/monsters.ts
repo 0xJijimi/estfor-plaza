@@ -137,19 +137,6 @@ export const useMonsterStore = defineStore({
                     const fishHealthRestored = itemStore.items.find(x => x.tokenId === itemStore.equippedItems.food)?.healthRestored || 0
                     const totalFoodRequired = Math.ceil(totalHealthLost / fishHealthRestored)
                     const xpPerHour = (m.info.xpPerHour * xpElapsedTime) / elapsedTime
-                    if (m.actionId === EstforConstants.ACTION_COMBAT_OBGORA) {
-                        console.log('damageDealt', damageDealt)
-                        console.log('combatTimePerKill', combatTimePerKill)
-                        console.log('damagePerMinute', damagePerMinute)
-                        console.log('damageTakenPerMinute', damageTakenPerMinute)
-                        console.log('respawnTime', respawnTime)
-                        console.log('numKilled', numKilled)
-                        console.log('combatElapsedTime', combatElapsedTime)
-                        console.log('xpElapsedTime', xpElapsedTime)
-                        console.log('totalHealthLost', totalHealthLost)
-                        console.log('totalFoodRequired', totalFoodRequired)
-                        console.log('xpPerHour', xpPerHour)
-                        }        
                     
                     monsterRankings.push({
                         name: monsterNames[m.actionId] || 'Unknown',
