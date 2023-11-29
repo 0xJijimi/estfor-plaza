@@ -79,17 +79,19 @@ export const useItemStore = defineStore({
         },
         getAggregatedCombatStats(state: ItemState) {
             const stats = new CombatStats()
-            Object.values(state.equippedItems).forEach((position, i) => {
-                if (i === 9) return // skip magic bag as they require special calculations
-                const item = state.items.find(x => x.tokenId === position)
-                if (item) {
-                    stats.melee += item.combatStats.melee
-                    stats.magic += item.combatStats.magic
-                    stats.ranged += item.combatStats.ranged
-                    stats.meleeDefence += item.combatStats.meleeDefence
-                    stats.magicDefence += item.combatStats.magicDefence
-                    stats.rangedDefence += item.combatStats.rangedDefence
-                    stats.health += item.combatStats.health
+            const localEquippedItems = state.equippedItems as any
+            Object.keys(state.equippedItems).forEach((key) => {
+                if (key !== 'magicBag') { // skip magic bag as they require special calculations
+                    const item = state.items.find(x => x.tokenId === localEquippedItems[key])
+                    if (item) { 
+                        stats.melee += item.combatStats.melee
+                        stats.magic += item.combatStats.magic
+                        stats.ranged += item.combatStats.ranged
+                        stats.meleeDefence += item.combatStats.meleeDefence
+                        stats.magicDefence += item.combatStats.magicDefence
+                        stats.rangedDefence += item.combatStats.rangedDefence
+                        stats.health += item.combatStats.health
+                    }
                 }
             })
         
@@ -104,17 +106,19 @@ export const useItemStore = defineStore({
             const playerState = coreStore.playerState
 
             const stats = new CombatStats()
-            Object.values(state.equippedItems).forEach((position, i) => {
-                if (i === 9) return // skip magic bag as they require special calculations
-                const item = state.items.find(x => x.tokenId === position)
-                if (item) {
-                    stats.melee += item.combatStats.melee
-                    stats.magic += item.combatStats.magic
-                    stats.ranged += item.combatStats.ranged
-                    stats.meleeDefence += item.combatStats.meleeDefence
-                    stats.magicDefence += item.combatStats.magicDefence
-                    stats.rangedDefence += item.combatStats.rangedDefence
-                    stats.health += item.combatStats.health
+            const localEquippedItems = state.equippedItems as any
+            Object.keys(state.equippedItems).forEach((key) => {
+                if (key !== 'magicBag') { // skip magic bag as they require special calculations
+                    const item = state.items.find(x => x.tokenId === localEquippedItems[key])
+                    if (item) { 
+                        stats.melee += item.combatStats.melee
+                        stats.magic += item.combatStats.magic
+                        stats.ranged += item.combatStats.ranged
+                        stats.meleeDefence += item.combatStats.meleeDefence
+                        stats.magicDefence += item.combatStats.magicDefence
+                        stats.rangedDefence += item.combatStats.rangedDefence
+                        stats.health += item.combatStats.health
+                    }
                 }
             })
         

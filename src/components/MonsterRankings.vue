@@ -36,8 +36,8 @@
                                         <div class="font-bold">{{ m.name }}</div>
                                         <div class="text-xs flex gap-2 items-center max-md:hidden">
                                             <div class="tooltip tooltip-primary tooltip-right" :data-tip="m.meleeDamagePerMinute.toString() + ' Melee Damage Per Minute'"><img src="/src/assets/melee.png" class="mask mask-squircle w-6" alt="Melee" /></div> {{ m.meleeDamagePerMinute }}
-                                            <div class="tooltip tooltip-primary tooltip-right" :data-tip="m.magicDamagePerMinute.toString() + ' Magic Damage Per Minute'"><img src="/src/assets/magic.png" class="mask mask-squircle w-6" alt="Magic" /></div> {{ m.magicDamagePerMinute }}
                                             <div class="tooltip tooltip-primary tooltip-right" :data-tip="m.rangedDamagePerMinute.toString() + ' Ranged Damage Per Minute'"><img src="/src/assets/ranged.png" class="mask mask-squircle w-6" alt="Ranged" /></div> {{ m.rangedDamagePerMinute }}
+                                            <div class="tooltip tooltip-primary tooltip-right" :data-tip="m.magicDamagePerMinute.toString() + ' Magic Damage Per Minute'"><img src="/src/assets/magic.png" class="mask mask-squircle w-6" alt="Magic" /></div> {{ m.magicDamagePerMinute }}
                                             <div class="tooltip tooltip-primary tooltip-right" :data-tip="m.combatStats.health + ' Total Health'"><img src="/src/assets/health.png" class="mask mask-squircle w-6" alt="Health" /></div> {{ m.combatStats.health }}
                                         </div>
                                     </div>
