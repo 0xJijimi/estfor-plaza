@@ -5,7 +5,7 @@
                 <table class="table md:table-md table-xs">
                     <thead>
                     <tr>
-                        <th></th>
+                        <th><HourSelect v-model="elapsedTime" /></th>
                         <th class="text-right"><div class="flex gap-1 items-center justify-end">Damage Dealt Per Minute 
                             <ChevronUpDownIcon v-if="currentSort != 'damagePerMinute'" class="w-6 text-white hover:text-gray-400 cursor-pointer" @click="updateSort('damagePerMinute', 'desc')"/>
                             <ChevronDownIcon v-else-if="currentSort == 'damagePerMinute' && currentDirection == 'desc'" class="w-6 text-white hover:text-gray-400 cursor-pointer" @click="updateSort('damagePerMinute', 'asc')"/>
@@ -51,7 +51,7 @@
                             </td>
                             <td class="text-right">                                
                                 <div>
-                                    <div>{{ m.damageTakenPerHour }}</div>
+                                    <div>{{ m.damageTakenPerHour.toFixed(0) }}</div>
                                     <div class="text-xs max-md:hidden text-gray-300">
                                         <span v-if="m.fishRequiredPerHour > 0 && m.fishRequiredPerHour !== Infinity">{{ m.fishRequiredPerHour }} {{ equippedFishName }}</span>
                                         <span v-else-if="m.fishRequiredPerHour === Infinity" class="text-error">Hero will die (equip food)</span>
@@ -73,11 +73,15 @@ import { useMonsterStore } from '../store/monsters'
 import { computed, ref } from 'vue'
 import { ChevronUpDownIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/vue/24/solid'
 import { useItemStore } from '../store/items';
+import HourSelect from './inputs/HourSelect.vue'
 
 const itemStore = useItemStore()
 const monsterStore = useMonsterStore()
+
+const elapsedTime = ref(1)
+
 const monsterRankings = computed(() => {
-    const storeRankings = [...monsterStore.getMonsterRankings]
+    const storeRankings = [...monsterStore.getMonsterRankings(elapsedTime.value)]
     if (currentSort.value) {
         storeRankings.sort((a, b) => {
             if (currentDirection.value == 'desc') {
