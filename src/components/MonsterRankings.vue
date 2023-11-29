@@ -11,7 +11,7 @@
                             <ChevronDownIcon v-else-if="currentSort == 'damagePerMinute' && currentDirection == 'desc'" class="w-6 text-white hover:text-gray-400 cursor-pointer" @click="updateSort('damagePerMinute', 'asc')"/>
                             <ChevronUpIcon v-else class="w-6 text-white hover:text-gray-400 cursor-pointer" @click="updateSort(null, 'desc')"/>
                         </div></th>
-                        <th class="text-right"><div class="flex gap-1 items-center justify-end">Damage Taken Per Hour 
+                        <th class="text-right"><div class="flex gap-1 items-center justify-end">Damage Taken Over {{ elapsedTime }} Hour{{ elapsedTime > 1 ? 's' : '' }}
                             <ChevronUpDownIcon v-if="currentSort != 'damageTakenPerHour'" class="w-6 text-white hover:text-gray-400 cursor-pointer" @click="updateSort('damageTakenPerHour', 'desc')"/>
                             <ChevronDownIcon v-else-if="currentSort == 'damageTakenPerHour' && currentDirection == 'desc'" class="w-6 text-white hover:text-gray-400 cursor-pointer" @click="updateSort('damageTakenPerHour', 'asc')"/>
                             <ChevronUpIcon v-else class="w-6 text-white hover:text-gray-400 cursor-pointer" @click="updateSort(null, 'desc')"/>
