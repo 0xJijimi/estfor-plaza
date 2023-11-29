@@ -34,7 +34,21 @@ const getChainName = (network: string) => {
 <template>
     <nav class="navbar bg-base-100-50 border-solid border-b-2 border-primary">
         <div class="navbar-start">
-            <router-link to="/" class="btn btn-ghost btn-circle ml-4"><img width="46" src="/src/assets/logo.png"></router-link>
+            <router-link to="/" class="btn btn-ghost btn-circle ml-4"><img width="46" src="/src/assets/logo.png"></router-link>            
+            <router-link to="/" class="max-sm:hidden btn btn-ghost ml-4 mr-2">Combat Calculator</router-link> 
+            <span class="max-sm:hidden">|</span>
+            <router-link to="/skills" class="max-sm:hidden btn btn-ghost ml-2">Skill Training</router-link>
+            <div class="sm:hidden dropdown">
+                <div tabindex="0" role="button" class="btn m-1 border-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                    </svg>
+                </div>
+                <ul class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                    <li><router-link to="/">Combat Calculator</router-link> </li>
+                    <li> <router-link to="/skills">Skill Training</router-link></li>
+                </ul>
+            </div>
         </div>
         <div class="navbar-end">
             <!-- <button class="btn btn-ghost btn-circle" v-if="isDark" @click="onThemeToggle('light')">

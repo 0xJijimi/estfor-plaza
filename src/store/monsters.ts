@@ -4,8 +4,7 @@ import { defineStore } from "pinia"
 import { allActions } from '../data/actions'
 import { useItemStore } from "./items"
 import { EstforConstants } from "@paintswap/estfor-definitions"
-
-export const MEDIA_URL = 'https://media.estfor.com'
+import { MEDIA_URL } from "./core"
 
 export interface MonsterState {
     monsters: ActionInput[]

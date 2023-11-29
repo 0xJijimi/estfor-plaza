@@ -5,6 +5,7 @@ import estforPlayerAbi from '../abi/estforPlayer.json'
 import { Player, getPlayerState } from "../utils/api"
 
 export const NATIVE_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
+export const MEDIA_URL = 'https://media.estfor.com'
 
 export enum Network {
     fantom = "fantom",

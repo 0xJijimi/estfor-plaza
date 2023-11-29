@@ -23,6 +23,7 @@ export interface Player {
     agilityXP: number
     fletchingXP: number
     alchemyXP: number
+    forgingXP: number
     isFullMode: boolean
 }
 

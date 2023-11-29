@@ -10,6 +10,20 @@ const routes: Array<RouteRecordRaw> = [
     {
         path: "/",
         component: () => import("../components/Base.vue"),
+        children: [
+            {
+                path: "",
+                redirect: "/combat",
+            },
+            {
+                path: "combat",
+                component: () => import("../components/CombatCalculator.vue"),
+            },
+            {
+                path: 'skills',
+                component: () => import("../components/SkillTraining.vue"),
+            },
+        ],
     },    
 ]
 

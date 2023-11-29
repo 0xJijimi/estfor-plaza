@@ -13,7 +13,6 @@
             <span class="loading loading-spinner text-primary loading-md mx-auto"></span>
         </div>
         <div v-else>
-            <CombatCalculator />
             <RouterView />
         </div>
     </div>
@@ -23,7 +22,6 @@
 import { chain, account, connect } from '@kolirt/vue-web3-auth'
 import { onMounted, ref, watch } from 'vue'
 import { useCoreStore } from '../store/core'
-import CombatCalculator from './CombatCalculator.vue'
 
 const coreStore = useCoreStore()
 const loading = ref(false)
