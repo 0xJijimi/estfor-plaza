@@ -494,7 +494,7 @@ export const useSkillStore = defineStore({
                         currentAction.actionId = lastAction.actionId
                         currentAction.name = actionNames[lastAction.actionId]
                     }
-                    const nextActionIndex = inputs.findIndex(x => x.info.minXP > currentAction.minXP)
+                    const nextActionIndex = inputs.findIndex(x => x.info.minXP > currentAction.minXP && x.info.xpPerHour > currentAction.xpPerHour)
                     if (nextActionIndex > -1) {
                         nextAction = {
                             minXP: inputs[nextActionIndex].info.minXP,

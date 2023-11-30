@@ -3,8 +3,8 @@
         <div v-for="action in allActions" :key="action.skill" class="card bg-base-100-50 shadow-xl rounded-lg">
             <figure><img class="w-full" :src="`${MEDIA_URL}/landscape/${skillNames[action.skill]?.toLowerCase()}.jpg`" :alt="skillNames[action.skill]" /></figure>
             <div class="card-body">
-                <div class="grid grid-cols-2">
-                    <div class="flex-row justify-between">
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="flex-col flex justify-between">
                         <div class="flex flex-col">
                             <div class="text-2xl font-bold">{{ skillNames[action.skill] || 'Unknown' }}</div>
                             <div class="text-sm text-gray-400">{{ action.relevantAction.currentAction.name || 'Unknown' }}</div>
@@ -14,7 +14,7 @@
                             <div class="text-sm text-gray-400">Current action</div>
                         </div>
                     </div>
-                    <div class="flex-row justify-between">
+                    <div class="flex-col flex justify-between">
                         <div class="flex flex-col">
                             <div class="text-2xl font-bold">{{ hoursUntilNextAction(action.relevantAction) }} hour{{ hoursUntilNextAction(action.relevantAction) > 1 ? 's' : '' }}</div>
                             <div class="text-sm text-gray-400">Until next action unlock</div>
