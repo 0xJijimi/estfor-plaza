@@ -59,7 +59,7 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="text-right">{{ m.xpPerHour.toFixed(0) }}</td>
+                            <td class="text-right">{{ (m.xpPerHour * coreStore.getCombatXPBoostMultiplier).toFixed(0) }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -73,10 +73,12 @@ import { useMonsterStore } from '../store/monsters'
 import { computed, ref } from 'vue'
 import { ChevronUpDownIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/vue/24/solid'
 import { useItemStore } from '../store/items';
+import { useCoreStore } from '../store/core';
 import HourSelect from './inputs/HourSelect.vue'
 
 const itemStore = useItemStore()
 const monsterStore = useMonsterStore()
+const coreStore = useCoreStore()
 
 const elapsedTime = ref(1)
 

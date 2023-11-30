@@ -179,6 +179,39 @@ export const useCoreStore = defineStore({
 
             return multiplier
         },
+        getCombatXPBoostMultiplier: (state: CoreState) => {
+            if (!state.applyBoost) {
+                return 1
+            }
+
+            let multiplier = 1
+            if (state.coreData.globalBoostType === BoostType.COMBAT_XP || state.coreData.globalBoostType === BoostType.ANY_XP) {
+                if (new Date((parseInt(state.coreData.globalBoostStartTime, 10) * 1000) + (state.coreData.globalBoostDuration * 1000)) > new Date()) {
+                    multiplier += state.coreData.globalBoostVal / 100
+                }
+            }
+            if (state.clanState && (state.clanState.boostType === BoostType.COMBAT_XP || state.clanState.boostType === BoostType.ANY_XP)) {
+                if (new Date((parseInt(state.clanState.boostStartTime, 10) * 1000) + (state.clanState.boostDuration * 1000)) > new Date()) {
+                    multiplier += state.clanState.boostVal / 100
+                }
+            }
+
+            if (state.individualBoost) {
+                const vial = allItems.find(x => x.tokenId === state.individualBoost)
+                if (vial?.boostType === BoostType.COMBAT_XP || vial?.boostType === BoostType.ANY_XP) {
+                    multiplier += vial.boostValue / 100
+                }
+            }
+
+            if (state.applyWishingWellBoost) {
+                const vial = allItems.find(x => x.tokenId === EstforConstants.LUCK_OF_THE_DRAW)
+                if (vial?.boostType === BoostType.COMBAT_XP || vial?.boostType === BoostType.ANY_XP) {
+                    multiplier += vial.boostValue / 100
+                }
+            }
+
+            return multiplier
+        },
     },
     actions: {
         setCurrentNetwork(network: Network) {         

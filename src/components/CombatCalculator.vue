@@ -18,6 +18,7 @@
         </div>
     </div>
     <HeroStats class="my-10" />
+    <BoostPanel :hide-non-combat="true" class="my-10" />
     <MonsterRankings />
 </template>
 
@@ -26,6 +27,7 @@ import { EquipPosition, Skill } from "@paintswap/estfor-definitions/types"
 import { useItemStore } from '../store/items'
 import Avatar from './Avatar.vue'
 import HeroStats from './HeroStats.vue'
+import BoostPanel from './BoostPanel.vue'
 import ItemSelect from './inputs/ItemSelect.vue'
 import { computed, nextTick, ref } from "vue"
 import MonsterRankings from "./MonsterRankings.vue"
