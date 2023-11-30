@@ -1,4 +1,5 @@
 <template>
+    <BoostPanel :hide-combat="true" />
     <div class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-5 my-10">
         <div v-for="action in allActions" :key="action.skill" class="card bg-base-100-50 shadow-xl rounded-lg">
             <figure><img class="w-full" :src="`${MEDIA_URL}/landscape/${skillNames[action.skill]?.toLowerCase()}.jpg`" :alt="skillNames[action.skill]" /></figure>
@@ -10,7 +11,7 @@
                             <div class="text-sm text-gray-400">{{ action.relevantAction.currentAction.name || 'Unknown' }}</div>
                         </div>
                         <div class="flex flex-col mt-5">
-                            <div class="text-2xl font-bold">{{ action.relevantAction.currentAction.xpPerHour }} XP/hour</div>
+                            <div class="text-2xl font-bold">{{ (action.relevantAction.currentAction.xpPerHour * coreStore.getNonCombatXPBoostMultiplier).toFixed(0) }} XP/hour</div>
                             <div class="text-sm text-gray-400">Current action</div>
                         </div>
                     </div>
@@ -20,7 +21,7 @@
                             <div class="text-sm text-gray-400">Until next action unlock</div>
                         </div>
                         <div v-if="action.relevantAction.nextAction" class="flex flex-col mt-5">
-                            <div class="text-2xl font-bold">{{ action.relevantAction.nextAction?.xpPerHour }} XP/hour</div>
+                            <div class="text-2xl font-bold">{{ (action.relevantAction.nextAction?.xpPerHour * coreStore.getNonCombatXPBoostMultiplier).toFixed(0) }} XP/hour</div>
                             <div class="text-sm text-gray-400">Next action</div>
                         </div>
                     </div>
@@ -33,10 +34,12 @@
 <script setup lang="ts">
 import { Skill } from '@paintswap/estfor-definitions/types'
 import { useSkillStore, RelevantAction, skillNames } from '../store/skills'
-import { MEDIA_URL } from '../store/core'
+import { MEDIA_URL, useCoreStore } from '../store/core'
 import { computed } from 'vue'
+import BoostPanel from './BoostPanel.vue';
 
 const skillStore = useSkillStore()
+const coreStore = useCoreStore()
 
 const allActions = computed(() => {
     return [
@@ -60,6 +63,6 @@ const hoursUntilNextAction = (relevantAction: RelevantAction) => {
         return 0 // max level
     }
     const xpToNextAction = relevantAction.nextAction.minXP - relevantAction.currentXPForSkill
-    return Math.ceil(xpToNextAction / relevantAction.currentAction.xpPerHour)
+    return Math.ceil(xpToNextAction / (relevantAction.currentAction.xpPerHour * coreStore.getNonCombatXPBoostMultiplier))
 }
 </script>

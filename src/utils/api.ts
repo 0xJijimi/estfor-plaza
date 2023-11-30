@@ -1,3 +1,5 @@
+import { BoostType } from "@paintswap/estfor-definitions/types"
+
 const baseUrl = 'https://api.estfor.com'
 
 export interface Player {
@@ -27,15 +29,50 @@ export interface Player {
     isFullMode: boolean
 }
 
-export interface PlayerResult {
+export interface Clan {
+    id: number
+    name: string
+    boostStartTime: string
+    boostDuration: number
+    boostVal: number
+    boostType: BoostType
+    boostItemTokenId: number
+}
+
+export interface ClanMember {
     player: Player
+    clan: Clan | null
+}
+
+export interface ClanMemberResult {
+    clanMember: ClanMember
+}
+
+export interface CoreData {
+    gamePaused: boolean
+    globalBoostStartTime: string
+    globalBoostDuration: number
+    globalBoostVal: number
+    globalBoostType: BoostType
+    globalBoostItemTokenId: number
+}
+
+export interface CoreDataResult {
+    coreData: CoreData
 }
 
 export const getPlayerState = async (
     playerId: number
-): Promise<PlayerResult> => {
+): Promise<ClanMemberResult> => {
     const response = await fetch(
-        `${baseUrl}/players/${playerId}`
+        `${baseUrl}/clan-members/${playerId}`
+    )
+    return response.json()
+}
+
+export const getGlobalData = async (): Promise<CoreDataResult> => {
+    const response = await fetch(
+        `${baseUrl}/core-data`
     )
     return response.json()
 }
