@@ -2,10 +2,11 @@ import { defineStore } from "pinia"
 import { account, readContract, } from '@kolirt/vue-web3-auth'
 
 import estforPlayerAbi from '../abi/estforPlayer.json'
-import { CoreData, Clan, Player, getPlayerState, getGlobalData } from "../utils/api"
-import { BoostType } from "@paintswap/estfor-definitions/types"
+import { CoreData, Clan, Player, getPlayerState, getGlobalData, getUserItemNFTs } from "../utils/api"
+import { BoostType, Skill, UserItemNFT } from "@paintswap/estfor-definitions/types"
 import { EstforConstants } from "@paintswap/estfor-definitions"
 import { allItems } from "../data/items"
+import { allFullAttireBonuses } from "../data/fullAttireBonuses"
 
 export const NATIVE_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
 export const MEDIA_URL = 'https://media.estfor.com'
@@ -38,6 +39,7 @@ export interface CoreState {
     applyBoost: boolean
     individualBoost: number | null
     applyWishingWellBoost: boolean
+    inventory: UserItemNFT[]
 }
 
 export const boostVialNames = {
@@ -57,10 +59,61 @@ export const boostTypeNames = {
     [BoostType.PASSIVE_SKIP_CHANCE]: "Passive Skip Chance",
 }
 
+export const avatarBoostSkills = {
+    [1]: [Skill.MAGIC],
+    [2]: [Skill.THIEVING],
+    [3]: [Skill.MAGIC, Skill.DEFENCE],
+    [4]: [Skill.MELEE],
+    [5]: [Skill.MAGIC, Skill.HEALTH],
+    [6]: [Skill.MELEE, Skill.DEFENCE],
+    [7]: [Skill.RANGED],
+    [8]: [Skill.MELEE, Skill.MAGIC],
+    [10001]: [Skill.MAGIC],
+    [10002]: [Skill.THIEVING],
+    [10003]: [Skill.MAGIC, Skill.DEFENCE],
+    [10004]: [Skill.MELEE],
+    [10005]: [Skill.MAGIC, Skill.HEALTH],
+    [10006]: [Skill.MELEE, Skill.DEFENCE],
+    [10007]: [Skill.RANGED],
+    [10008]: [Skill.MELEE, Skill.MAGIC],
+}
+
 export const xpBoundaries = [0, 84, 174, 270, 374, 486, 606, 734, 872, 1021, 1179, 1350, 1532, 1728, 1938, 2163, 2404, 2662, 2939, 3236, 3553, 3894, 4258, 4649, 5067, 5515, 5995, 6510, 7060, 7650, 8282, 8959, 9685, 10461, 11294, 12185, 13140, 14162, 15258, 16432, 17689, 19036, 20479, 22025, 23681, 25456, 27357, 29393, 31575, 33913, 36418, 39102, 41977, 45058, 48359, 51896, 55686, 59747, 64098, 68761, 73757, 79110, 84847, 90995, 97582, 104641, 112206, 120312, 128998, 138307, 148283, 158973, 170430, 182707, 195864, 209963, 225074, 241267, 258621, 277219, 297150, 318511, 341403, 365936, 392228, 420406, 450605, 482969, 517654, 554828, 594667, 637364, 683124, 732166, 784726, 841057, 901428, 966131, 1035476, 1109796] 
 
 export const getLevel = (xp: number) => {
     return xpBoundaries.findIndex(x => x > xp)
+}
+
+export const heroAvatarMultiplier = (player: Player, skill: Skill) => {
+    let multiplier = 0
+    // @ts-ignore
+    if ((avatarBoostSkills[player.avatarId] || []).includes(skill)) {
+        let heroXPMultiplier = 1
+        if (player.isFullMode) {
+            heroXPMultiplier = 2
+        }
+        // @ts-ignore
+        if (avatarBoostSkills[player.avatarId]?.length === 2) {
+            multiplier += 0.05 * heroXPMultiplier
+        } else {
+            multiplier += 0.1 * heroXPMultiplier
+        }
+    }
+    return multiplier
+}
+
+export const fullAttireMultiplier = (inventory: UserItemNFT[], skill: Skill) => {
+    const fullAttireBonus = allFullAttireBonuses.find(x => x.skill === skill)
+    if (!fullAttireBonus) {
+        return 0
+    }
+
+    const fullAttire = fullAttireBonus.itemTokenIds.every(x => inventory.some(y => y.tokenId === x && parseInt(y.amount, 10) > 0))
+    if (!fullAttire) {
+        return 0
+    }
+
+    return fullAttireBonus.bonusXPPercent / 100
 }
 
 export const useCoreStore = defineStore({
@@ -86,6 +139,7 @@ export const useCoreStore = defineStore({
             applyBoost: true,
             individualBoost: null,
             applyWishingWellBoost: false,
+            inventory: [],
         } as CoreState),
     getters: {
         getNetworkAddressMap: (state: CoreState): AddressMap[] | undefined => {
@@ -146,71 +200,48 @@ export const useCoreStore = defineStore({
             }
             return clanBoost
         },
-        getNonCombatXPBoostMultiplier: (state: CoreState) => {
-            if (!state.applyBoost) {
-                return 1
-            }
+        getXPBoostMultiplier: (state: CoreState) => {
+            return (skill: Skill, boost: BoostType) => {
+                let multiplier = 1
+                
+                // Apply innate hero boosts as they always count
+                multiplier += heroAvatarMultiplier(state.playerState, skill)
 
-            let multiplier = 1
-            if (state.coreData.globalBoostType === BoostType.NON_COMBAT_XP || state.coreData.globalBoostType === BoostType.ANY_XP) {
-                if (new Date((parseInt(state.coreData.globalBoostStartTime, 10) * 1000) + (state.coreData.globalBoostDuration * 1000)) > new Date()) {
-                    multiplier += state.coreData.globalBoostVal / 100
-                }
-            }
-            if (state.clanState && (state.clanState.boostType === BoostType.NON_COMBAT_XP || state.clanState.boostType === BoostType.ANY_XP)) {
-                if (new Date((parseInt(state.clanState.boostStartTime, 10) * 1000) + (state.clanState.boostDuration * 1000)) > new Date()) {
-                    multiplier += state.clanState.boostVal / 100
-                }
-            }
+                // Apply set bonus from full attire if applicable
+                multiplier += fullAttireMultiplier(state.inventory, skill)
 
-            if (state.individualBoost) {
-                const vial = allItems.find(x => x.tokenId === state.individualBoost)
-                if (vial?.boostType === BoostType.NON_COMBAT_XP || vial?.boostType === BoostType.ANY_XP) {
-                    multiplier += vial.boostValue / 100
+                if (!state.applyBoost) {
+                    return multiplier
                 }
-            }
 
-            if (state.applyWishingWellBoost) {
-                const vial = allItems.find(x => x.tokenId === EstforConstants.LUCK_OF_THE_DRAW)
-                if (vial?.boostType === BoostType.NON_COMBAT_XP || vial?.boostType === BoostType.ANY_XP) {
-                    multiplier += vial.boostValue / 100
+                if (state.coreData.globalBoostType === boost || state.coreData.globalBoostType === BoostType.ANY_XP) {
+                    if (new Date((parseInt(state.coreData.globalBoostStartTime, 10) * 1000) + (state.coreData.globalBoostDuration * 1000)) > new Date()) {
+                        multiplier += state.coreData.globalBoostVal / 100
+                    }
                 }
-            }
-
-            return multiplier
-        },
-        getCombatXPBoostMultiplier: (state: CoreState) => {
-            if (!state.applyBoost) {
-                return 1
-            }
-
-            let multiplier = 1
-            if (state.coreData.globalBoostType === BoostType.COMBAT_XP || state.coreData.globalBoostType === BoostType.ANY_XP) {
-                if (new Date((parseInt(state.coreData.globalBoostStartTime, 10) * 1000) + (state.coreData.globalBoostDuration * 1000)) > new Date()) {
-                    multiplier += state.coreData.globalBoostVal / 100
+                if (state.clanState && (state.clanState.boostType === boost || state.clanState.boostType === BoostType.ANY_XP)) {
+                    if (new Date((parseInt(state.clanState.boostStartTime, 10) * 1000) + (state.clanState.boostDuration * 1000)) > new Date()) {
+                        multiplier += state.clanState.boostVal / 100
+                    }
                 }
-            }
-            if (state.clanState && (state.clanState.boostType === BoostType.COMBAT_XP || state.clanState.boostType === BoostType.ANY_XP)) {
-                if (new Date((parseInt(state.clanState.boostStartTime, 10) * 1000) + (state.clanState.boostDuration * 1000)) > new Date()) {
-                    multiplier += state.clanState.boostVal / 100
-                }
-            }
 
-            if (state.individualBoost) {
-                const vial = allItems.find(x => x.tokenId === state.individualBoost)
-                if (vial?.boostType === BoostType.COMBAT_XP || vial?.boostType === BoostType.ANY_XP) {
-                    multiplier += vial.boostValue / 100
+                // Average the boost values over the duration if they're shorter than a day
+                if (state.individualBoost) {
+                    const vial = allItems.find(x => x.tokenId === state.individualBoost)
+                    if (vial?.boostType === boost || vial?.boostType === BoostType.ANY_XP) {
+                        multiplier += (vial.boostValue / 100) * (vial.boostDuration >= (60 * 60 * 24) ? 1 : vial.boostDuration / (60 * 60 * 24))
+                    }
                 }
-            }
 
-            if (state.applyWishingWellBoost) {
-                const vial = allItems.find(x => x.tokenId === EstforConstants.LUCK_OF_THE_DRAW)
-                if (vial?.boostType === BoostType.COMBAT_XP || vial?.boostType === BoostType.ANY_XP) {
-                    multiplier += vial.boostValue / 100
+                if (state.applyWishingWellBoost) {
+                    const vial = allItems.find(x => x.tokenId === EstforConstants.LUCK_OF_THE_DRAW)
+                    if (vial?.boostType === boost || vial?.boostType === BoostType.ANY_XP) {
+                        multiplier += (vial.boostValue / 100) * (vial.boostDuration >= (60 * 60 * 24) ? 1 : vial.boostDuration / (60 * 60 * 24))
+                    }
                 }
-            }
 
-            return multiplier
+                return multiplier
+            }
         },
     },
     actions: {
@@ -223,6 +254,7 @@ export const useCoreStore = defineStore({
             this.playerId = 0
             this.playerState = {} as Player
             this.clanState = null
+            this.inventory = []
         },
         async getActivePlayer() {
             const playerAddress = this.getAddress(Address.estforPlayers)
@@ -248,6 +280,9 @@ export const useCoreStore = defineStore({
 
             const globalState = await getGlobalData()
             this.coreData = globalState.coreData
+
+            const inventory = await getUserItemNFTs(this.playerState.owner, allFullAttireBonuses.flatMap(x => x.itemTokenIds))
+            this.inventory = inventory.userItemNFTs
         },
     },
 })

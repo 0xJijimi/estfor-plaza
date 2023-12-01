@@ -52,7 +52,14 @@
                 </select>
                 <div class="form-control items-end">
                     <label class="label cursor-pointer">
-                        <span class="label-text text-xs mr-2">Wishing Well (+{{ wishingWellBoost.boostValue }}% {{ boostTypeNames[wishingWellBoost.boostType] }})</span> 
+                        <span class="label-text text-xs mr-2 items-center flex">
+                            Wishing Well (+{{ wishingWellBoost.boostValue }}% {{ boostTypeNames[wishingWellBoost.boostType] }})
+                            <div class="tooltip tooltip-primary tooltip-bottom ml-2" :data-tip="'Wishing well boost lasts for ' + wishingWellBoost.boostDuration / 60 / 60 + ' hours and this is included in the calculations'">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                                </svg>
+                            </div>
+                        </span> 
                         <input type="checkbox" class="checkbox checkbox-primary" v-model="applyWishingWellBoost" @update:model-value="onUpdateWishingWellBoost" />
                     </label>
                 </div>
@@ -122,6 +129,6 @@ const boostOptions = computed(() => {
 })
 
 const wishingWellBoost = computed(() => {
-    return itemStore.items.find(x => x.tokenId === EstforConstants.LUCK_OF_THE_DRAW) || { boostType: BoostType.ANY_XP, boostValue: 0 }
+    return itemStore.items.find(x => x.tokenId === EstforConstants.LUCK_OF_THE_DRAW) || { boostType: BoostType.ANY_XP, boostValue: 0, boostDuration: 0 }
 })
 </script>

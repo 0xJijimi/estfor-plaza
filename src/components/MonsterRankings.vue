@@ -5,7 +5,10 @@
                 <table class="table md:table-md table-xs">
                     <thead>
                     <tr>
-                        <th><HourSelect v-model="elapsedTime" /></th>
+                        <th class="flex max-md:flex-col">
+                            <HourSelect v-model="elapsedTime" class="md:w-1/2 mr-2" />
+                            <CombatStyleSelect v-model="combatStyle" :skill="weaponSkill" class="md:w-1/2" />
+                        </th>
                         <th class="text-right"><div class="flex gap-1 items-center justify-end">Damage Dealt Per Minute 
                             <ChevronUpDownIcon v-if="currentSort != 'damagePerMinute'" class="w-6 text-white hover:text-gray-400 cursor-pointer" @click="updateSort('damagePerMinute', 'desc')"/>
                             <ChevronDownIcon v-else-if="currentSort == 'damagePerMinute' && currentDirection == 'desc'" class="w-6 text-white hover:text-gray-400 cursor-pointer" @click="updateSort('damagePerMinute', 'asc')"/>
@@ -59,7 +62,12 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="text-right">{{ (m.xpPerHour * coreStore.getCombatXPBoostMultiplier).toFixed(0) }}</td>
+                            <td class="text-right">
+                                <div>
+                                    <div>{{ (m.xpPerHour * coreStore.getXPBoostMultiplier(combatStyle, BoostType.COMBAT_XP)).toFixed(0) }}</div>
+                                    <div class="text-xs max-md:hidden text-gray-300">{{ levelsGained(currentXPForCombatStyle, m.xpPerHour) }} level{{ levelsGained(currentXPForCombatStyle, m.xpPerHour) === 1 ? '' : 's' }} gained</div>
+                                </div>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -70,17 +78,54 @@
 
 <script setup lang="ts">
 import { useMonsterStore } from '../store/monsters'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { ChevronUpDownIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/vue/24/solid'
 import { useItemStore } from '../store/items';
-import { useCoreStore } from '../store/core';
+import { getLevel, useCoreStore } from '../store/core';
 import HourSelect from './inputs/HourSelect.vue'
+import CombatStyleSelect from './inputs/CombatStyleSelect.vue'
+import { BoostType, Skill } from '@paintswap/estfor-definitions/types';
 
 const itemStore = useItemStore()
 const monsterStore = useMonsterStore()
 const coreStore = useCoreStore()
 
 const elapsedTime = ref(1)
+const combatStyle = ref(Skill.DEFENCE)
+
+const weaponSkill = computed(() => {
+    const weapon = itemStore.items.find(x => x.tokenId === itemStore.equippedItems.rightHand)
+    if (weapon) {
+        return weapon.skill
+    }
+    return Skill.NONE
+})
+
+watch(() => itemStore.equippedItems.rightHand, () => {
+    combatStyle.value = weaponSkill.value
+})
+
+const currentXPForCombatStyle = computed(() => {
+    let xp = 0
+    switch (combatStyle.value) {
+        case Skill.MELEE:
+            xp = coreStore.playerState.meleeXP
+            break
+        case Skill.RANGED:
+            xp = coreStore.playerState.rangedXP
+            break
+        case Skill.MAGIC:
+            xp = coreStore.playerState.magicXP
+            break
+        case Skill.DEFENCE:
+            xp = coreStore.playerState.defenceXP
+            break
+        default:
+            xp = 0
+    }
+    // @ts-ignore - parseInt is fine here
+    return parseInt(xp, 10)
+})
 
 const monsterRankings = computed(() => {
     const storeRankings = [...monsterStore.getMonsterRankings(elapsedTime.value)]
@@ -106,5 +151,9 @@ const currentDirection = ref('desc')
 const updateSort = (sort: string | null, direction: string) => {
     currentSort.value = sort
     currentDirection.value = direction
+}
+
+const levelsGained = (currentXP: number, xpPerHour: number) => {
+    return getLevel(currentXP + ((xpPerHour * coreStore.getXPBoostMultiplier(combatStyle.value, BoostType.COMBAT_XP)) * elapsedTime.value)) - getLevel(currentXP)
 }
 </script>

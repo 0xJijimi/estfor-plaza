@@ -7,11 +7,23 @@
                 <div class="grid grid-cols-2 gap-2">
                     <div class="flex-col flex justify-between">
                         <div class="flex flex-col">
-                            <div class="text-2xl font-bold">{{ skillNames[action.skill] || 'Unknown' }}</div>
+                            <div class="text-2xl font-bold flex items-center gap-2">
+                                {{ skillNames[action.skill] || 'Unknown' }}
+                                <div v-if="fullAttireMultiplier(coreStore.inventory, action.skill)" class="tooltip tooltip-primary tooltip-bottom" data-tip="Bonus XP from full attire outfit">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 19.5v-15m0 0l-6.75 6.75M12 4.5l6.75 6.75" />
+                                    </svg>
+                                </div>
+                                <div v-if="heroAvatarMultiplier(coreStore.playerState, action.skill)" class="tooltip tooltip-primary tooltip-bottom" data-tip="Bonus XP from hero">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 19.5v-15m0 0l-6.75 6.75M12 4.5l6.75 6.75" />
+                                    </svg>
+                                </div>
+                            </div>
                             <div class="text-sm text-gray-400">{{ action.relevantAction.currentAction.name || 'Unknown' }}</div>
                         </div>
                         <div class="flex flex-col mt-5">
-                            <div class="text-2xl font-bold">{{ (action.relevantAction.currentAction.xpPerHour * coreStore.getNonCombatXPBoostMultiplier).toFixed(0) }} XP/hour</div>
+                            <div class="text-2xl font-bold">{{ (action.relevantAction.currentAction.xpPerHour * coreStore.getXPBoostMultiplier(action.skill, BoostType.NON_COMBAT_XP)).toFixed(0) }} XP/hour</div>
                             <div class="text-sm text-gray-400">Current action</div>
                         </div>
                     </div>
@@ -21,7 +33,7 @@
                             <div class="text-sm text-gray-400">Until next action unlock</div>
                         </div>
                         <div v-if="action.relevantAction.nextAction" class="flex flex-col mt-5">
-                            <div class="text-2xl font-bold">{{ (action.relevantAction.nextAction?.xpPerHour * coreStore.getNonCombatXPBoostMultiplier).toFixed(0) }} XP/hour</div>
+                            <div class="text-2xl font-bold">{{ (action.relevantAction.nextAction?.xpPerHour * coreStore.getXPBoostMultiplier(action.skill, BoostType.NON_COMBAT_XP)).toFixed(0) }} XP/hour</div>
                             <div class="text-sm text-gray-400">Next action</div>
                         </div>
                     </div>
@@ -32,9 +44,9 @@
 </template>
 
 <script setup lang="ts">
-import { Skill } from '@paintswap/estfor-definitions/types'
+import { BoostType, Skill } from '@paintswap/estfor-definitions/types'
 import { useSkillStore, RelevantAction, skillNames } from '../store/skills'
-import { MEDIA_URL, useCoreStore } from '../store/core'
+import { MEDIA_URL, useCoreStore, fullAttireMultiplier, heroAvatarMultiplier } from '../store/core'
 import { computed } from 'vue'
 import BoostPanel from './BoostPanel.vue';
 
@@ -63,6 +75,6 @@ const hoursUntilNextAction = (relevantAction: RelevantAction) => {
         return 0 // max level
     }
     const xpToNextAction = relevantAction.nextAction.minXP - relevantAction.currentXPForSkill
-    return Math.ceil(xpToNextAction / (relevantAction.currentAction.xpPerHour * coreStore.getNonCombatXPBoostMultiplier))
+    return Math.ceil(xpToNextAction / (relevantAction.currentAction.xpPerHour * coreStore.getXPBoostMultiplier(relevantAction.skill, BoostType.NON_COMBAT_XP)))
 }
 </script>

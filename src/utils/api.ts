@@ -1,4 +1,4 @@
-import { BoostType } from "@paintswap/estfor-definitions/types"
+import { BoostType, UserItemNFT } from "@paintswap/estfor-definitions/types"
 
 const baseUrl = 'https://api.estfor.com'
 
@@ -61,6 +61,10 @@ export interface CoreDataResult {
     coreData: CoreData
 }
 
+export interface UserItemNFTResult {
+    userItemNFTs: UserItemNFT[]
+}
+
 export const getPlayerState = async (
     playerId: number
 ): Promise<ClanMemberResult> => {
@@ -73,6 +77,13 @@ export const getPlayerState = async (
 export const getGlobalData = async (): Promise<CoreDataResult> => {
     const response = await fetch(
         `${baseUrl}/core-data`
+    )
+    return response.json()
+}
+
+export const getUserItemNFTs = async (user: string, tokenIds: number[]): Promise<UserItemNFTResult> => {
+    const response = await fetch(
+        `${baseUrl}/user-item-nfts/${user}?${tokenIds.map(x => `tokenIds[]=${x}`).join('&')}`
     )
     return response.json()
 }

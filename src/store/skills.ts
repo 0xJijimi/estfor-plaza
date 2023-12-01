@@ -382,6 +382,7 @@ export interface RelevantAction {
     currentAction: RelevantActionInput,
     nextAction: RelevantActionInput | undefined,
     currentXPForSkill: number,
+    skill: Skill,
 }
 
 export const useSkillStore = defineStore({
@@ -537,7 +538,7 @@ export const useSkillStore = defineStore({
                         }
                     }
                 }
-                return { currentAction, nextAction, currentXPForSkill }
+                return { currentAction, nextAction, currentXPForSkill, skill }
             }
         },
     },
