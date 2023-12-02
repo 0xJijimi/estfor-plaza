@@ -478,6 +478,12 @@ export const useSkillStore = defineStore({
                             return -1
                         if (b.info.xpPerHour < a.info.xpPerHour)
                             return 1
+
+                        if (b.info.minXP > a.info.minXP)
+                            return -1
+                        if (b.info.minXP < a.info.minXP)
+                            return 1
+
                         return 0
                     })
 
@@ -495,13 +501,25 @@ export const useSkillStore = defineStore({
                         currentAction.actionId = lastAction.actionId
                         currentAction.name = actionNames[lastAction.actionId]
                     }
-                    const nextActionIndex = inputs.findIndex(x => x.info.minXP > currentAction.minXP && x.info.xpPerHour > currentAction.xpPerHour)
-                    if (nextActionIndex > -1) {
+                    const nextActions = inputs.filter(x => x.info.minXP > currentAction.minXP && x.info.xpPerHour > currentAction.xpPerHour)
+                    if (nextActions.length > 1) {
+                        nextActions.sort((a, b) => {
+                            if (b.info.minXP > a.info.minXP)
+                                return -1
+                            if (b.info.minXP < a.info.minXP)
+                                return 1
+
+                            if (b.info.xpPerHour > a.info.xpPerHour)
+                                return -1
+                            if (b.info.xpPerHour < a.info.xpPerHour)
+                                return 1
+                            return 0
+                        })
                         nextAction = {
-                            minXP: inputs[nextActionIndex].info.minXP,
-                            xpPerHour: inputs[nextActionIndex].info.xpPerHour,
-                            actionId: inputs[nextActionIndex].actionId,
-                            name: actionNames[inputs[nextActionIndex].actionId],
+                            minXP: nextActions[0].info.minXP,
+                            xpPerHour: nextActions[0].info.xpPerHour,
+                            actionId: nextActions[0].actionId,
+                            name: actionNames[nextActions[0].actionId],
                         }
                     }
                 } else {
@@ -509,6 +527,11 @@ export const useSkillStore = defineStore({
                         if (b.xpPerHour > a.xpPerHour)
                             return -1
                         if (b.xpPerHour < a.xpPerHour)
+                            return 1
+
+                        if (b.minXPs[b.minSkills.indexOf(skill)] > a.minXPs[b.minSkills.indexOf(skill)])
+                            return -1
+                        if (b.minXPs[b.minSkills.indexOf(skill)] < a.minXPs[b.minSkills.indexOf(skill)])
                             return 1
                         return 0
                     })
@@ -528,13 +551,25 @@ export const useSkillStore = defineStore({
                         currentAction.actionId = lastAction.outputTokenId
                         currentAction.name = actionChoiceNames[lastAction.outputTokenId]
                     }
-                    const nextActionIndex = inputChoices.findIndex(x => x.minXPs.some((y, i) => y > currentAction.minXP && x.minSkills[i] === skill) && x.xpPerHour > currentAction.xpPerHour)
-                    if (nextActionIndex > -1) {
+                    const nextActions = inputChoices.filter(x => x.minXPs.some((y, i) => y > currentAction.minXP && x.minSkills[i] === skill) && x.xpPerHour > currentAction.xpPerHour)
+                    if (nextActions.length > 1) {
+                        nextActions.sort((a, b) => {
+                            if (b.minXPs[b.minSkills.indexOf(skill)] > a.minXPs[b.minSkills.indexOf(skill)])
+                                return -1
+                            if (b.minXPs[b.minSkills.indexOf(skill)] < a.minXPs[b.minSkills.indexOf(skill)])
+                                return 1
+    
+                            if (b.xpPerHour > a.xpPerHour)
+                                return -1
+                            if (b.xpPerHour < a.xpPerHour)
+                                return 1
+                            return 0
+                        })
                         nextAction = {
-                            minXP: inputChoices[nextActionIndex].minXPs[inputChoices[nextActionIndex].minSkills.findIndex(x => x === skill)] || 0,
-                            xpPerHour: inputChoices[nextActionIndex].xpPerHour,
-                            actionId: inputChoices[nextActionIndex].outputTokenId,
-                            name: actionChoiceNames[inputChoices[nextActionIndex].outputTokenId],
+                            minXP: nextActions[0].minXPs[nextActions[0].minSkills.findIndex(x => x === skill)] || 0,
+                            xpPerHour: nextActions[0].xpPerHour,
+                            actionId: nextActions[0].outputTokenId,
+                            name: actionChoiceNames[nextActions[0].outputTokenId],
                         }
                     }
                 }
