@@ -31,12 +31,12 @@
                             <td>
                                 <div class="flex items-center gap-3">
                                     <div class="avatar">
-                                        <div class="mask mask-square rounded-lg w-12 h-12">
-                                            <img :src="m.imgSource" :alt="m.name" />
+                                        <div class="mask mask-square rounded-lg w-12 h-12 cursor-pointer">
+                                            <img :src="m.imgSource" :alt="m.name" @click.prevent="monsterInfoRef?.openDialog(m.actionId)" />
                                         </div>
                                     </div>
                                     <div>
-                                        <div class="font-bold">{{ m.name }}</div>
+                                        <div class="font-bold cursor-pointer" @click.prevent="monsterInfoRef?.openDialog(m.actionId)">{{ m.name }}</div>
                                         <div class="text-xs flex gap-2 items-center max-md:hidden">
                                             <div class="tooltip tooltip-primary tooltip-right" :data-tip="m.meleeDamagePerMinute.toString() + ' Melee Damage Per Minute'"><img src="/src/assets/melee.png" class="mask mask-squircle w-6" alt="Melee" /></div> {{ m.meleeDamagePerMinute }}
                                             <div class="tooltip tooltip-primary tooltip-right" :data-tip="m.rangedDamagePerMinute.toString() + ' Ranged Damage Per Minute'"><img src="/src/assets/ranged.png" class="mask mask-squircle w-6" alt="Ranged" /></div> {{ m.rangedDamagePerMinute }}
@@ -74,6 +74,7 @@
             </div>
         </div>
     </div>
+    <MonsterInfo ref="monsterInfoRef" />
 </template>
 
 <script setup lang="ts">
@@ -85,6 +86,7 @@ import { getLevel, useCoreStore } from '../store/core';
 import HourSelect from './inputs/HourSelect.vue'
 import CombatStyleSelect from './inputs/CombatStyleSelect.vue'
 import { BoostType, Skill } from '@paintswap/estfor-definitions/types';
+import MonsterInfo from './dialogs/MonsterInfo.vue'
 
 const itemStore = useItemStore()
 const monsterStore = useMonsterStore()
@@ -92,6 +94,7 @@ const coreStore = useCoreStore()
 
 const elapsedTime = ref(1)
 const combatStyle = ref(Skill.DEFENCE)
+const monsterInfoRef = ref<typeof MonsterInfo>()
 
 const weaponSkill = computed(() => {
     const weapon = itemStore.items.find(x => x.tokenId === itemStore.equippedItems.rightHand)

@@ -30,7 +30,7 @@ const calculateDamage = (atk: number, def: number) => {
     return Math.max(1, damage)
 }
 
-const monsterNames = {
+export const monsterNames = {
     [EstforConstants.ACTION_COMBAT_NATUOW]: "Natuow",
     [EstforConstants.ACTION_COMBAT_ANCIENT_ENT]: "Ancient Ent",
     [EstforConstants.ACTION_COMBAT_ARCANE_DRAGON]: "Arcane Dragon",
@@ -54,7 +54,7 @@ const monsterNames = {
     [EstforConstants.ACTION_COMBAT_UFFINCH]: "Uffinch",
 }
 
-const monsterImageMap = {
+export const monsterImageMap = {
     [EstforConstants.ACTION_COMBAT_NATUOW]: "monster_1_9zp1zn5o.jpg",
     [EstforConstants.ACTION_COMBAT_ANCIENT_ENT]: "monster_13_1fng96z1.jpg",
     [EstforConstants.ACTION_COMBAT_ARCANE_DRAGON]: "monster_3_th8l97g7.jpg",
@@ -138,6 +138,7 @@ export const useMonsterStore = defineStore({
                     const xpPerHour = (m.info.xpPerHour * xpElapsedTime) / elapsedTime
                     
                     monsterRankings.push({
+                        actionId: m.actionId,
                         name: monsterNames[m.actionId] || 'Unknown',
                         damagePerMinute,
                         damageTakenPerHour: totalHealthLost,
