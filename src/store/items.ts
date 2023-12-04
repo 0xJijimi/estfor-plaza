@@ -145,6 +145,7 @@ export const itemNames = {
 
     [EstforConstants.TINY_ELIXIUM]: "Tiny Elixium",
     [EstforConstants.SMALL_ELIXIUM]: "Small Elixium",
+    [EstforConstants.EXTRA_LARGE_ELIXIUM]: "Extra Large Elixium",
     [EstforConstants.MEDIUM_ELIXIUM]: "Medium Elixium",
     [EstforConstants.LARGE_ELIXIUM]: "Large Elixium",
 
@@ -194,6 +195,7 @@ export const itemNames = {
     [EstforConstants.DIAMOND_AMULET]: "Diamond Amulet",
     [EstforConstants.AMETHYST_AMULET]: "Amethyst Amulet",
     [EstforConstants.DRAGONSTONE_AMULET]: "Dragonstone Amulet",
+    [EstforConstants.DRAGONSTONE]: "Dragonstone",
 
     [EstforConstants.APPRENTICE_BODY]: "Apprentice Body",
     [EstforConstants.APPRENTICE_GAUNTLETS]: "Apprentice Gauntlets",
@@ -330,6 +332,35 @@ export const itemNames = {
     [EstforConstants.DIAMOND]: "Diamond",
     [EstforConstants.AMETHYST]: "Amethyst",
     [EstforConstants.COAL_ORE]: "Coal Ore",
+
+    [EstforConstants.WOOD_FISHING_ROD]: "Wood Fishing Rod",
+    [EstforConstants.NET_STICK]: "Net with Stick",
+    [EstforConstants.MEDIUM_NET]: "Medium Net",
+    [EstforConstants.LARGE_NET]: "Large Net",
+    [EstforConstants.CAGE]: "Cage",
+    [EstforConstants.HARPOON]: "Harpoon",
+
+    [EstforConstants.RAW_MINNUS]: "Raw Minnus",
+    [EstforConstants.RAW_BLEKK]: "Raw Blekk",
+    [EstforConstants.RAW_SKRIMP]: "Raw Skrimp",
+    [EstforConstants.RAW_FEOLA]: "Raw Feola",
+    [EstforConstants.RAW_ANCHO]: "Raw Ancho",
+    [EstforConstants.RAW_TROUT]: "Raw Trout",
+    [EstforConstants.RAW_ROJJA]: "Raw Rojja",
+    [EstforConstants.RAW_BOWFISH]: "Raw Bowfish",
+    [EstforConstants.RAW_GOLDFISH]: "Raw Goldfish",
+    [EstforConstants.RAW_MYSTY_BLUE]: "Raw Mysty Blue",
+    [EstforConstants.RAW_FLITFISH]: "Raw Flitfish",
+    [EstforConstants.RAW_RAZORFISH]: "Raw Razorfish",
+    [EstforConstants.RAW_QUAFFER]: "Raw Quaffer",
+    [EstforConstants.RAW_ROXA]: "Raw Roxa",
+    [EstforConstants.RAW_AZACUDDA]: "Raw Azacudda",
+    [EstforConstants.RAW_STONECLAW]: "Raw Stoneclaw",
+    [EstforConstants.RAW_CRUSKAN]: "Raw Cruskan",
+    [EstforConstants.RAW_CHODFISH]: "Raw Chodfish",
+    [EstforConstants.RAW_DOUBTFISH]: "Raw Doubtfish",
+    [EstforConstants.RAW_ROSEFIN]: "Raw Rosefin",
+
 }
 
 export interface EquippedItems {

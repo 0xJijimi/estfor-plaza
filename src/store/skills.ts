@@ -66,7 +66,7 @@ export const skillNames = {
 
 export const actionNames = {
     // taken from the actionId in allActions from  ../data/actions.ts
-    [EstforConstants.ACTION_WOODCUTTING_LOG]: "Ash",
+    [EstforConstants.ACTION_WOODCUTTING_LOG]: "Log",
     [EstforConstants.ACTION_WOODCUTTING_OAK]: "Oak",
     [EstforConstants.ACTION_WOODCUTTING_WILLOW]: "Willow",
     [EstforConstants.ACTION_WOODCUTTING_MAPLE]: "Maple",
@@ -137,11 +137,17 @@ export interface RelevantActionInput {
     name: string,
 }
 
+export enum ActionType {
+    action,
+    actionChoice,
+}
+
 export interface RelevantAction {
     currentAction: RelevantActionInput,
     nextAction: RelevantActionInput | undefined,
     currentXPForSkill: number,
     skill: Skill,
+    actionType: ActionType,
 }
 
 export const useSkillStore = defineStore({
@@ -332,7 +338,7 @@ export const useSkillStore = defineStore({
                         }
                     }
                 }
-                return { currentAction, nextAction, currentXPForSkill, skill }
+                return { currentAction, nextAction, currentXPForSkill, skill, actionType: isActionChoice ? ActionType.actionChoice : ActionType.action }
             }
         },
     },

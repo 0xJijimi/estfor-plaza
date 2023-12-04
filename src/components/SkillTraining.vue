@@ -2,7 +2,7 @@
     <BoostPanel :hide-combat="true" />
     <div class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-5 my-10">
         <div v-for="action in allActions" :key="action.skill" class="card bg-base-100-50 shadow-xl rounded-lg">
-            <figure><img class="w-full" :src="`${MEDIA_URL}/landscape/${skillNames[action.skill]?.toLowerCase()}.jpg`" :alt="skillNames[action.skill]" /></figure>
+            <figure><img class="w-full cursor-pointer" :src="`${MEDIA_URL}/landscape/${skillNames[action.skill]?.toLowerCase()}.jpg`" :alt="skillNames[action.skill]" @click.prevent="action.relevantAction.actionType === ActionType.action ? actionInfoRef?.openDialog(action.skill) : actionChoiceInfoRef?.openDialog(action.skill)" /></figure>
             <div class="card-body">
                 <div class="grid grid-cols-2 gap-2">
                     <div class="flex-col flex justify-between">
@@ -41,17 +41,23 @@
             </div>
         </div>
     </div>
+    <ActionInfo ref="actionInfoRef" />
+    <ActionChoiceInfo ref="actionChoiceInfoRef" />
 </template>
 
 <script setup lang="ts">
 import { BoostType, Skill } from '@paintswap/estfor-definitions/types'
-import { useSkillStore, RelevantAction, skillNames } from '../store/skills'
+import { useSkillStore, RelevantAction, skillNames, ActionType } from '../store/skills'
 import { MEDIA_URL, useCoreStore, fullAttireMultiplier, heroAvatarMultiplier } from '../store/core'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import BoostPanel from './BoostPanel.vue';
+import ActionInfo from './dialogs/ActionInfo.vue';
+import ActionChoiceInfo from './dialogs/ActionChoiceInfo.vue';
 
 const skillStore = useSkillStore()
 const coreStore = useCoreStore()
+const actionInfoRef = ref<typeof ActionInfo>()
+const actionChoiceInfoRef = ref<typeof ActionChoiceInfo>()
 
 const allActions = computed(() => {
     return [
