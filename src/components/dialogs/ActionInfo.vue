@@ -8,7 +8,7 @@
                 <table class="table md:table-md table-xs">
                     <thead>
                     <tr>
-                        <th class="text-left">Item</th>
+                        <th class="text-left">Action</th>
                         <th class="text-right">Level</th>
                         <th class="text-right">XP (per hour)</th>
                         <th class="text-right">Item required</th>
@@ -49,7 +49,7 @@ import { Skill } from '@paintswap/estfor-definitions/types';
 const skillId = ref(0)
 
 const actions = computed(() => {
-    const a = allActions.filter(x => x.info.skill === skillId.value)
+    const a = [...allActions.filter(x => x.info.skill === skillId.value)]
     a.sort((a, b) => a.info.minXP > b.info.minXP ? 1 : -1)
     return a
 })

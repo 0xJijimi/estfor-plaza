@@ -56,25 +56,25 @@ const actions = computed(() => {
     let a: ActionChoiceInput[] = []
     switch (skillId.value) {
         case Skill.COOKING:
-            a = skillStore.cooking
+            a = [...skillStore.cooking]
             break
         case Skill.CRAFTING:
-            a = skillStore.crafting
+            a = [...skillStore.crafting]
             break
         case Skill.SMITHING:
-            a = skillStore.smithing
+            a = [...skillStore.smithing]
             break
         case Skill.FIREMAKING:
-            a = skillStore.firemaking
+            a = [...skillStore.firemaking]
             break
         case Skill.ALCHEMY:
-            a = skillStore.alchemy
+            a = [...skillStore.alchemy]
             break
         case Skill.FORGING:
-            a = skillStore.forging
+            a = [...skillStore.forging]
             break
         case Skill.FLETCHING:
-            a = skillStore.fletching
+            a = [...skillStore.fletching]
             break
         default:
             return []
