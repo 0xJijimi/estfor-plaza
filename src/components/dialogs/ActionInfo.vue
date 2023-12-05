@@ -16,7 +16,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr v-for="a in actions" :key="a.actionId">
+                    <tr v-for="a in actions" :key="a.actionId" :class="{'text-gray-400': a.info.minXP > playerXp}">
                         <td class="text-left">{{ actionNames[a.actionId] }}</td>
                         <td class="text-right">{{ getLevel(a.info.minXP) }}</td> 
                         <td class="text-right">{{ a.info.xpPerHour }}</td> 
@@ -24,7 +24,7 @@
                         <td v-if="a.guaranteedRewards.length > 0" class="text-right"><span v-for="r in a.guaranteedRewards" :key="r.itemTokenId">{{ r.rate / 10 }}</span></td>
                         <td v-if="a.randomRewards.length > 0" class="text-right">
                             <div v-for="r in a.randomRewards" :key="r.itemTokenId" class="text-xs">
-                                <span>{{ itemNames[r.itemTokenId] }} - {{ r.amount }} ({{ ((r.chance * a.info.successPercent) / 65535).toFixed(2) }}% - {{ ((r.chance * 90) / 65535).toFixed(2) }}%)</span>
+                                <span>{{ itemNames[r.itemTokenId] }} - {{ r.amount }} ({{ (r.chance * Math.min(90, a.info.successPercent + Math.max(0, getLevel(playerXp) - getLevel(a.info.minXP))) / 65535).toFixed(2) }}%)</span>
                             </div>
                         </td>
                     </tr>
@@ -41,12 +41,18 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { actionNames, skillNames } from '../../store/skills'
-import { MEDIA_URL, getLevel } from '../../store/core'
+import { MEDIA_URL, getLevel, useCoreStore, skillToXPMap } from '../../store/core'
 import { itemNames } from '../../store/items'
 import { allActions } from '../../data/actions';
 import { Skill } from '@paintswap/estfor-definitions/types';
 
+const coreStore = useCoreStore()
 const skillId = ref(0)
+
+const playerXp = computed(() => {
+    // @ts-ignore
+    return coreStore.playerState[skillToXPMap[skillId.value]]
+})
 
 const actions = computed(() => {
     const a = [...allActions.filter(x => x.info.skill === skillId.value)]

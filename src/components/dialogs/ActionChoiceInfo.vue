@@ -17,9 +17,9 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr v-for="(a, i) in actions" :key="i">
+                    <tr v-for="(a, i) in actions" :key="i" :class="{'text-gray-400': (a.minXPs[a.minSkills.findIndex(s => s === skillId)] || 0) > playerXp}">
                         <td class="text-left">{{ itemNames[a.outputTokenId] }}</td>
-                        <td class="text-right">{{ getLevel(a.minXPs[a.minSkills.findIndex(s => s === skillId) || 0] || 0) }}</td> 
+                        <td class="text-right">{{ getLevel(a.minXPs[a.minSkills.findIndex(s => s === skillId)] || 0) }}</td> 
                         <td class="text-right">{{ a.xpPerHour }}</td> 
                         <td class="text-right">
                             <div v-for="x in a.inputTokenIds" :key="x">{{ itemNames[x] }}</div>
@@ -28,7 +28,7 @@
                             <div v-for="x in a.inputAmounts" :key="x">{{ x * a.rate / 1000 }}</div>
                         </td> 
                         <td class="text-right">
-                            <span v-if="a.successPercent < 100">{{ (a.outputAmount * a.rate / 1000 * a.successPercent / 100).toFixed(1) }} - {{ (a.outputAmount * a.rate / 1000 * 90 / 100).toFixed(1) }}</span>
+                            <span v-if="a.successPercent < 100">{{ (a.outputAmount * a.rate / 1000 * (Math.min(90, a.successPercent + Math.max(0, getLevel(playerXp) - getLevel(a.minXPs[a.minSkills.findIndex(s => s === skillId)] || 0))) / 100)).toFixed(1) }}</span>
                             <span v-else>{{ a.outputAmount * a.rate / 1000 }}</span>
                         </td> 
                     </tr>
@@ -45,12 +45,18 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { skillNames, useSkillStore } from '../../store/skills'
-import { MEDIA_URL, getLevel } from '../../store/core'
+import { MEDIA_URL, getLevel, useCoreStore, skillToXPMap } from '../../store/core'
 import { itemNames } from '../../store/items'
 import { ActionChoiceInput, Skill } from '@paintswap/estfor-definitions/types'
 
+const coreStore = useCoreStore()
 const skillId = ref(0)
 const skillStore = useSkillStore()
+
+const playerXp = computed(() => {
+    // @ts-ignore
+    return coreStore.playerState[skillToXPMap[skillId.value]]
+})
 
 const actions = computed(() => {
     let a: ActionChoiceInput[] = []
