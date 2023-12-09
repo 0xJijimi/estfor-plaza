@@ -6,16 +6,17 @@ import Header from "./components/layout/Header.vue"
 const appStore = useAppStore()
 
 const setPreferredColorScheme = () => {
-    if (appStore.theme === "notheme") {
-        if (
-            "matchMedia" in window &&
-            window.matchMedia("(prefers-color-scheme: dark)").matches
-        ) {
-            appStore.setTheme("dark")
-        } else {
-            appStore.setTheme("light")
-        }
-    }
+    appStore.setTheme("dark")
+    // if (appStore.theme === "notheme") {
+    //     if (
+    //         "matchMedia" in window &&
+    //         window.matchMedia("(prefers-color-scheme: dark)").matches
+    //     ) {
+    //         appStore.setTheme("dark")
+    //     } else {
+    //         appStore.setTheme("light")
+    //     }
+    // }
 }
 
 onMounted(() => {
