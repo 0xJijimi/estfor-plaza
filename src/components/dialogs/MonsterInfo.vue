@@ -42,12 +42,12 @@
                     </thead>
                     <tbody>
                     <tr v-for="i in monster?.guaranteedRewards">
-                        <td class="text-left">{{ itemNames[i.itemTokenId] || 'Unknown' }}</td>                        
+                        <td class="text-left cursor-pointer" @click.prevent="itemStore.itemSearch = itemNames[i.itemTokenId]">{{ itemNames[i.itemTokenId] || 'Unknown' }}</td>                        
                         <td class="text-right">{{ i.rate / 10 }}</td>
                         <td class="text-right">100%</td>
                     </tr>
                     <tr v-for="i in monster?.randomRewards">
-                        <td class="text-left">{{ itemNames[i.itemTokenId] }}</td>                        
+                        <td class="text-left cursor-pointer" @click.prevent="itemStore.itemSearch = itemNames[i.itemTokenId]">{{ itemNames[i.itemTokenId] }}</td>                        
                         <td class="text-right">{{ i.amount }}</td>
                         <td class="text-right">{{ ((i.chance * 100) / 65535).toFixed(2) }}%</td>
                     </tr>
@@ -65,9 +65,10 @@
 import { computed, ref } from 'vue'
 import { monsterNames, monsterImageMap, useMonsterStore } from '../../store/monsters'
 import { MEDIA_URL } from '../../store/core'
-import { itemNames } from '../../store/items'
+import { itemNames, useItemStore } from '../../store/items'
 
 const monsterStore = useMonsterStore()
+const itemStore = useItemStore()
 
 const monsterId = ref(0)
 

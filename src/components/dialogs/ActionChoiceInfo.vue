@@ -2,7 +2,7 @@
     <dialog id="action_choice_modal" class="modal">
         <div class="modal-box bg-base-100 border-2 border-primary md:w-4/5 max-w-full">
             <h3 class="font-bold text-lg text-center">{{ skillName }}</h3>
-            <img :src="imgSource" :alt="skillName" class="w-full mx-auto mt-5 max-w-[800px]" />
+            <img :src="imgSource" :alt="skillName" class="w-full mx-auto mt-5 max-w-[800px] rounded-lg" />
 
             <div class="overflow-x-auto mt-5">
                 <table class="table md:table-md table-xs">
@@ -11,22 +11,21 @@
                         <th class="text-left">Item</th>
                         <th class="text-right">Level</th>
                         <th class="text-right">XP (per hour)</th>
-                        <th class="text-right">Inputs</th>
-                        <th class="text-right">Input Amounts</th>
+                        <th class="text-right">Inputs (per hour)</th>
                         <th class="text-right">Output (per hour)</th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr v-for="(a, i) in actions" :key="i" :class="{'text-gray-400': (a.minXPs[a.minSkills.findIndex(s => s === skillId)] || 0) > playerXp}">
-                        <td class="text-left">{{ itemNames[a.outputTokenId] }}</td>
+                        <td class="text-left cursor-pointer" @click.prevent="itemStore.itemSearch = itemNames[a.outputTokenId]">{{ itemNames[a.outputTokenId] }}</td>
                         <td class="text-right">{{ getLevel(a.minXPs[a.minSkills.findIndex(s => s === skillId)] || 0) }}</td> 
                         <td class="text-right">{{ a.xpPerHour }}</td> 
-                        <td class="text-right">
-                            <div v-for="x in a.inputTokenIds" :key="x">{{ itemNames[x] }}</div>
-                        </td> 
-                        <td class="text-right">
-                            <div v-for="x in a.inputAmounts" :key="x">{{ x * a.rate / 1000 }}</div>
-                        </td> 
+                        <td class="text-left">
+                            <div v-for="(x, i) in a.inputTokenIds" :key="x" class="flex justify-between cursor-pointer" @click.prevent="itemStore.itemSearch = itemNames[x]">
+                                <div>{{ itemNames[x] }}</div>
+                                <div>{{ a.inputAmounts[i] * a.rate / 1000 }}</div>
+                            </div>
+                        </td>
                         <td class="text-right">
                             <span v-if="a.successPercent < 100">{{ (a.outputAmount * a.rate / 1000 * (Math.min(90, a.successPercent + Math.max(0, getLevel(playerXp) - getLevel(a.minXPs[a.minSkills.findIndex(s => s === skillId)] || 0))) / 100)).toFixed(1) }}</span>
                             <span v-else>{{ a.outputAmount * a.rate / 1000 }}</span>
@@ -46,12 +45,13 @@
 import { computed, ref } from 'vue'
 import { skillNames, useSkillStore } from '../../store/skills'
 import { MEDIA_URL, getLevel, useCoreStore, skillToXPMap } from '../../store/core'
-import { itemNames } from '../../store/items'
+import { itemNames, useItemStore } from '../../store/items'
 import { ActionChoiceInput, Skill } from '@paintswap/estfor-definitions/types'
 
 const coreStore = useCoreStore()
 const skillId = ref(0)
 const skillStore = useSkillStore()
+const itemStore = useItemStore()
 
 const playerXp = computed(() => {
     // @ts-ignore
@@ -92,7 +92,12 @@ const actions = computed(() => {
             return -1
         return 0
     })
-    return a
+    return a.filter(x => 
+        x.inputTokenIds.some(y => itemNames[y]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase())) || 
+        itemNames[x.outputTokenId]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase()) ||
+        itemNames[x.handItemTokenIdRangeMax]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase()) ||
+        itemNames[x.handItemTokenIdRangeMax]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase())
+    )
 })
 
 const skillName = computed(() => {

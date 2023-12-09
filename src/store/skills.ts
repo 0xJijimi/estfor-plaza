@@ -5,7 +5,7 @@ import { allActions } from '../data/actions'
 import { useCoreStore } from "./core"
 import { EstforConstants } from "@paintswap/estfor-definitions"
 import { allActionChoicesAlchemy, allActionChoicesCooking, allActionChoicesCrafting, allActionChoicesFiremaking, allActionChoicesFletching, allActionChoicesForging, allActionChoicesSmithing } from "../data/actionChoices"
-import { itemNames } from "./items"
+import { itemNames, useItemStore } from "./items"
 
 export interface SkillState {
     woodcutting: ActionInput[],
@@ -148,6 +148,7 @@ export interface RelevantAction {
     currentXPForSkill: number,
     skill: Skill,
     actionType: ActionType,
+    hasItemSearch: boolean,
 }
 
 export const useSkillStore = defineStore({
@@ -173,8 +174,10 @@ export const useSkillStore = defineStore({
                 let inputs: ActionInput[] = []
                 let isActionChoice = false
                 const coreStore = useCoreStore()
+                const itemStore = useItemStore()
                 const playerState = coreStore.playerState
                 let currentXPForSkill = 1
+                let hasItemSearch = false
                 switch (skill) {
                     case Skill.WOODCUTTING:
                         inputs = state.woodcutting
@@ -287,6 +290,17 @@ export const useSkillStore = defineStore({
                             name: actionNames[nextActions[0].actionId],
                         }
                     }
+
+                    if (
+                        inputs.some(x =>
+                            x.guaranteedRewards.some(y => itemNames[y.itemTokenId]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase())) || 
+                            x.randomRewards.some(y => itemNames[y.itemTokenId]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase())) ||
+                            itemNames[x.info.handItemTokenIdRangeMax]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase()) ||
+                            itemNames[x.info.handItemTokenIdRangeMax]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase())
+                        ) 
+                    ) {
+                        hasItemSearch = true
+                    }
                 } else {
                     inputChoices.sort((a, b) => {
                         if (b.xpPerHour > a.xpPerHour)
@@ -337,8 +351,19 @@ export const useSkillStore = defineStore({
                             name: itemNames[nextActions[0].outputTokenId],
                         }
                     }
+
+                    if (
+                        inputChoices.some(x =>
+                            x.inputTokenIds.some(y => itemNames[y]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase())) || 
+                            itemNames[x.outputTokenId]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase()) ||
+                            itemNames[x.handItemTokenIdRangeMax]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase()) ||
+                            itemNames[x.handItemTokenIdRangeMax]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase())
+                        ) 
+                    ) {
+                        hasItemSearch = true
+                    }
                 }
-                return { currentAction, nextAction, currentXPForSkill, skill, actionType: isActionChoice ? ActionType.actionChoice : ActionType.action }
+                return { currentAction, nextAction, currentXPForSkill, skill, actionType: isActionChoice ? ActionType.actionChoice : ActionType.action, hasItemSearch }
             }
         },
     },

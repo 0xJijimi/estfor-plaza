@@ -81,7 +81,7 @@
 import { useMonsterStore } from '../store/monsters'
 import { computed, ref, watch } from 'vue'
 import { ChevronUpDownIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/vue/24/solid'
-import { useItemStore } from '../store/items';
+import { useItemStore, itemNames } from '../store/items';
 import { getLevel, useCoreStore } from '../store/core';
 import HourSelect from './inputs/HourSelect.vue'
 import CombatStyleSelect from './inputs/CombatStyleSelect.vue'
@@ -143,7 +143,10 @@ const monsterRankings = computed(() => {
             }
         })
     }
-    return storeRankings.slice(0, 10)
+    return storeRankings.filter(x => 
+        x.guaranteedRewards.some(y => itemNames[y.itemTokenId]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase())) || 
+        x.randomRewards.some(y => itemNames[y.itemTokenId]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase()))
+    ).slice(0, 10)
 })
 
 const equippedFishName = computed(() => itemStore.items.find(x => x.tokenId === itemStore.equippedItems.food)?.name)

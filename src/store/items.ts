@@ -382,6 +382,7 @@ export interface ItemState {
     rangedActionChoices: ActionChoiceInput[],
     magicActionChoices: ActionChoiceInput[],
     equippedItems: EquippedItems,
+    itemSearch: string,
 }
 
 export const useItemStore = defineStore({
@@ -392,6 +393,7 @@ export const useItemStore = defineStore({
             rangedActionChoices: allActionChoicesRanged as ActionChoiceInput[],
             magicActionChoices: allActionChoicesMagic as ActionChoiceInput[],
             equippedItems: localStorage.getItem('equippedItems') ? JSON.parse(localStorage.getItem('equippedItems') as string) : {} as EquippedItems,
+            itemSearch: '',
         } as ItemState),
     getters: {
         getItemsForSlotAndXP: (state: ItemState) => {

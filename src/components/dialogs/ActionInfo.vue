@@ -2,7 +2,7 @@
     <dialog id="action_modal" class="modal">
         <div class="modal-box bg-base-100 border-2 border-primary md:w-4/5 max-w-full">
             <h3 class="font-bold text-lg text-center">{{ skillName }}</h3>
-            <img :src="imgSource" :alt="skillName" class="w-full mx-auto mt-5 max-w-[800px]" />
+            <img :src="imgSource" :alt="skillName" class="w-full mx-auto mt-5 max-w-[800px] rounded-lg" />
 
             <div class="overflow-x-auto mt-5">
                 <table class="table md:table-md table-xs">
@@ -11,7 +11,7 @@
                         <th class="text-left">Action</th>
                         <th class="text-right">Level</th>
                         <th class="text-right">XP (per hour)</th>
-                        <th class="text-right">Item required</th>
+                        <th class="text-left">Item required</th>
                         <th class="text-right">Loot (per hour)</th>
                     </tr>
                     </thead>
@@ -20,11 +20,13 @@
                         <td class="text-left">{{ actionNames[a.actionId] }}</td>
                         <td class="text-right">{{ getLevel(a.info.minXP) }}</td> 
                         <td class="text-right">{{ a.info.xpPerHour }}</td> 
-                        <td class="text-right">{{ itemNames[a.info.handItemTokenIdRangeMin] || 'None' }}</td> 
-                        <td v-if="a.guaranteedRewards.length > 0" class="text-right"><span v-for="r in a.guaranteedRewards" :key="r.itemTokenId">{{ r.rate / 10 }}</span></td>
-                        <td v-if="a.randomRewards.length > 0" class="text-right">
-                            <div v-for="r in a.randomRewards" :key="r.itemTokenId" class="text-xs">
-                                <span>{{ itemNames[r.itemTokenId] }} - {{ r.amount }} ({{ (r.chance * Math.min(90, a.info.successPercent + Math.max(0, getLevel(playerXp) - getLevel(a.info.minXP))) / 65535).toFixed(2) }}%)</span>
+                        <td class="text-left">{{ itemNames[a.info.handItemTokenIdRangeMin] || 'None' }}</td> 
+                        <td v-if="a.guaranteedRewards.length > 0" class="text-right cursor-pointer">
+                            <span v-for="r in a.guaranteedRewards" :key="r.itemTokenId" @click.prevent="itemStore.itemSearch = itemNames[r.itemTokenId]">{{ r.rate / 10 }}</span>
+                        </td>
+                        <td v-if="a.randomRewards.length > 0" class="text-right cursor-pointer">
+                            <div v-for="r in a.randomRewards" :key="r.itemTokenId" class="text-xs flex justify-between" @click.prevent="itemStore.itemSearch = itemNames[r.itemTokenId]">
+                                <span>{{ itemNames[r.itemTokenId] }}</span><span>{{ r.amount }} ({{ (r.chance * Math.min(90, a.info.successPercent + Math.max(0, getLevel(playerXp) - getLevel(a.info.minXP))) / 65535).toFixed(2) }}%)</span>
                             </div>
                         </td>
                     </tr>
@@ -42,12 +44,13 @@
 import { computed, ref } from 'vue'
 import { actionNames, skillNames } from '../../store/skills'
 import { MEDIA_URL, getLevel, useCoreStore, skillToXPMap } from '../../store/core'
-import { itemNames } from '../../store/items'
+import { itemNames, useItemStore } from '../../store/items'
 import { allActions } from '../../data/actions';
 import { Skill } from '@paintswap/estfor-definitions/types';
 
 const coreStore = useCoreStore()
 const skillId = ref(0)
+const itemStore = useItemStore()
 
 const playerXp = computed(() => {
     // @ts-ignore
@@ -57,7 +60,12 @@ const playerXp = computed(() => {
 const actions = computed(() => {
     const a = [...allActions.filter(x => x.info.skill === skillId.value)]
     a.sort((a, b) => a.info.minXP > b.info.minXP ? 1 : -1)
-    return a
+    return a.filter(x =>
+        x.guaranteedRewards.some(y => itemNames[y.itemTokenId]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase())) || 
+        x.randomRewards.some(y => itemNames[y.itemTokenId]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase())) ||
+        itemNames[x.info.handItemTokenIdRangeMax]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase()) ||
+        itemNames[x.info.handItemTokenIdRangeMax]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase())
+    )
 })
 
 const skillName = computed(() => {

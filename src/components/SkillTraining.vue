@@ -1,45 +1,47 @@
 <template>
     <BoostPanel :hide-combat="true" />
     <div class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-5 my-10">
-        <div v-for="action in allActions" :key="action.skill" class="card bg-base-100-50 shadow-xl rounded-lg">
-            <figure><img class="w-full cursor-pointer" :src="`${MEDIA_URL}/landscape/${skillNames[action.skill]?.toLowerCase()}.jpg`" :alt="skillNames[action.skill]" @click.prevent="action.relevantAction.actionType === ActionType.action ? actionInfoRef?.openDialog(action.skill) : actionChoiceInfoRef?.openDialog(action.skill)" /></figure>
-            <div class="card-body">
-                <div class="grid grid-cols-2 gap-2">
-                    <div class="flex-col flex justify-between">
-                        <div class="flex flex-col">
-                            <div class="text-2xl font-bold flex items-center gap-2">
-                                {{ skillNames[action.skill] || 'Unknown' }}
-                                <div v-if="fullAttireMultiplier(coreStore.inventory, action.skill)" class="tooltip tooltip-primary tooltip-bottom" data-tip="Bonus XP from full attire outfit">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 19.5v-15m0 0l-6.75 6.75M12 4.5l6.75 6.75" />
-                                    </svg>
+        <template v-for="action in allActions" :key="action.skill">
+            <div v-if="action.relevantAction.hasItemSearch" class="card bg-base-100-50 shadow-xl rounded-lg">
+                <figure><img class="w-full cursor-pointer" :src="`${MEDIA_URL}/landscape/${skillNames[action.skill]?.toLowerCase()}.jpg`" :alt="skillNames[action.skill]" @click.prevent="action.relevantAction.actionType === ActionType.action ? actionInfoRef?.openDialog(action.skill) : actionChoiceInfoRef?.openDialog(action.skill)" /></figure>
+                <div class="card-body">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="flex-col flex justify-between">
+                            <div class="flex flex-col">
+                                <div class="text-2xl font-bold flex items-center gap-2">
+                                    {{ skillNames[action.skill] || 'Unknown' }}
+                                    <div v-if="fullAttireMultiplier(coreStore.inventory, action.skill)" class="tooltip tooltip-primary tooltip-bottom" data-tip="Bonus XP from full attire outfit">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 19.5v-15m0 0l-6.75 6.75M12 4.5l6.75 6.75" />
+                                        </svg>
+                                    </div>
+                                    <div v-if="heroAvatarMultiplier(coreStore.playerState, action.skill)" class="tooltip tooltip-primary tooltip-bottom" data-tip="Bonus XP from hero">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 19.5v-15m0 0l-6.75 6.75M12 4.5l6.75 6.75" />
+                                        </svg>
+                                    </div>
                                 </div>
-                                <div v-if="heroAvatarMultiplier(coreStore.playerState, action.skill)" class="tooltip tooltip-primary tooltip-bottom" data-tip="Bonus XP from hero">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 19.5v-15m0 0l-6.75 6.75M12 4.5l6.75 6.75" />
-                                    </svg>
-                                </div>
+                                <div class="text-sm text-gray-400">{{ action.relevantAction.currentAction.name || 'Unknown' }}</div>
                             </div>
-                            <div class="text-sm text-gray-400">{{ action.relevantAction.currentAction.name || 'Unknown' }}</div>
+                            <div class="flex flex-col mt-5">
+                                <div class="text-2xl font-bold">{{ (action.relevantAction.currentAction.xpPerHour * coreStore.getXPBoostMultiplier(action.skill, BoostType.NON_COMBAT_XP)).toFixed(0) }} XP/hour</div>
+                                <div class="text-sm text-gray-400">Current action</div>
+                            </div>
                         </div>
-                        <div class="flex flex-col mt-5">
-                            <div class="text-2xl font-bold">{{ (action.relevantAction.currentAction.xpPerHour * coreStore.getXPBoostMultiplier(action.skill, BoostType.NON_COMBAT_XP)).toFixed(0) }} XP/hour</div>
-                            <div class="text-sm text-gray-400">Current action</div>
-                        </div>
-                    </div>
-                    <div class="flex-col flex justify-between">
-                        <div class="flex flex-col">
-                            <div class="text-2xl font-bold">{{ hoursUntilNextAction(action.relevantAction) }} hour{{ hoursUntilNextAction(action.relevantAction) > 1 ? 's' : '' }}</div>
-                            <div class="text-sm text-gray-400">Until next action unlock</div>
-                        </div>
-                        <div v-if="action.relevantAction.nextAction" class="flex flex-col mt-5">
-                            <div class="text-2xl font-bold">{{ (action.relevantAction.nextAction?.xpPerHour * coreStore.getXPBoostMultiplier(action.skill, BoostType.NON_COMBAT_XP)).toFixed(0) }} XP/hour</div>
-                            <div class="text-sm text-gray-400">Next action</div>
+                        <div class="flex-col flex justify-between">
+                            <div class="flex flex-col">
+                                <div class="text-2xl font-bold">{{ hoursUntilNextAction(action.relevantAction) }} hour{{ hoursUntilNextAction(action.relevantAction) > 1 ? 's' : '' }}</div>
+                                <div class="text-sm text-gray-400">Until next action unlock</div>
+                            </div>
+                            <div v-if="action.relevantAction.nextAction" class="flex flex-col mt-5">
+                                <div class="text-2xl font-bold">{{ (action.relevantAction.nextAction?.xpPerHour * coreStore.getXPBoostMultiplier(action.skill, BoostType.NON_COMBAT_XP)).toFixed(0) }} XP/hour</div>
+                                <div class="text-sm text-gray-400">Next action</div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </template>
     </div>
     <ActionInfo ref="actionInfoRef" />
     <ActionChoiceInfo ref="actionChoiceInfoRef" />
@@ -74,7 +76,6 @@ const allActions = computed(() => {
         { skill: Skill.ALCHEMY, relevantAction: skillStore.getCurrentAndNextActionForSkill(Skill.ALCHEMY) },
     ]
 });
-
 
 const hoursUntilNextAction = (relevantAction: RelevantAction) => {
     if (!relevantAction.nextAction) {

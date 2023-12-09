@@ -2,11 +2,17 @@
 import { computed, watch } from "vue"
 // import { useAppStore } from "../../store/app"
 import { useCoreStore, Network } from "../../store/core"
-import {account, disconnect, connect, accountDetails, chain, getAvailableChains, switchChain, Chain} from '@kolirt/vue-web3-auth'
+import { account, disconnect, connect, accountDetails, chain, getAvailableChains, switchChain, Chain} from '@kolirt/vue-web3-auth'
 import { icons } from "../../utils/icons"
+import { useItemStore, itemNames } from "../../store/items"
 
 // const appStore = useAppStore()
 const coreStore = useCoreStore()
+const itemStore = useItemStore()
+
+const allItemNames = computed(() => {
+    return Object.values(itemNames)
+})
 
 // const isDark = computed(() => appStore.theme === "dark")
 
@@ -61,6 +67,15 @@ const getChainName = (network: string) => {
                     <path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" clip-rule="evenodd" />
                 </svg>
             </button> -->
+            <div class="join max-md:hidden items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-2 text-primary">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                </svg>
+                <input type="text" placeholder="Item Search" class="input input-sm input-bordered max-w-xs bg-base-100-50" v-model="itemStore.itemSearch" list="item-datalist" />
+                <datalist id="item-datalist">
+                    <option v-for="item in allItemNames" :key="item" :value="item" />
+                </datalist>
+            </div>
             <div v-if="account.connected">
                 <div class="dropdown align-top">
                     <button tabindex="0" class="btn btn-circle btn-ghost"><img :src="currentIcon" :alt="coreStore.connectedNetwork" class="small-chain-icon" /></button>

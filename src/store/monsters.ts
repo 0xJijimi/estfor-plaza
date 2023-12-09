@@ -1,4 +1,4 @@
-import { ActionInput, CombatStats, Skill } from "@paintswap/estfor-definitions/types"
+import { ActionInput, CombatStats, GuaranteedReward, RandomReward, Skill } from "@paintswap/estfor-definitions/types"
 import { defineStore } from "pinia"
 
 import { allActions } from '../data/actions'
@@ -21,6 +21,8 @@ export interface MonsterRank {
     magicDamagePerMinute: number,
     fishRequiredPerHour: number,
     combatStats: CombatStats,
+    guaranteedRewards: GuaranteedReward[],
+    randomRewards: RandomReward[],
 }
 
 const calculateDamage = (atk: number, def: number) => {
@@ -149,6 +151,8 @@ export const useMonsterStore = defineStore({
                         combatStats: m.combatStats,
                         fishRequiredPerHour: totalFoodRequired,
                         imgSource: `${MEDIA_URL}/monsters/${monsterImageMap[m.actionId] || 'monster_1_9zp1zn5o.jpg'}`,
+                        guaranteedRewards: m.guaranteedRewards,
+                        randomRewards: m.randomRewards,
                     })
                 }
 
