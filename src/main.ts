@@ -14,6 +14,24 @@ app.use(createWeb3Auth({
     projectId: import.meta.env.VITE_PROJECT_ID,
     chains: [
         Chains.fantom,
+        // {
+        //     id: Chains.fantom.id,
+        //     name: 'Fantom Devnet',
+        //     network: Chains.fantom.network,
+        //     nativeCurrency: Chains.fantom.nativeCurrency,
+        //     rpcUrls: {
+        //         default: {
+        //             http: [import.meta.env.VITE_TENDERLY_RPC],
+        //             webSocket: [],
+        //         },
+        //         public: {
+        //             http: [import.meta.env.VITE_TENDERLY_RPC],
+        //             webSocket: [],
+        //         }
+        //     },
+        //     blockExplorers: Chains.fantom.blockExplorers,
+        //     contracts: Chains.fantom.contracts,
+        // },
     ],
 }))
 app.use(router)

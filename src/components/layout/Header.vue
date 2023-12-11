@@ -1,14 +1,19 @@
 <script setup lang="ts">
-import { computed, watch } from "vue"
+import { computed, onMounted, ref, watch } from "vue"
 // import { useAppStore } from "../../store/app"
 import { useCoreStore, Network } from "../../store/core"
-import { account, disconnect, connect, accountDetails, chain, getAvailableChains, switchChain, Chain} from '@kolirt/vue-web3-auth'
+import { account, disconnect, connect, accountDetails, chain, getAvailableChains, switchChain, Chain, readContract} from '@kolirt/vue-web3-auth'
 import { icons } from "../../utils/icons"
 import { useItemStore, itemNames } from "../../store/items"
+import broochAbi from '../../abi/brooch.json'
+import Donate from "../dialogs/Donate.vue"
+import { HOMEMADE_BROOCH_ADDRESS } from "../../utils/addresses"
 
 // const appStore = useAppStore()
 const coreStore = useCoreStore()
 const itemStore = useItemStore()
+
+const donateRef = ref<typeof Donate>()
 
 const allItemNames = computed(() => {
     return Object.values(itemNames)
@@ -24,9 +29,31 @@ const onSwitchChain = (network: string) => {
     switchChain(getAvailableChains().find(x => x.network == network) as Chain)
 }
 
+const init = async () => {
+    try {
+        if (account.connected) {
+            const balance = await readContract({
+                address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
+                abi: broochAbi,
+                functionName: 'balanceOf',
+                args: [account.address, 0],
+            }) as unknown as number
+            if (balance < 1) {
+                setTimeout(() => {
+                    donateRef.value?.openDialog()
+                }, 60000 * 5) // 5 minutes
+            }
+        }
+    } catch (e) {
+        console.log(e)
+    }
+}
+
 watch(chain, (newValue: Chain) => {
     coreStore.setCurrentNetwork(newValue.network as Network)
 })
+
+watch(account, init)
 
 const currentIcon = computed(() => {
     return icons.find(x => x.name == coreStore.connectedNetwork)?.icon
@@ -35,12 +62,14 @@ const currentIcon = computed(() => {
 const getChainName = (network: string) => {
     return getAvailableChains().find(x => x.network == network)?.name
 }
+
+onMounted(init)
 </script>
 
 <template>
     <nav class="navbar bg-base-100-50 border-solid border-b-2 border-primary">
         <div class="navbar-start">
-            <router-link to="/" class="btn btn-ghost btn-circle ml-4"><img width="46" src="/src/assets/logo.png"></router-link>            
+            <img width="46" src="/src/assets/logo.png" class="ml-2 cursor-pointer" @click.prevent="donateRef?.openDialog()">          
             <router-link to="/" class="max-sm:hidden btn btn-ghost ml-4 mr-2">Combat Calculator</router-link> 
             <span class="max-sm:hidden">|</span>
             <router-link to="/skills" class="max-sm:hidden btn btn-ghost ml-2">Skill Training</router-link>
@@ -100,6 +129,7 @@ const getChainName = (network: string) => {
             </button>
         </div>
     </nav>
+    <Donate ref="donateRef" />
 </template>
 
 <style scoped>
