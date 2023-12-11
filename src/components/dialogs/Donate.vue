@@ -5,7 +5,7 @@
             <p v-if="balance < 1" class="my-5">This information doesn't come free you know, I have eggs to incubate and fires to upkeep! Now why don't you buy one of my Emerald brooches and I'll stop pestering you, what do you say? It'll get you access to better information in the future...</p>
             <p v-if="balance < 1" class="my-5">It's better to buy them early because I increase the price after each one sold!</p>
             <p v-if="balance >= 1" class="my-5">Oh, you already have {{ balance }} of my brooches... would you like another one perchance?</p>
-            <img src="src/assets/emerald_brooch_web.png" class="rounded-lg" alt="Emerald Brooch" />
+            <img src="/src/assets/emerald_brooch_web.png" class="rounded-lg" alt="Emerald Brooch" />
             <button type="button" class="btn btn-primary btn-lg w-full mt-5" :disabled="loading" @click.prevent="mintNFT">Mint Emerald Brooch ({{ mintPrice }} FTM)</button>
         </div>
         <form method="dialog" class="modal-backdrop">
