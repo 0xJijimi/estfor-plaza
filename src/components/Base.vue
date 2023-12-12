@@ -14,6 +14,8 @@
         <div v-if="!account.connected" class="card md:w-[500px] bg-base-100-50 shadow-xl mx-auto my-[100px] p-10">
             <div class="text-center">
                 <h2 class="text-2xl font-bold">Welcome to Deif's Estfor Plaza!</h2>
+                <p class="text-lg my-5">Here you'll find all the information about the Kingdom and its inhabitants.</p>
+                <p class="text-lg my-5">Maybe you wish to know how long you can survive against the frightening Obgora, or how many hours of mastering smithing Adamantine Shields will unlock the knowledge to craft Runite armour? Then enter the Plaza, friend, you're in good company.</p>
                 <p class="text-lg">Connect your wallet below</p>
             </div>
             <div class="text-center my-4">
@@ -22,6 +24,22 @@
         </div>
         <div v-else-if="loading" class="mx-auto my-[100px] w-[500px] text-center">
             <span class="loading loading-spinner text-primary loading-md mx-auto"></span>
+        </div>
+        <div v-else-if="coreStore.playerId == 0" class="card md:w-[500px] bg-base-100-50 shadow-xl mx-auto my-[100px] p-10">
+            <div class="text-center">
+                <h2 class="text-2xl font-bold">Sorry friend, but I don't recognise you!</h2>
+                <p class="text-lg my-5">Do not worry as you can register for free, just click the button below then return here once you're all set up.</p>
+            </div>
+            <div class="text-center my-4">
+                <a href="https://estfor.com" target="_blank">
+                    <button class="btn btn-primary">
+                        Go to Estfor Kingdom 
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                        </svg>
+                    </button>
+                </a>
+            </div>
         </div>
         <div v-else>
             <RouterView />
