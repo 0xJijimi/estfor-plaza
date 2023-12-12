@@ -27,6 +27,9 @@
                     </tr>
                     </thead>
                     <tbody>
+                        <tr v-if="monsterRankings.length === 0">
+                            <td colspan="4" class="text-center">No monsters found that drop "{{ itemStore.itemSearch }}"</td>
+                        </tr>
                         <tr v-for="m in monsterRankings" :key="m.name">
                             <td>
                                 <div class="flex items-center gap-3">

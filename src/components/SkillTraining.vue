@@ -1,8 +1,15 @@
 <template>
     <BoostPanel :hide-combat="true" />
+    <template v-if="actionsWithItemSearch.length == 0">
+        <div class="card bg-base-100-50 shadow-xl rounded-lg my-5">
+            <div class="card-body text-center">
+                No skills found that require or produce "{{ itemStore.itemSearch }}"
+            </div>
+        </div>
+    </template>
     <div class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-5 my-10">
-        <template v-for="action in allActions" :key="action.skill">
-            <div v-if="action.relevantAction.hasItemSearch" class="card bg-base-100-50 shadow-xl rounded-lg">
+        <template v-for="action in actionsWithItemSearch" :key="action.skill">
+            <div class="card bg-base-100-50 shadow-xl rounded-lg">
                 <figure><img class="w-full cursor-pointer" :src="`${MEDIA_URL}/landscape/${skillNames[action.skill]?.toLowerCase()}.jpg`" :alt="skillNames[action.skill]" @click.prevent="action.relevantAction.actionType === ActionType.action ? actionInfoRef?.openDialog(action.skill) : actionChoiceInfoRef?.openDialog(action.skill)" /></figure>
                 <div class="card-body">
                     <div class="grid grid-cols-2 gap-2">
@@ -55,9 +62,11 @@ import { computed, ref } from 'vue'
 import BoostPanel from './BoostPanel.vue';
 import ActionInfo from './dialogs/ActionInfo.vue';
 import ActionChoiceInfo from './dialogs/ActionChoiceInfo.vue';
+import { useItemStore } from '../store/items';
 
 const skillStore = useSkillStore()
 const coreStore = useCoreStore()
+const itemStore = useItemStore()
 const actionInfoRef = ref<typeof ActionInfo>()
 const actionChoiceInfoRef = ref<typeof ActionChoiceInfo>()
 
@@ -76,6 +85,10 @@ const allActions = computed(() => {
         { skill: Skill.ALCHEMY, relevantAction: skillStore.getCurrentAndNextActionForSkill(Skill.ALCHEMY) },
     ]
 });
+
+const actionsWithItemSearch = computed(() => {
+    return allActions.value.filter(x => x.relevantAction.hasItemSearch)
+})
 
 const hoursUntilNextAction = (relevantAction: RelevantAction) => {
     if (!relevantAction.nextAction) {
