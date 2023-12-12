@@ -93,6 +93,7 @@ const actions = computed(() => {
         return 0
     })
     return a.filter(x => 
+        itemStore.itemSearch === '' ||
         x.inputTokenIds.some(y => itemNames[y]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase())) || 
         itemNames[x.outputTokenId]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase()) ||
         itemNames[x.handItemTokenIdRangeMax]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase()) ||

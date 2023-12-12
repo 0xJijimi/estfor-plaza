@@ -61,6 +61,7 @@ const actions = computed(() => {
     const a = [...allActions.filter(x => x.info.skill === skillId.value)]
     a.sort((a, b) => a.info.minXP > b.info.minXP ? 1 : -1)
     return a.filter(x =>
+        itemStore.itemSearch === '' ||
         x.guaranteedRewards.some(y => itemNames[y.itemTokenId]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase())) || 
         x.randomRewards.some(y => itemNames[y.itemTokenId]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase())) ||
         itemNames[x.info.handItemTokenIdRangeMax]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase()) ||

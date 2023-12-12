@@ -6,7 +6,10 @@
             <p v-if="balance < 1" class="my-5">It's better to buy them early because I increase the price after each one sold!</p>
             <p v-if="balance >= 1" class="my-5">Oh, you already have {{ balance }} of my brooches... would you like another one perchance?</p>
             <img src="/src/assets/emerald_brooch_web.png" class="rounded-lg" alt="Emerald Brooch" />
-            <button type="button" class="btn btn-primary btn-lg w-full mt-5" :disabled="loading" @click.prevent="mintNFT">Mint Emerald Brooch ({{ mintPrice }} FTM)</button>
+            <div class="flex mt-5">
+                <button type="button" class="btn btn-primary btn-lg grow sm:mr-5" :disabled="loading" @click.prevent="mintNFT">Mint Emerald Brooch ({{ mintPrice }} FTM)</button>
+                <a href="https://paintswap.finance/marketplace/fantom/collections/deif's-quality-brooches/nfts" target="_blank" class="max-sm:hidden"><button type="button" class="btn btn-primary btn-lg">View NFT</button></a>                
+            </div>
         </div>
         <form method="dialog" class="modal-backdrop">
             <button>close</button>

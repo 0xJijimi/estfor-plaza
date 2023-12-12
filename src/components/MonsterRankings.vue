@@ -144,6 +144,7 @@ const monsterRankings = computed(() => {
         })
     }
     return storeRankings.filter(x => 
+        itemStore.itemSearch === '' ||
         x.guaranteedRewards.some(y => itemNames[y.itemTokenId]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase())) || 
         x.randomRewards.some(y => itemNames[y.itemTokenId]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase()))
     ).slice(0, 10)
