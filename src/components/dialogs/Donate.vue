@@ -29,39 +29,6 @@ const totalSupply = ref(0)
 const baseTokenPrice = ref(0)
 const balance = ref(0)
 
-const openDialog = (_monsterId: number) => {
-    const dialog = document.getElementById('donate_modal') as HTMLDialogElement
-    dialog.showModal()
-}
-
-const mintPrice = computed(() => {
-    return ((BigInt(totalSupply.value) * BigInt(10 ** 18)) + BigInt(baseTokenPrice.value)) / BigInt(10 ** 18)
-})
-
-const mintNFT = async () => {
-    loading.value = true
-    try {
-        const data = await writeContract({
-            address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
-            abi: broochAbi,
-            functionName: 'mintBatch',
-            args: [account.address, [0], [1], solidityPacked(['bytes'], ['0x'])],
-            value: (BigInt(totalSupply.value) * BigInt(10 ** 18)) + BigInt(baseTokenPrice.value),
-            
-        })
-        await data?.wait()
-        app.addToast('Thank you for your support!', 'alert-success', 5000)
-    } catch (error) {  
-        // app.addToast('Failed to mint brooch', 'alert-error', 50000)      
-        console.log(error)
-    } finally {
-        loading.value = false
-        const dialog = document.getElementById('donate_modal') as HTMLDialogElement
-        dialog.close()
-        init()
-    }
-}
-
 const init = async () => {
     try {
         if (account.connected) {
@@ -93,6 +60,40 @@ const init = async () => {
     }
     finally {
         loading.value = false
+    }
+}
+
+const openDialog = (_monsterId: number) => {
+    const dialog = document.getElementById('donate_modal') as HTMLDialogElement
+    dialog.showModal()
+    init()
+}
+
+const mintPrice = computed(() => {
+    return ((BigInt(totalSupply.value) * BigInt(10 ** 18)) + BigInt(baseTokenPrice.value)) / BigInt(10 ** 18)
+})
+
+const mintNFT = async () => {
+    loading.value = true
+    try {
+        const data = await writeContract({
+            address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
+            abi: broochAbi,
+            functionName: 'mintBatch',
+            args: [account.address, [0], [1], solidityPacked(['bytes'], ['0x'])],
+            value: (BigInt(totalSupply.value) * BigInt(10 ** 18)) + BigInt(baseTokenPrice.value),
+            
+        })
+        await data?.wait()
+        app.addToast('Thank you for your support!', 'alert-success', 5000)
+    } catch (error) {  
+        // app.addToast('Failed to mint brooch', 'alert-error', 50000)      
+        console.log(error)
+    } finally {
+        loading.value = false
+        const dialog = document.getElementById('donate_modal') as HTMLDialogElement
+        dialog.close()
+        init()
     }
 }
 
