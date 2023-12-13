@@ -48,6 +48,10 @@ export interface ClanMemberResult {
     clanMember: ClanMember
 }
 
+export interface PlayerResult {
+    player: Player
+}
+
 export interface CoreData {
     gamePaused: boolean
     globalBoostStartTime: string
@@ -63,6 +67,10 @@ export interface CoreDataResult {
 
 export interface UserItemNFTResult {
     userItemNFTs: UserItemNFT[]
+}
+
+export interface PlayerSearchResult {
+    players: Player[]
 }
 
 export const getPlayerState = async (
@@ -84,6 +92,20 @@ export const getGlobalData = async (): Promise<CoreDataResult> => {
 export const getUserItemNFTs = async (user: string, tokenIds: number[]): Promise<UserItemNFTResult> => {
     const response = await fetch(
         `${baseUrl}/user-item-nfts/${user}?${tokenIds.map(x => `tokenIds[]=${x}`).join('&')}`
+    )
+    return response.json()
+}
+
+export const getPlayers = async (searchTerm: string): Promise<PlayerSearchResult> => {
+    const response = await fetch(
+        `${baseUrl}/players?name=${searchTerm}`
+    )
+    return response.json()
+}
+
+export const getSoloPlayerState =async (playerId: number): Promise<PlayerResult> => {
+    const response = await fetch(
+        `${baseUrl}/players/${playerId}`
     )
     return response.json()
 }

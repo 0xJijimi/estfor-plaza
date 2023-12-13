@@ -100,14 +100,14 @@ const combatStyle = ref(Skill.DEFENCE)
 const monsterInfoRef = ref<typeof MonsterInfo>()
 
 const weaponSkill = computed(() => {
-    const weapon = itemStore.items.find(x => x.tokenId === itemStore.equippedItems.rightHand)
+    const weapon = itemStore.items.find(x => x.tokenId === itemStore.getCurrentEquippedItems?.rightHand)
     if (weapon) {
         return weapon.skill
     }
     return Skill.NONE
 })
 
-watch(() => itemStore.equippedItems.rightHand, () => {
+watch(() => itemStore.getCurrentEquippedItems?.rightHand, () => {
     combatStyle.value = weaponSkill.value
 })
 
@@ -153,7 +153,7 @@ const monsterRankings = computed(() => {
     ).slice(0, 10)
 })
 
-const equippedFishName = computed(() => itemStore.items.find(x => x.tokenId === itemStore.equippedItems.food)?.name)
+const equippedFishName = computed(() => itemStore.items.find(x => x.tokenId === itemStore.getCurrentEquippedItems?.food)?.name)
 
 const currentSort = ref<string | null>(null)
 const currentDirection = ref('desc')

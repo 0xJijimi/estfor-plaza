@@ -2,11 +2,13 @@ import { defineStore } from "pinia"
 import { account, readContract, } from '@kolirt/vue-web3-auth'
 
 import estforPlayerAbi from '../abi/estforPlayer.json'
-import { CoreData, Clan, Player, getPlayerState, getGlobalData, getUserItemNFTs } from "../utils/api"
+import broochAbi from '../abi/brooch.json'
+import { CoreData, Clan, Player, getPlayerState, getGlobalData, getUserItemNFTs, getSoloPlayerState } from "../utils/api"
 import { BoostType, Skill, UserItemNFT } from "@paintswap/estfor-definitions/types"
 import { EstforConstants } from "@paintswap/estfor-definitions"
 import { allItems } from "../data/items"
 import { allFullAttireBonuses } from "../data/fullAttireBonuses"
+import { HOMEMADE_BROOCH_ADDRESS } from "../utils/addresses"
 
 export const NATIVE_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
 export const MEDIA_URL = 'https://media.estfor.com'
@@ -40,6 +42,7 @@ export interface CoreState {
     individualBoost: number | null
     applyWishingWellBoost: boolean
     inventory: UserItemNFT[]
+    heroRoster: Player[]
 }
 
 export const boostVialNames = {
@@ -155,6 +158,7 @@ export const useCoreStore = defineStore({
             individualBoost: null,
             applyWishingWellBoost: false,
             inventory: [],
+            heroRoster: localStorage.getItem('heroRoster') ? JSON.parse(localStorage.getItem('heroRoster') as string) : [],
         } as CoreState),
     getters: {
         getNetworkAddressMap: (state: CoreState): AddressMap[] | undefined => {
@@ -271,6 +275,27 @@ export const useCoreStore = defineStore({
             this.clanState = null
             this.inventory = []
         },
+        async getAllPlayerInfo(playerId: number) {
+            this.playerId = playerId
+
+            const playerState = await getPlayerState(this.playerId)
+            if (playerState.clanMember) {
+                this.playerState = playerState.clanMember.player
+
+                if (playerState.clanMember.clan) {
+                    this.clanState = playerState.clanMember.clan
+                }
+            } else {
+                this.clanState = null
+                const soloPlayerState = await getSoloPlayerState(this.playerId)
+                this.playerState = soloPlayerState.player
+            }
+
+            const inventory = await getUserItemNFTs(this.playerState.owner, allFullAttireBonuses.flatMap(x => x.itemTokenIds))
+            this.inventory = inventory.userItemNFTs
+
+            this.addHeroToRoster(this.playerState)
+        },
         async getActivePlayer() {
             const playerAddress = this.getAddress(Address.estforPlayers)
             if (!playerAddress || !account.connected) {
@@ -284,20 +309,34 @@ export const useCoreStore = defineStore({
                 args: [account.address],
             })
 
-            this.playerId = activePlayer as unknown as number
-
-            const playerState = await getPlayerState(this.playerId)
-            this.playerState = playerState.clanMember.player
-
-            if (playerState.clanMember.clan) {
-                this.clanState = playerState.clanMember.clan
-            }
+            await this.getAllPlayerInfo(activePlayer as unknown as number)
 
             const globalState = await getGlobalData()
             this.coreData = globalState.coreData
+        },
+        async loadPlayer(playerId: number) {
+            const balance = await readContract({
+                address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
+                abi: broochAbi,
+                functionName: 'balanceOf',
+                args: [account.address, 0],
+            })
 
-            const inventory = await getUserItemNFTs(this.playerState.owner, allFullAttireBonuses.flatMap(x => x.itemTokenIds))
-            this.inventory = inventory.userItemNFTs
+            if ((balance as unknown as bigint) < 1) {
+                throw new Error('NO_EMERALD_BROOCH')
+            }
+
+            await this.getAllPlayerInfo(playerId)
+        },
+        addHeroToRoster(player: Player) {
+            if (!this.heroRoster.some(x => x.id === player.id)) {
+                this.heroRoster.push(player)
+                localStorage.setItem('heroRoster', JSON.stringify(this.heroRoster))
+            }
+        },
+        removeHeroFromRoster(player: Player) {
+            this.heroRoster = this.heroRoster.filter(x => x.id !== player.id)
+            localStorage.setItem('heroRoster', JSON.stringify(this.heroRoster))
         },
     },
 })

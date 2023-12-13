@@ -4,7 +4,7 @@ import { defineStore } from "pinia"
 import { allActions } from '../data/actions'
 import { useItemStore } from "./items"
 import { EstforConstants } from "@paintswap/estfor-definitions"
-import { MEDIA_URL } from "./core"
+import { MEDIA_URL, useCoreStore } from "./core"
 
 export interface MonsterState {
     monsters: ActionInput[]
@@ -89,11 +89,14 @@ export const useMonsterStore = defineStore({
     getters: {
         getMonsterRankings: (state: MonsterState) => {
             return (hours: number) => {
+                const coreStore = useCoreStore()
                 const itemStore = useItemStore()
+
+                const equippedItems = itemStore.equippedItems.find(x => x.playerId === Number(coreStore.playerId))
                 
-                let isMelee = itemStore.items.find(x => x.tokenId === itemStore.equippedItems.rightHand)?.skill === Skill.MELEE || false
-                let isRanged = itemStore.items.find(x => x.tokenId === itemStore.equippedItems.rightHand)?.skill === Skill.RANGED || false
-                let isMagic = itemStore.items.find(x => x.tokenId === itemStore.equippedItems.rightHand)?.skill === Skill.MAGIC || false
+                let isMelee = itemStore.items.find(x => x.tokenId === equippedItems?.rightHand)?.skill === Skill.MELEE || false
+                let isRanged = itemStore.items.find(x => x.tokenId === equippedItems?.rightHand)?.skill === Skill.RANGED || false
+                let isMagic = itemStore.items.find(x => x.tokenId === equippedItems?.rightHand)?.skill === Skill.MAGIC || false
 
                 const combatStats = itemStore.getTotalCombatStats
 
@@ -135,7 +138,7 @@ export const useMonsterStore = defineStore({
                         totalHealthLost = 0
                     }
 
-                    const fishHealthRestored = itemStore.items.find(x => x.tokenId === itemStore.equippedItems.food)?.healthRestored || 0
+                    const fishHealthRestored = itemStore.items.find(x => x.tokenId === equippedItems?.food)?.healthRestored || 0
                     const totalFoodRequired = Math.ceil(totalHealthLost / fishHealthRestored)
                     const xpPerHour = (m.info.xpPerHour * xpElapsedTime) / elapsedTime
                     

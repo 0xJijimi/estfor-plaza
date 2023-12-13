@@ -375,13 +375,14 @@ export interface EquippedItems {
     magicBag: number | undefined,
     quiver: number | undefined,
     food: number | undefined,
+    playerId: number | undefined,
 }
 
 export interface ItemState {
     items: ItemInput[],
     rangedActionChoices: ActionChoiceInput[],
     magicActionChoices: ActionChoiceInput[],
-    equippedItems: EquippedItems,
+    equippedItems: EquippedItems[],
     itemSearch: string,
 }
 
@@ -392,10 +393,16 @@ export const useItemStore = defineStore({
             items: allItems as ItemInput[],
             rangedActionChoices: allActionChoicesRanged as ActionChoiceInput[],
             magicActionChoices: allActionChoicesMagic as ActionChoiceInput[],
-            equippedItems: localStorage.getItem('equippedItems') ? JSON.parse(localStorage.getItem('equippedItems') as string) : {} as EquippedItems,
+            equippedItems: localStorage.getItem('equippedItemsMulti') ? JSON.parse(localStorage.getItem('equippedItemsMulti') as string) : [] as EquippedItems[],
             itemSearch: '',
         } as ItemState),
     getters: {
+        getCurrentEquippedItems(state: ItemState) {
+            const coreStore = useCoreStore()            
+            const playerState = coreStore.playerState
+
+            return state.equippedItems.find(x => x.playerId === Number(playerState.id))
+        },
         getItemsForSlotAndXP: (state: ItemState) => {
             return (position: EquipPosition) => {
                 const coreStore = useCoreStore()
@@ -424,9 +431,12 @@ export const useItemStore = defineStore({
             }))
         },
         getAggregatedCombatStats(state: ItemState) {
+            const coreStore = useCoreStore()            
+            const playerState = coreStore.playerState
+
             const stats = new CombatStats()
-            const localEquippedItems = state.equippedItems as any
-            Object.keys(state.equippedItems).forEach((key) => {
+            const localEquippedItems = state.equippedItems.find(x => x.playerId === Number(playerState.id)) as any || {}
+            Object.keys(localEquippedItems).forEach((key) => {
                 if (key !== 'magicBag') { // skip magic bag as they require special calculations
                     const item = state.items.find(x => x.tokenId === localEquippedItems[key])
                     if (item) { 
@@ -441,8 +451,8 @@ export const useItemStore = defineStore({
                 }
             })
         
-            if (state.equippedItems.magicBag) {
-                stats.magic += state.equippedItems.magicBag
+            if (localEquippedItems.magicBag) {
+                stats.magic += localEquippedItems.magicBag
             }
             
             return stats
@@ -452,8 +462,8 @@ export const useItemStore = defineStore({
             const playerState = coreStore.playerState
 
             const stats = new CombatStats()
-            const localEquippedItems = state.equippedItems as any
-            Object.keys(state.equippedItems).forEach((key) => {
+            const localEquippedItems = state.equippedItems.find(x => x.playerId === Number(playerState.id)) as any || {}
+            Object.keys(localEquippedItems).forEach((key) => {
                 if (key !== 'magicBag') { // skip magic bag as they require special calculations
                     const item = state.items.find(x => x.tokenId === localEquippedItems[key])
                     if (item) { 
@@ -468,8 +478,8 @@ export const useItemStore = defineStore({
                 }
             })
         
-            if (state.equippedItems.magicBag) {
-                stats.magic += state.equippedItems.magicBag
+            if (localEquippedItems.magicBag) {
+                stats.magic += localEquippedItems.magicBag
             }
 
             stats.melee += getLevel(playerState.meleeXP)
@@ -485,8 +495,25 @@ export const useItemStore = defineStore({
     },
     actions: {
         updateEquippedItems(equippedItems: EquippedItems) {
-            this.equippedItems = equippedItems
-            localStorage.setItem('equippedItems', JSON.stringify(equippedItems))
+            const coreStore = useCoreStore()            
+            const e = this.equippedItems.find(x => x.playerId === Number(coreStore.playerId))
+            if (e) {
+                e.head = equippedItems.head
+                e.neck = equippedItems.neck
+                e.body = equippedItems.body
+                e.arms = equippedItems.arms
+                e.legs = equippedItems.legs
+                e.feet = equippedItems.feet
+                e.rightHand = equippedItems.rightHand
+                e.leftHand = equippedItems.leftHand
+                e.magicBag = equippedItems.magicBag
+                e.quiver = equippedItems.quiver
+                e.food = equippedItems.food
+            } else {
+                equippedItems.playerId = Number(coreStore.playerId)
+                this.equippedItems.push(equippedItems)
+            }
+            localStorage.setItem('equippedItemsMulti', JSON.stringify(this.equippedItems))
         },
     },
 })

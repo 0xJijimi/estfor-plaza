@@ -13,7 +13,7 @@
     "@heroicons/vue": "^2.0.18",
     "@kolirt/vue-web3-auth": "^0.1.4",
     "@paintswap/estfor-definitions": "^1.0.70",
-    "@vueuse/core": "^10.6.1",
+    "@vueuse/core": "^10.7.0",
     "@vueuse/head": "^2.0.0",
     "ethers": "^6.8.1",
     "pinia": "^2.1.7",

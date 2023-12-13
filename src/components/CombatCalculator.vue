@@ -1,6 +1,6 @@
 <template>
     <div class="flex my-10 gap-10">
-        <Avatar class="flex-initial w-1/3 min-w-[200px]" />
+        <Avatar class="flex-initial w-1/3 min-w-[200px]" :id="coreStore.playerState?.avatarId" :name="coreStore.playerState?.name" />
         <div class="flex-grow card bg-base-100-50 shadow-xl rounded-lg">
             <div class="card-body flex flex-wrap">
                 <ItemSelect :items="headItems" label="Head" @update:model-value="onUpdate" v-model="equippedItems.head" />
@@ -31,9 +31,11 @@ import BoostPanel from './BoostPanel.vue'
 import ItemSelect from './inputs/ItemSelect.vue'
 import { computed, nextTick, ref } from "vue"
 import MonsterRankings from "./MonsterRankings.vue"
+import { useCoreStore } from "../store/core"
 
 const itemStore = useItemStore()
-const equippedItems = ref({ ...itemStore.equippedItems })
+const coreStore = useCoreStore()
+const equippedItems = ref({ ...itemStore.getCurrentEquippedItems })
 
 const headItems = computed(() => itemStore.getItemsForSlotAndXP(EquipPosition.HEAD))
 const neckItems = computed(() => itemStore.getItemsForSlotAndXP(EquipPosition.NECK))
@@ -62,7 +64,7 @@ const onUpdate = async () => {
         equippedItems.value.quiver = undefined
         equippedItems.value.magicBag = undefined
     }
-    itemStore.updateEquippedItems(equippedItems.value)
+    itemStore.updateEquippedItems(equippedItems.value as any)
 }
 
 const isMelee = computed(() => {

@@ -1,10 +1,9 @@
 <template>
-    <dialog id="donate_modal" class="modal">
+    <dialog id="emerald_brooch_paywall_modal" class="modal">
         <div class="modal-box bg-base-100 border-2 border-primary">
-            <h3 class="font-bold text-lg text-center">Hey, enjoying the plaza?</h3>
-            <p v-if="brooch.balance < 1" class="my-5">This information doesn't come free you know, I have eggs to incubate and fires to upkeep! Now why don't you buy one of my Emerald brooches and I'll stop pestering you, what do you say? It'll get you access to better information in the future...</p>
-            <p v-if="brooch.balance < 1" class="my-5">It's better to buy them early because I increase the price after each one sold!</p>
-            <p v-if="brooch.balance >= 1" class="my-5">Oh, you already have {{ brooch.balance }} of my brooches... would you like another one perchance?</p>
+            <h3 class="font-bold text-lg text-center">Sorry, you're not a member!</h3>
+            <p class="my-5">This information doesn't come free you know, I have eggs to incubate and fires to upkeep! Now why don't you buy one of my Emerald brooches and you can get basic access to the Plaza?</p>
+            <p class="my-5">It's better to buy them early because I increase the price after each one sold!</p>
             <img src="/src/assets/emerald_brooch_web.png" class="rounded-lg" alt="Emerald Brooch" />
             <div class="flex mt-5">
                 <button type="button" class="btn btn-primary btn-lg grow sm:mr-5" :disabled="loading" @click.prevent="mintNFT">Mint Emerald Brooch ({{ mintPrice }} FTM)</button>
@@ -45,7 +44,7 @@ const init = async () => {
 }
 
 const openDialog = (_monsterId: number) => {
-    const dialog = document.getElementById('donate_modal') as HTMLDialogElement
+    const dialog = document.getElementById('emerald_brooch_paywall_modal') as HTMLDialogElement
     dialog.showModal()
     init()
 }
@@ -65,7 +64,7 @@ const mintNFT = async () => {
         console.log(error)
     } finally {
         loading.value = false
-        const dialog = document.getElementById('donate_modal') as HTMLDialogElement
+        const dialog = document.getElementById('emerald_brooch_paywall_modal') as HTMLDialogElement
         dialog.close()
         init()
     }

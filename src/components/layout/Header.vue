@@ -69,10 +69,20 @@ onMounted(init)
 <template>
     <nav class="navbar bg-base-100-50 border-solid border-b-2 border-primary">
         <div class="navbar-start">
-            <img width="46" src="/src/assets/logo.png" class="ml-2 cursor-pointer" @click.prevent="donateRef?.openDialog()">          
-            <router-link to="/" class="max-md:hidden btn btn-ghost ml-4 mr-2">Combat Calculator</router-link> 
+            <img width="46" src="/src/assets/logo.png" class="ml-2 cursor-pointer" @click.prevent="donateRef?.openDialog()">
+            <router-link to="/hero-select" class="max-md:hidden btn btn-ghost mr-2 ml-2">Hero Select</router-link>
             <span class="max-md:hidden">|</span>
-            <router-link to="/skills" class="max-md:hidden btn btn-ghost ml-2">Skill Training</router-link>
+            <ul class="menu menu-horizontal max-md:hidden">
+                <li>
+                    <details>
+                        <summary>Combat/Skill Calculators</summary>
+                        <ul class="bg-base-100 z-[1]">
+                            <li><router-link to="/combat">Combat Calculator</router-link></li>
+                            <li><router-link to="/skills">Skill Training</router-link></li>
+                        </ul>
+                    </details>
+                </li>
+            </ul>
             <div class="md:hidden dropdown">
                 <div tabindex="0" role="button" class="btn m-1 border-0">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -80,8 +90,9 @@ onMounted(init)
                     </svg>
                 </div>
                 <ul class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-                    <li><router-link to="/">Combat Calculator</router-link> </li>
-                    <li> <router-link to="/skills">Skill Training</router-link></li>
+                    <li><router-link to="/hero-select">Hero Select</router-link></li>
+                    <li><router-link to="/combat">Combat Calculator</router-link> </li>
+                    <li><router-link to="/skills">Skill Training</router-link></li>                    
                 </ul>
             </div>
         </div>

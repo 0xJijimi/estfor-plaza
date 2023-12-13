@@ -23,6 +23,10 @@ const routes: Array<RouteRecordRaw> = [
                 path: 'skills',
                 component: () => import("../components/SkillTraining.vue"),
             },
+            {
+                path: 'hero-select',
+                component: () => import("../components/HeroSelect.vue"),
+            },
         ],
     },    
 ]
