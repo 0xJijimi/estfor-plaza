@@ -1,9 +1,11 @@
 <template>
     <dialog id="emerald_brooch_paywall_modal" class="modal">
         <div class="modal-box bg-base-100 border-2 border-primary">
-            <h3 class="font-bold text-lg text-center">Sorry, you're not a member!</h3>
-            <p class="my-5">This information doesn't come free you know, I have eggs to incubate and fires to upkeep! Now why don't you buy one of my Emerald brooches and you can get basic access to the Plaza?</p>
-            <p class="my-5">It's better to buy them early because I increase the price after each one sold!</p>
+            <h3 v-if="brooch.balance < 1" class="font-bold text-lg text-center">Sorry, you're not a member!</h3>
+            <h3 v-else class="font-bold text-lg text-center">Ahh, a member of the Plaza!</h3>
+            <p v-if="brooch.balance < 1" class="my-5">This information doesn't come free you know, I have eggs to incubate and fires to upkeep! Now why don't you buy one of my Emerald brooches and you can get basic access to the Plaza?</p>
+            <p v-if="brooch.balance < 1" class="my-5">It's better to buy them early because I increase the price after each one sold!</p>
+            <p v-else class="my-5">You already have access to use this feature. But feel free to buy another one of my brooches if you like...</p>
             <img src="/src/assets/emerald_brooch_web.png" class="rounded-lg" alt="Emerald Brooch" />
             <div class="flex mt-5">
                 <button type="button" class="btn btn-primary btn-lg grow sm:mr-5" :disabled="loading" @click.prevent="mintNFT">Mint Emerald Brooch ({{ mintPrice }} FTM)</button>
@@ -17,8 +19,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
-import { account } from '@kolirt/vue-web3-auth'
+import { computed, onMounted, ref } from 'vue'
+import { getAccount, waitForTransaction, watchAccount } from '@wagmi/core'
 import { useAppStore } from '../../store/app'
 import { useBroochStore } from '../../store/brooch'
 
@@ -33,7 +35,8 @@ const brooch = computed(() => {
 
 const init = async () => {
     try {
-        if (account.connected) {
+        const account = getAccount()
+        if (account.isConnected) {
             loading.value = true
             await broochStore.getBroochData(0)
         }
@@ -44,6 +47,11 @@ const init = async () => {
 }
 
 const openDialog = (_monsterId: number) => {
+    const account = getAccount()
+    if (account.isDisconnected) {
+        return
+    }
+    
     const dialog = document.getElementById('emerald_brooch_paywall_modal') as HTMLDialogElement
     dialog.showModal()
     init()
@@ -57,7 +65,7 @@ const mintNFT = async () => {
     loading.value = true
     try {
         const data = await broochStore.mintNFT(0)
-        await data?.wait()
+        await waitForTransaction({ hash: data.hash })
         app.addToast('Thank you for your support!', 'alert-success', 5000)
     } catch (error) {  
         // app.addToast('Failed to mint brooch', 'alert-error', 50000)      
@@ -70,7 +78,7 @@ const mintNFT = async () => {
     }
 }
 
-watch(account, init)
+watchAccount(init)
 
 onMounted(init)
 

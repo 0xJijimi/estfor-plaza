@@ -1,4 +1,4 @@
-import { account, readContract, writeContract } from "@kolirt/vue-web3-auth"
+import { getAccount, readContract, writeContract } from "@wagmi/core"
 import { defineStore } from "pinia"
 import { HOMEMADE_BROOCH_ADDRESS } from "../utils/addresses"
 import broochAbi from '../abi/brooch.json'
@@ -33,6 +33,7 @@ export const useBroochStore = defineStore({
     },
     actions: {
         async getBroochData(tokenId: number) {
+            const account = getAccount()
             const result = await Promise.all([
                 readContract({
                     address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
@@ -61,6 +62,7 @@ export const useBroochStore = defineStore({
             this.brooches[tokenId] = brooch
         },
         mintNFT(tokenId: number) {
+            const account = getAccount()
             return writeContract({
                 address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
                 abi: broochAbi,

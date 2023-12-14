@@ -27,6 +27,10 @@ const routes: Array<RouteRecordRaw> = [
                 path: 'hero-select',
                 component: () => import("../components/HeroSelect.vue"),
             },
+            {
+                path: 'training-plan',
+                component: () => import("../components/TrainingPlan.vue"),
+            },
         ],
     },    
 ]

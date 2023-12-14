@@ -1,5 +1,5 @@
 import { defineStore } from "pinia"
-import { account, readContract, } from '@kolirt/vue-web3-auth'
+import { readContract, getAccount, getNetwork } from '@wagmi/core'
 
 import estforPlayerAbi from '../abi/estforPlayer.json'
 import broochAbi from '../abi/brooch.json'
@@ -9,13 +9,10 @@ import { EstforConstants } from "@paintswap/estfor-definitions"
 import { allItems } from "../data/items"
 import { allFullAttireBonuses } from "../data/fullAttireBonuses"
 import { HOMEMADE_BROOCH_ADDRESS } from "../utils/addresses"
+import { fantom } from 'viem/chains'
 
 export const NATIVE_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
 export const MEDIA_URL = 'https://media.estfor.com'
-
-export enum Network {
-    fantom = "fantom",
-}
 
 export enum Address {
     estforPlayers,
@@ -27,13 +24,12 @@ export interface AddressMap {
 }
 
 export interface AddressNetworkMap {
-    network: Network
+    network: number
     addresses: AddressMap[]
 }
 
 export interface CoreState {
     addresses: AddressNetworkMap[]
-    connectedNetwork: Network
     playerId: number
     playerState: Player
     clanState: Clan | null
@@ -140,7 +136,7 @@ export const useCoreStore = defineStore({
         ({
             addresses: [                
                 {
-                    network: Network.fantom,
+                    network: fantom.id,
                     addresses: [
                         {
                             name: Address.estforPlayers,
@@ -149,7 +145,6 @@ export const useCoreStore = defineStore({
                     ],
                 },
             ],
-            connectedNetwork: Network.fantom,
             playerId: 0,
             playerState: {} as Player,
             clanState: null,
@@ -162,10 +157,12 @@ export const useCoreStore = defineStore({
         } as CoreState),
     getters: {
         getNetworkAddressMap: (state: CoreState): AddressMap[] | undefined => {
-            return state.addresses.find(x => x.network == state.connectedNetwork)?.addresses
+            const network = getNetwork()
+            return state.addresses.find(x => x.network == network.chain?.id)?.addresses
         },
         getAddress: (state: CoreState) => {
-            return (name: Address) => state.addresses.find(x => x.network == state.connectedNetwork)?.addresses.find(x => x.name == name)?.address; 
+            const network = getNetwork()
+            return (name: Address) => state.addresses.find(x => x.network == network.chain?.id)?.addresses.find(x => x.name == name)?.address; 
         },
         globalBoostData: (state: CoreState) => {
             const globalBoost = {
@@ -264,10 +261,6 @@ export const useCoreStore = defineStore({
         },
     },
     actions: {
-        setCurrentNetwork(network: Network) {         
-            this.connectedNetwork = network
-            this.disconnect()
-        },
         disconnect() {
             // reset state  
             this.playerId = 0
@@ -298,7 +291,8 @@ export const useCoreStore = defineStore({
         },
         async getActivePlayer() {
             const playerAddress = this.getAddress(Address.estforPlayers)
-            if (!playerAddress || !account.connected) {
+            const account = getAccount()
+            if (!playerAddress || !account.isConnected) {
                 return
             }
 
@@ -315,6 +309,7 @@ export const useCoreStore = defineStore({
             this.coreData = globalState.coreData
         },
         async loadPlayer(playerId: number) {
+            const account = getAccount()
             const balance = await readContract({
                 address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
                 abi: broochAbi,

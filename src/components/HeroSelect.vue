@@ -43,7 +43,7 @@
             </div>
 
             <div class="text-center mt-5">
-                <p>Here you can select any hero and load their skills into the Plaza to calculate their combat stats and skill training times.</p>
+                <div>Here you can select any hero and load their skills into the Plaza to calculate their combat stats and skill training times. <img src="/src/assets/emerald_brooch_icon.png" class="rounded-lg w-[20px] inline cursor-pointer" alt="Emerald Brooch" @click.prevent="emeraldBroochPaywallRef?.openDialog()" /></div>
                 <ol class="list-decimal list-inside mt-5">
                     <li>Search for the hero name</li>
                     <li>Click on the hero portrait you wish to load</li>

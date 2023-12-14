@@ -11,7 +11,7 @@
         </div>
     </div>
     <div class="container mx-auto">
-        <div v-if="!account.connected" class="card md:w-[500px] bg-base-100-50 shadow-xl mx-auto my-[100px] p-10">
+        <div v-if="!isConnected" class="card md:w-[500px] bg-base-100-50 shadow-xl mx-auto my-[100px] p-10">
             <div class="text-center">
                 <h2 class="text-2xl font-bold">Welcome to Deif's Estfor Plaza!</h2>
                 <p class="text-lg my-5">Here you'll find all the information about the Kingdom and its inhabitants.</p>
@@ -19,7 +19,7 @@
                 <p class="text-lg">Connect your wallet below</p>
             </div>
             <div class="text-center my-4">
-                <button class="btn btn-primary" @click="connect()">Connect Wallet</button>
+                <button class="btn btn-primary" @click="open()">Connect Wallet</button>
             </div>
         </div>
         <div v-else-if="loading" class="mx-auto my-[100px] w-[500px] text-center">
@@ -48,22 +48,30 @@
 </template>
 
 <script setup lang="ts">
-import { chain, account, connect } from '@kolirt/vue-web3-auth'
-import { computed, onMounted, ref, watch } from 'vue'
+import { getAccount, watchNetwork, watchAccount } from '@wagmi/core'
+import { useWeb3Modal } from '@web3modal/wagmi/vue'
+import { computed, onMounted, ref } from 'vue'
 import { useCoreStore } from '../store/core'
 import { useAppStore } from '../store/app'
 
 const coreStore = useCoreStore()
 const app = useAppStore()
 const loading = ref(false)
+const { open } = useWeb3Modal()
 
 const toasts = computed(() => app.toasts)
+const isConnected = ref(false)
 
 const init = async () => {
     try {
-        if (account.connected) {
+        const account = getAccount()
+        if (account.isConnected) {
             loading.value = true
             await coreStore.getActivePlayer()
+            isConnected.value = true
+        } else if (account.isDisconnected) {
+            coreStore.disconnect()
+            isConnected.value = false
         }
     } catch (e) {
         console.log(e)  
@@ -74,7 +82,8 @@ const init = async () => {
 
 onMounted(init)
 
-watch([chain, account], init)
+watchNetwork(coreStore.disconnect)
+watchAccount(init)
 </script>
 
 <style>

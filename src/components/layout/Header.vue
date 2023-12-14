@@ -1,16 +1,11 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue"
-// import { useAppStore } from "../../store/app"
-import { useCoreStore, Network } from "../../store/core"
-import { account, disconnect, connect, accountDetails, chain, getAvailableChains, switchChain, Chain, readContract} from '@kolirt/vue-web3-auth'
-import { icons } from "../../utils/icons"
+import { computed, onMounted, ref } from "vue"
+import { readContract, getAccount, watchAccount } from '@wagmi/core'
 import { useItemStore, itemNames } from "../../store/items"
 import broochAbi from '../../abi/brooch.json'
 import Donate from "../dialogs/Donate.vue"
 import { HOMEMADE_BROOCH_ADDRESS } from "../../utils/addresses"
 
-// const appStore = useAppStore()
-const coreStore = useCoreStore()
 const itemStore = useItemStore()
 
 const donateRef = ref<typeof Donate>()
@@ -19,19 +14,10 @@ const allItemNames = computed(() => {
     return Object.values(itemNames)
 })
 
-// const isDark = computed(() => appStore.theme === "dark")
-
-// const onThemeToggle = (theme: string) => {
-//     appStore.setTheme(theme)
-// }
-
-const onSwitchChain = (network: string) => {
-    switchChain(getAvailableChains().find(x => x.network == network) as Chain)
-}
-
 const init = async () => {
     try {
-        if (account.connected) {
+        const account = getAccount()
+        if (account.isConnected) {
             const balance = await readContract({
                 address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
                 abi: broochAbi,
@@ -49,20 +35,7 @@ const init = async () => {
     }
 }
 
-watch(chain, (newValue: Chain) => {
-    coreStore.setCurrentNetwork(newValue.network as Network)
-})
-
-watch(account, init)
-
-const currentIcon = computed(() => {
-    return icons.find(x => x.name == coreStore.connectedNetwork)?.icon
-})
-
-const getChainName = (network: string) => {
-    return getAvailableChains().find(x => x.network == network)?.name
-}
-
+watchAccount(init)
 onMounted(init)
 </script>
 
@@ -79,6 +52,7 @@ onMounted(init)
                         <ul class="bg-base-100 z-[1]">
                             <li><router-link to="/combat">Combat Calculator</router-link></li>
                             <li><router-link to="/skills">Skill Training</router-link></li>
+                            <!-- <li><router-link to="/training-plan">Training Plan</router-link></li> -->
                         </ul>
                     </details>
                 </li>
@@ -92,7 +66,8 @@ onMounted(init)
                 <ul class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
                     <li><router-link to="/hero-select">Hero Select</router-link></li>
                     <li><router-link to="/combat">Combat Calculator</router-link> </li>
-                    <li><router-link to="/skills">Skill Training</router-link></li>                    
+                    <li><router-link to="/skills">Skill Training</router-link></li>
+                    <!-- <li><router-link to="/training-plan">Training Plan</router-link></li> -->
                 </ul>
             </div>
         </div>
@@ -107,7 +82,7 @@ onMounted(init)
                     <path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" clip-rule="evenodd" />
                 </svg>
             </button> -->
-            <div class="join max-md:hidden items-center">
+            <div class="join max-lg:hidden items-center mr-2">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-2 text-primary">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                 </svg>
@@ -116,28 +91,7 @@ onMounted(init)
                     <option v-for="item in allItemNames" :key="item" :value="item" />
                 </datalist>
             </div>
-            <div v-if="account.connected">
-                <div class="dropdown align-top">
-                    <button tabindex="0" class="btn btn-circle btn-ghost"><img :src="currentIcon" :alt="coreStore.connectedNetwork" class="small-chain-icon" /></button>
-                    <div tabindex="0" class="shadow dropdown-content bg-base-200 z-20">
-                        <div v-for="icon in icons" :key="icon.name" class="flex items-center gap-4 cursor-pointer py-2 px-4 rounded-md border-primary border-2 border-solid hover:border-white" @click="onSwitchChain(icon.name)">
-                            <img :src="icon.icon" :alt="icon.name" class="flex-none chain-icon" />
-                            <div class="flex">{{ getChainName(icon.name) }}</div>
-                        </div>
-                    </div>
-                </div>
-                <button @click="accountDetails()" class="btn btn-ghost align-top">
-                    {{ account.shortAddress }}
-                </button>
-                <button @click="disconnect()" class="btn btn-ghost btn-circle">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
-                        <path fill-rule="evenodd" d="M7.5 3.75A1.5 1.5 0 006 5.25v13.5a1.5 1.5 0 001.5 1.5h6a1.5 1.5 0 001.5-1.5V15a.75.75 0 011.5 0v3.75a3 3 0 01-3 3h-6a3 3 0 01-3-3V5.25a3 3 0 013-3h6a3 3 0 013 3V9A.75.75 0 0115 9V5.25a1.5 1.5 0 00-1.5-1.5h-6zm5.03 4.72a.75.75 0 010 1.06l-1.72 1.72h10.94a.75.75 0 010 1.5H10.81l1.72 1.72a.75.75 0 11-1.06 1.06l-3-3a.75.75 0 010-1.06l3-3a.75.75 0 011.06 0z" clip-rule="evenodd" />
-                    </svg>
-                </button>
-            </div>
-            <button v-else @click="connect()" class="btn btn-ghost">
-                Connect
-            </button>
+            <w3m-button />
         </div>
     </nav>
     <Donate ref="donateRef" />

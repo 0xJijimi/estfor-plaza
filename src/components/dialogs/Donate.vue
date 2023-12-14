@@ -18,8 +18,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
-import { account } from '@kolirt/vue-web3-auth'
+import { computed, onMounted, ref } from 'vue'
+import { getAccount, waitForTransaction, watchAccount } from '@wagmi/core'
 import { useAppStore } from '../../store/app'
 import { useBroochStore } from '../../store/brooch'
 
@@ -34,7 +34,8 @@ const brooch = computed(() => {
 
 const init = async () => {
     try {
-        if (account.connected) {
+        const account = getAccount()
+        if (account.isConnected) {
             loading.value = true
             await broochStore.getBroochData(0)
         }
@@ -45,6 +46,11 @@ const init = async () => {
 }
 
 const openDialog = (_monsterId: number) => {
+    const account = getAccount()
+    if (account.isDisconnected) {
+        return
+    }
+
     const dialog = document.getElementById('donate_modal') as HTMLDialogElement
     dialog.showModal()
     init()
@@ -58,7 +64,8 @@ const mintNFT = async () => {
     loading.value = true
     try {
         const data = await broochStore.mintNFT(0)
-        await data?.wait()
+        console.log(data.hash)
+        await waitForTransaction({ hash: data.hash })
         app.addToast('Thank you for your support!', 'alert-success', 5000)
     } catch (error) {  
         // app.addToast('Failed to mint brooch', 'alert-error', 50000)      
@@ -71,7 +78,7 @@ const mintNFT = async () => {
     }
 }
 
-watch(account, init)
+watchAccount(init)
 
 onMounted(init)
 
