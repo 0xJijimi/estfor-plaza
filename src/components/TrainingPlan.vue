@@ -11,12 +11,12 @@
 
 <script setup lang="ts">
 import { ref } from "vue"
-import { useCoreStore } from '../store/core'
+// import { useCoreStore } from '../store/core'
 import EmeraldBroochPaywall from './dialogs/EmeraldBroochPaywall.vue'
 
-const coreStore = useCoreStore()
+// const coreStore = useCoreStore()
 
-const loading = ref(false)
+// const loading = ref(false)
 
 const emeraldBroochPaywallRef = ref<typeof EmeraldBroochPaywall>()
 
