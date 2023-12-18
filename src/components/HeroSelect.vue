@@ -68,10 +68,11 @@
 import Avatar from './Avatar.vue'
 import { ref } from "vue"
 import { watchDebounced } from '@vueuse/core'
-import { Player, getPlayers } from '../utils/api';
+import { getPlayers } from '../utils/api';
 import { useAppStore } from '../store/app';
 import { useCoreStore } from '../store/core';
 import EmeraldBroochPaywall from './dialogs/EmeraldBroochPaywall.vue';
+import { Player } from '@paintswap/estfor-definitions/types';
 
 const app = useAppStore()
 const coreStore = useCoreStore()

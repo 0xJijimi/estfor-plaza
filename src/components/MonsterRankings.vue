@@ -112,7 +112,7 @@ watch(() => itemStore.getCurrentEquippedItems?.rightHand, () => {
 })
 
 const currentXPForCombatStyle = computed(() => {
-    let xp = 0
+    let xp = "0"
     switch (combatStyle.value) {
         case Skill.MELEE:
             xp = coreStore.playerState.meleeXP
@@ -127,7 +127,7 @@ const currentXPForCombatStyle = computed(() => {
             xp = coreStore.playerState.defenceXP
             break
         default:
-            xp = 0
+            xp = "0"
     }
     // @ts-ignore - parseInt is fine here
     return parseInt(xp, 10)
@@ -164,6 +164,6 @@ const updateSort = (sort: string | null, direction: string) => {
 }
 
 const levelsGained = (currentXP: number, xpPerHour: number) => {
-    return getLevel(currentXP + ((xpPerHour * coreStore.getXPBoostMultiplier(combatStyle.value, BoostType.COMBAT_XP)) * elapsedTime.value)) - getLevel(currentXP)
+    return getLevel((currentXP + ((xpPerHour * coreStore.getXPBoostMultiplier(combatStyle.value, BoostType.COMBAT_XP)) * elapsedTime.value)).toString()) - getLevel(currentXP.toString())
 }
 </script>

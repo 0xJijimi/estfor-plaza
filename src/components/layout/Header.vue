@@ -48,10 +48,11 @@ onMounted(init)
             <ul class="menu menu-horizontal max-md:hidden">
                 <li>
                     <details>
-                        <summary>Combat/Skill Calculators</summary>
+                        <summary>The Plaza</summary>
                         <ul class="bg-base-100 z-[1]">
                             <li><router-link to="/combat">Combat Calculator</router-link></li>
                             <li><router-link to="/skills">Skill Training</router-link></li>
+                            <li><router-link to="/lotteries">Wishing Well Ranking</router-link></li>
                             <!-- <li><router-link to="/training-plan">Training Plan</router-link></li> -->
                         </ul>
                     </details>
@@ -67,6 +68,7 @@ onMounted(init)
                     <li><router-link to="/hero-select">Hero Select</router-link></li>
                     <li><router-link to="/combat">Combat Calculator</router-link> </li>
                     <li><router-link to="/skills">Skill Training</router-link></li>
+                    <li><router-link to="/lotteries">Wishing Well Ranking</router-link></li>
                     <!-- <li><router-link to="/training-plan">Training Plan</router-link></li> -->
                 </ul>
             </div>

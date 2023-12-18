@@ -3,8 +3,8 @@ import { readContract, getAccount, getNetwork } from '@wagmi/core'
 
 import estforPlayerAbi from '../abi/estforPlayer.json'
 import broochAbi from '../abi/brooch.json'
-import { CoreData, Clan, Player, getPlayerState, getGlobalData, getUserItemNFTs, getSoloPlayerState } from "../utils/api"
-import { BoostType, Skill, UserItemNFT } from "@paintswap/estfor-definitions/types"
+import { CoreData, Clan, getPlayerState, getGlobalData, getUserItemNFTs, getSoloPlayerState } from "../utils/api"
+import { BoostType, Player, Skill, UserItemNFT } from "@paintswap/estfor-definitions/types"
 import { EstforConstants } from "@paintswap/estfor-definitions"
 import { allItems } from "../data/items"
 import { allFullAttireBonuses } from "../data/fullAttireBonuses"
@@ -30,7 +30,7 @@ export interface AddressNetworkMap {
 
 export interface CoreState {
     addresses: AddressNetworkMap[]
-    playerId: number
+    playerId: string
     playerState: Player
     clanState: Clan | null
     coreData: CoreData
@@ -93,8 +93,8 @@ export const skillToXPMap = {
 
 export const xpBoundaries = [0, 84, 174, 270, 374, 486, 606, 734, 872, 1021, 1179, 1350, 1532, 1728, 1938, 2163, 2404, 2662, 2939, 3236, 3553, 3894, 4258, 4649, 5067, 5515, 5995, 6510, 7060, 7650, 8282, 8959, 9685, 10461, 11294, 12185, 13140, 14162, 15258, 16432, 17689, 19036, 20479, 22025, 23681, 25456, 27357, 29393, 31575, 33913, 36418, 39102, 41977, 45058, 48359, 51896, 55686, 59747, 64098, 68761, 73757, 79110, 84847, 90995, 97582, 104641, 112206, 120312, 128998, 138307, 148283, 158973, 170430, 182707, 195864, 209963, 225074, 241267, 258621, 277219, 297150, 318511, 341403, 365936, 392228, 420406, 450605, 482969, 517654, 554828, 594667, 637364, 683124, 732166, 784726, 841057, 901428, 966131, 1035476, 1109796] 
 
-export const getLevel = (xp: number) => {
-    const level = xpBoundaries.findIndex(x => x > xp)
+export const getLevel = (xp: string) => {
+    const level = xpBoundaries.findIndex(x => x > parseInt(xp, 10))
     return level === -1 ? 100 : level
 }
 
@@ -145,7 +145,7 @@ export const useCoreStore = defineStore({
                     ],
                 },
             ],
-            playerId: 0,
+            playerId: "0",
             playerState: {} as Player,
             clanState: null,
             coreData: {} as CoreData,
@@ -263,12 +263,12 @@ export const useCoreStore = defineStore({
     actions: {
         disconnect() {
             // reset state  
-            this.playerId = 0
+            this.playerId = "0"
             this.playerState = {} as Player
             this.clanState = null
             this.inventory = []
         },
-        async getAllPlayerInfo(playerId: number) {
+        async getAllPlayerInfo(playerId: string) {
             this.playerId = playerId
 
             const playerState = await getPlayerState(this.playerId)
@@ -303,12 +303,12 @@ export const useCoreStore = defineStore({
                 args: [account.address],
             })
 
-            await this.getAllPlayerInfo(activePlayer as unknown as number)
+            await this.getAllPlayerInfo(activePlayer as unknown as string)
 
             const globalState = await getGlobalData()
             this.coreData = globalState.coreData
         },
-        async loadPlayer(playerId: number) {
+        async loadPlayer(playerId: string) {
             const account = getAccount()
             const balance = await readContract({
                 address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,

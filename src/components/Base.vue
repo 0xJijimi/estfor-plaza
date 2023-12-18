@@ -25,7 +25,7 @@
         <div v-else-if="loading" class="mx-auto my-[100px] w-[500px] text-center">
             <span class="loading loading-spinner text-primary loading-md mx-auto"></span>
         </div>
-        <div v-else-if="coreStore.playerId == 0" class="card md:w-[500px] bg-base-100-50 shadow-xl mx-auto my-[100px] p-10">
+        <div v-else-if="coreStore.playerId == '0'" class="card md:w-[500px] bg-base-100-50 shadow-xl mx-auto my-[100px] p-10">
             <div class="text-center">
                 <h2 class="text-2xl font-bold">Sorry friend, but I don't recognise you!</h2>
                 <p class="text-lg my-5">Do not worry as you can register for free, just click the button below then return here once you're all set up.</p>

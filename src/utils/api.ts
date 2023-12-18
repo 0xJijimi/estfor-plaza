@@ -1,33 +1,6 @@
-import { BoostType, UserItemNFT } from "@paintswap/estfor-definitions/types"
+import { BoostType, Lottery, Player, RaffleEntry, UserItemNFT } from "@paintswap/estfor-definitions/types"
 
 const baseUrl = 'https://api.estfor.com'
-
-export interface Player {
-    id: number
-    tokenId: number
-    avatarId: number
-    name: string
-    owner: string
-    isActive: boolean
-    meleeXP: number
-    defenceXP: number
-    magicXP: number
-    rangedXP: number
-    healthXP: number
-    miningXP: number
-    smithingXP: number
-    woodcuttingXP: number
-    firemakingXP: number
-    cookingXP: number
-    craftingXP: number
-    fishingXP: number
-    thievingXP: number
-    agilityXP: number
-    fletchingXP: number
-    alchemyXP: number
-    forgingXP: number
-    isFullMode: boolean
-}
 
 export interface Clan {
     id: number
@@ -73,8 +46,16 @@ export interface PlayerSearchResult {
     players: Player[]
 }
 
+export interface LotteriesResult {
+    lotteries: Lottery[]
+}
+
+export interface RaffleEntryResult {
+    raffleEntries: RaffleEntry[]
+}
+
 export const getPlayerState = async (
-    playerId: number
+    playerId: string
 ): Promise<ClanMemberResult> => {
     const response = await fetch(
         `${baseUrl}/clan-members/${playerId}`
@@ -103,9 +84,30 @@ export const getPlayers = async (searchTerm: string): Promise<PlayerSearchResult
     return response.json()
 }
 
-export const getSoloPlayerState =async (playerId: number): Promise<PlayerResult> => {
+export const getPlayersByIds = async (ids: string[]): Promise<PlayerSearchResult> => {
+    const response = await fetch(
+        `${baseUrl}/players?${ids.map(x => `tokenIds[]=${x}`).join('&')}`
+    )
+    return response.json()
+}
+
+export const getSoloPlayerState =async (playerId: string): Promise<PlayerResult> => {
     const response = await fetch(
         `${baseUrl}/players/${playerId}`
+    )
+    return response.json()
+}
+
+export const getLotteries = async (numToSkip: number): Promise<LotteriesResult> => {
+    const response = await fetch(
+        `${baseUrl}/lotteries?numToSkip=${numToSkip}`
+    )
+    return response.json()
+}
+
+export const getRaffleEntries = async (numToSkip: number): Promise<RaffleEntryResult> => {
+    const response = await fetch(
+        `${baseUrl}/raffle-entries?numToSkip=${numToSkip}`
     )
     return response.json()
 }

@@ -181,54 +181,54 @@ export const useSkillStore = defineStore({
                 switch (skill) {
                     case Skill.WOODCUTTING:
                         inputs = state.woodcutting
-                        currentXPForSkill = playerState.woodcuttingXP
+                        currentXPForSkill = parseInt(playerState.woodcuttingXP, 10)
                         break
                     case Skill.MINING:
                         inputs = state.mining
-                        currentXPForSkill = playerState.miningXP
+                        currentXPForSkill = parseInt(playerState.miningXP, 10)
                         break
                     case Skill.FISHING:
                         inputs = state.fishing
-                        currentXPForSkill = playerState.fishingXP
+                        currentXPForSkill = parseInt(playerState.fishingXP, 10)
                         break
                     case Skill.COOKING:
                         inputChoices = state.cooking
-                        currentXPForSkill = playerState.cookingXP
+                        currentXPForSkill = parseInt(playerState.cookingXP, 10)
                         isActionChoice = true
                         break
                     case Skill.CRAFTING:
                         inputChoices = state.crafting
-                        currentXPForSkill = playerState.craftingXP
+                        currentXPForSkill = parseInt(playerState.craftingXP, 10)
                         isActionChoice = true
                         break
                     case Skill.SMITHING:
                         inputChoices = state.smithing
-                        currentXPForSkill = playerState.smithingXP
+                        currentXPForSkill = parseInt(playerState.smithingXP, 10)
                         isActionChoice = true
                         break
                     case Skill.FIREMAKING:
                         inputChoices = state.firemaking
-                        currentXPForSkill = playerState.firemakingXP
+                        currentXPForSkill = parseInt(playerState.firemakingXP, 10)
                         isActionChoice = true
                         break
                     case Skill.ALCHEMY:
                         inputChoices = state.alchemy
-                        currentXPForSkill = playerState.alchemyXP
+                        currentXPForSkill = parseInt(playerState.alchemyXP, 10)
                         isActionChoice = true
                         break
                     case Skill.FORGING:
                         inputChoices = state.forging
-                        currentXPForSkill = playerState.forgingXP
+                        currentXPForSkill = parseInt(playerState.forgingXP, 10)
                         isActionChoice = true
                         break
                     case Skill.FLETCHING:
                         inputChoices = state.fletching
-                        currentXPForSkill = playerState.fletchingXP
+                        currentXPForSkill = parseInt(playerState.fletchingXP, 10)
                         isActionChoice = true
                         break
                     case Skill.THIEVING:
                         inputs = state.thieving
-                        currentXPForSkill = playerState.thievingXP
+                        currentXPForSkill = parseInt(playerState.thievingXP, 10)
                         break
                 }
 
