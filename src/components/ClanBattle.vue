@@ -351,9 +351,6 @@ const simulateBattles = async () => {
                 clanAWins++
             } else if (highestBDiceRoll > highestADiceRoll) {
                 clanBWins++
-            } else {
-                // draw, defender wins
-                clanBWins++
             }
         }
 
