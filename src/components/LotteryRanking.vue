@@ -8,12 +8,12 @@
                 <div v-else>
                     <div class="overflow-x-auto">
                         <table class="table md:table-md table-xs">
-                            <caption class="caption-top mb-5">
+                            <caption class="caption-top mb-5 text-lg">
                                 Wishing Well Luckiest Heroes
                             </caption>
                             <thead>
                             <tr>
-                                <th class="w-[100px] text-center">Avatar</th>
+                                <th class="w-[80px] text-center">Avatar</th>
                                 <th>Name</th>
                                 <th class="text-right">Times Won</th>
                                 <th class="text-right">Times Entered</th>
@@ -22,7 +22,11 @@
                             </thead>
                             <tbody>
                             <tr v-for="w in winners" :key="w.playerId">
-                                <td><img :src="`https://media.estfor.com/characters/${w.avatarId}.jpg`" class="rounded-lg" /> </td>
+                                <td class="avatar">
+                                    <div class="mask mask-square rounded-lg w-12 h-12">
+                                        <img :src="`https://media.estfor.com/characters/${w.avatarId}.jpg`" />
+                                    </div>
+                                </td>
                                 <td>{{ w.name }}</td>
                                 <td class="text-right">{{ w.count}}</td>
                                 <td class="text-right">{{ w.attempts }}</td>
@@ -42,12 +46,12 @@
                 <div v-else>
                     <div class="overflow-x-auto">
                         <table class="table md:table-md table-xs">
-                            <caption class="caption-top mb-5">
+                            <caption class="caption-top mb-5 text-lg">
                                 Wishing Well Unluckiest Heroes
                             </caption>
                             <thead>
                             <tr>
-                                <th class="w-[100px] text-center">Avatar</th>
+                                <th class="w-[80px] text-center">Avatar</th>
                                 <th>Name</th>
                                 <th class="text-right">Times Won</th>
                                 <th class="text-right">Times Entered</th>
@@ -56,7 +60,11 @@
                             </thead>
                             <tbody>
                             <tr v-for="l in losers" :key="l.playerId">
-                                <td><img :src="`https://media.estfor.com/characters/${l.avatarId}.jpg`" class="rounded-lg" /> </td>
+                                <td class="avatar">
+                                    <div class="mask mask-square rounded-lg w-12 h-12">
+                                        <img :src="`https://media.estfor.com/characters/${l.avatarId}.jpg`" />
+                                    </div>
+                                </td>
                                 <td>{{ l.name }}</td>
                                 <td class="text-right">{{ l.count}}</td>
                                 <td class="text-right">{{ l.attempts }}</td>

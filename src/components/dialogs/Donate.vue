@@ -2,7 +2,7 @@
     <dialog id="donate_modal" class="modal">
         <div class="modal-box bg-base-100 border-2 border-primary">
             <h3 class="font-bold text-lg text-center">Hey, enjoying the plaza?</h3>
-            <p v-if="brooch.balance < 1" class="my-5">This information doesn't come free you know, I have eggs to incubate and fires to upkeep! Now why don't you buy one of my Emerald brooches and I'll stop pestering you, what do you say? It'll get you access to better information in the future...</p>
+            <p v-if="brooch.balance < 1" class="my-5">This information doesn't come free you know, I have eggs to incubate and fires to upkeep! Now why don't you buy one of my Emerald brooches and I'll stop pestering you, what do you say?</p>
             <p v-if="brooch.balance < 1" class="my-5">It's better to buy them early because I increase the price after each one sold!</p>
             <p v-if="brooch.balance >= 1" class="my-5">Oh, you already have {{ brooch.balance }} of my brooches... would you like another one perchance?</p>
             <img src="/src/assets/emerald_brooch_web.png" class="rounded-lg" alt="Emerald Brooch" />
@@ -18,8 +18,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { getAccount, waitForTransaction, watchAccount } from '@wagmi/core'
+import { computed, ref } from 'vue'
+import { getAccount, waitForTransaction } from '@wagmi/core'
 import { useAppStore } from '../../store/app'
 import { useBroochStore } from '../../store/brooch'
 
@@ -64,7 +64,6 @@ const mintNFT = async () => {
     loading.value = true
     try {
         const data = await broochStore.mintNFT(0)
-        console.log(data.hash)
         await waitForTransaction({ hash: data.hash })
         app.addToast('Thank you for your support!', 'alert-success', 5000)
     } catch (error) {  
@@ -77,10 +76,6 @@ const mintNFT = async () => {
         init()
     }
 }
-
-watchAccount(init)
-
-onMounted(init)
 
 defineExpose({
     openDialog

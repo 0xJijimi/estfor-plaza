@@ -53,8 +53,10 @@ import { useWeb3Modal } from '@web3modal/wagmi/vue'
 import { computed, onMounted, ref } from 'vue'
 import { useCoreStore } from '../store/core'
 import { useAppStore } from '../store/app'
+import { useBroochStore } from '../store/brooch'
 
 const coreStore = useCoreStore()
+const broochStore = useBroochStore()
 const app = useAppStore()
 const loading = ref(false)
 const { open } = useWeb3Modal()
@@ -68,6 +70,7 @@ const init = async () => {
         if (account.isConnected) {
             loading.value = true
             await coreStore.getActivePlayer()
+            await broochStore.getBroochData(0)
             isConnected.value = true
         } else if (account.isDisconnected) {
             coreStore.disconnect()

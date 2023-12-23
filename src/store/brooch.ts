@@ -12,6 +12,7 @@ export interface Brooch {
 
 export interface BroochState {
     brooches: Brooch[]
+    initialised: boolean
 }
 
 export const useBroochStore = defineStore({
@@ -19,6 +20,7 @@ export const useBroochStore = defineStore({
     state: () =>
         ({
             brooches: [] as Brooch[],
+            initialised: false,
         } as BroochState),
     getters: {
         brooch(state: BroochState) {
@@ -55,11 +57,12 @@ export const useBroochStore = defineStore({
                 }),
             ])
             const brooch = this.brooches[tokenId] || {}
-            brooch.totalSupply = result[0] as unknown as number
-            brooch.baseTokenPrice = result[1] as unknown as number
-            brooch.balance = result[2] as unknown as number
+            brooch.totalSupply = parseInt((result[0] as unknown as bigint).toString(), 10)
+            brooch.baseTokenPrice = parseInt((result[1] as unknown as bigint).toString(), 10)
+            brooch.balance = parseInt((result[2] as unknown as bigint).toString(), 10)
 
             this.brooches[tokenId] = brooch
+            this.initialised = true
         },
         mintNFT(tokenId: number) {
             const account = getAccount()

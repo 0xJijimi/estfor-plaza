@@ -19,8 +19,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { getAccount, waitForTransaction, watchAccount } from '@wagmi/core'
+import { computed, ref } from 'vue'
+import { getAccount, waitForTransaction } from '@wagmi/core'
 import { useAppStore } from '../../store/app'
 import { useBroochStore } from '../../store/brooch'
 
@@ -77,10 +77,6 @@ const mintNFT = async () => {
         init()
     }
 }
-
-watchAccount(init)
-
-onMounted(init)
 
 defineExpose({
     openDialog

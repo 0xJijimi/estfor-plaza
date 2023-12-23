@@ -5,7 +5,7 @@
                 <Avatar :id="coreStore.playerState.avatarId" :name="coreStore.playerState.name" />
             </div>
             <div class="grow overflow-x-auto">
-                <table class="table md:table-md table-xs">
+                <table class="table md:table-md table-xs text-lg">
                     <caption class="caption-top">
                         Hero Roster
                     </caption>

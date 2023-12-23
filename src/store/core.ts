@@ -3,8 +3,8 @@ import { readContract, getAccount, getNetwork } from '@wagmi/core'
 
 import estforPlayerAbi from '../abi/estforPlayer.json'
 import broochAbi from '../abi/brooch.json'
-import { CoreData, Clan, getPlayerState, getGlobalData, getUserItemNFTs, getSoloPlayerState } from "../utils/api"
-import { BoostType, Player, Skill, UserItemNFT } from "@paintswap/estfor-definitions/types"
+import { CoreData, getPlayerState, getGlobalData, getUserItemNFTs, getSoloPlayerState } from "../utils/api"
+import { BoostType, Clan, Player, Skill, UserItemNFT } from "@paintswap/estfor-definitions/types"
 import { EstforConstants } from "@paintswap/estfor-definitions"
 import { allItems } from "../data/items"
 import { allFullAttireBonuses } from "../data/fullAttireBonuses"

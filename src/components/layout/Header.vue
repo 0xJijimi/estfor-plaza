@@ -5,10 +5,21 @@ import { useItemStore, itemNames } from "../../store/items"
 import broochAbi from '../../abi/brooch.json'
 import Donate from "../dialogs/Donate.vue"
 import { HOMEMADE_BROOCH_ADDRESS } from "../../utils/addresses"
+import { useRoute } from "vue-router"
+import { useBroochStore } from "../../store/brooch"
 
 const itemStore = useItemStore()
+const broochStore = useBroochStore()
+
+const route = useRoute()
 
 const donateRef = ref<typeof Donate>()
+
+const showBrooch = () => {
+    if (broochStore.brooch(0).balance === 0) {
+        donateRef.value?.openDialog()
+    }
+}
 
 const allItemNames = computed(() => {
     return Object.values(itemNames)
@@ -53,7 +64,7 @@ onMounted(init)
                             <li><router-link to="/combat">Combat Calculator</router-link></li>
                             <li><router-link to="/skills">Skill Training</router-link></li>
                             <li><router-link to="/lotteries">Wishing Well Ranking</router-link></li>
-                            <!-- <li><router-link to="/training-plan">Training Plan</router-link></li> -->
+                            <li><router-link to="/clan-battle" @click="showBrooch">Clan Battle <img src="/src/assets/emerald_brooch_icon.png" class="rounded-lg w-[20px] inline cursor-pointer" alt="Emerald Brooch" /></router-link></li>
                         </ul>
                     </details>
                 </li>
@@ -69,7 +80,7 @@ onMounted(init)
                     <li><router-link to="/combat">Combat Calculator</router-link> </li>
                     <li><router-link to="/skills">Skill Training</router-link></li>
                     <li><router-link to="/lotteries">Wishing Well Ranking</router-link></li>
-                    <!-- <li><router-link to="/training-plan">Training Plan</router-link></li> -->
+                    <li><router-link to="/clan-battle" @click="showBrooch">Clan Battle <img src="/src/assets/emerald_brooch_icon.png" class="rounded-lg w-[20px] inline cursor-pointer" alt="Emerald Brooch" /></router-link></li>
                 </ul>
             </div>
         </div>
@@ -84,7 +95,7 @@ onMounted(init)
                     <path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" clip-rule="evenodd" />
                 </svg>
             </button> -->
-            <div class="join max-lg:hidden items-center mr-2">
+            <div v-if="route.meta.showItemSearch" class="join max-lg:hidden items-center mr-2">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-2 text-primary">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                 </svg>

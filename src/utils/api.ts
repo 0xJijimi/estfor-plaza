@@ -1,16 +1,6 @@
-import { BoostType, Lottery, Player, RaffleEntry, UserItemNFT } from "@paintswap/estfor-definitions/types"
+import { BoostType, Clan, Lottery, Player, RaffleEntry, UserItemNFT } from "@paintswap/estfor-definitions/types"
 
 const baseUrl = 'https://api.estfor.com'
-
-export interface Clan {
-    id: number
-    name: string
-    boostStartTime: string
-    boostDuration: number
-    boostVal: number
-    boostType: BoostType
-    boostItemTokenId: number
-}
 
 export interface ClanMember {
     player: Player
@@ -19,6 +9,14 @@ export interface ClanMember {
 
 export interface ClanMemberResult {
     clanMember: ClanMember
+}
+
+export interface ClanMembersResult {
+    clanMembers: ClanMember[]
+}
+
+export interface ClansResult {
+    clans: Clan[]
 }
 
 export interface PlayerResult {
@@ -108,6 +106,20 @@ export const getLotteries = async (numToSkip: number): Promise<LotteriesResult> 
 export const getRaffleEntries = async (numToSkip: number): Promise<RaffleEntryResult> => {
     const response = await fetch(
         `${baseUrl}/raffle-entries?numToSkip=${numToSkip}`
+    )
+    return response.json()
+}
+
+export const getClanMembers = async (clanId: string): Promise<ClanMembersResult> => {
+    const response = await fetch(
+        `${baseUrl}/clan-members?clanId=${clanId}`
+    )
+    return response.json()
+}
+
+export const getClans = async (numToSkip: number): Promise<ClansResult> => {
+    const response = await fetch(
+        `${baseUrl}/clans?numToSkip=${numToSkip}`
     )
     return response.json()
 }
