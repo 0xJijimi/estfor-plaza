@@ -4,7 +4,7 @@ import { readContract, getAccount, getNetwork } from '@wagmi/core'
 import estforPlayerAbi from '../abi/estforPlayer.json'
 import broochAbi from '../abi/brooch.json'
 import { CoreData, getPlayerState, getGlobalData, getUserItemNFTs, getSoloPlayerState } from "../utils/api"
-import { BoostType, Clan, Player, Skill, UserItemNFT } from "@paintswap/estfor-definitions/types"
+import { BoostType, Clan, Player, QueuedAction, Skill, UserItemNFT } from "@paintswap/estfor-definitions/types"
 import { EstforConstants } from "@paintswap/estfor-definitions"
 import { allItems } from "../data/items"
 import { allFullAttireBonuses } from "../data/fullAttireBonuses"
@@ -32,6 +32,7 @@ export interface CoreState {
     addresses: AddressNetworkMap[]
     playerId: string
     playerState: Player
+    originalState: Player
     clanState: Clan | null
     coreData: CoreData
     applyBoost: boolean
@@ -39,6 +40,7 @@ export interface CoreState {
     applyWishingWellBoost: boolean
     inventory: UserItemNFT[]
     heroRoster: Player[]
+    queuedActions: QueuedAction[]
 }
 
 export const boostVialNames = {
@@ -147,6 +149,7 @@ export const useCoreStore = defineStore({
             ],
             playerId: "0",
             playerState: {} as Player,
+            originalState: {} as Player,
             clanState: null,
             coreData: {} as CoreData,
             applyBoost: true,
@@ -154,6 +157,7 @@ export const useCoreStore = defineStore({
             applyWishingWellBoost: false,
             inventory: [],
             heroRoster: localStorage.getItem('heroRoster') ? JSON.parse(localStorage.getItem('heroRoster') as string) : [],
+            queuedActions: [],
         } as CoreState),
     getters: {
         getNetworkAddressMap: (state: CoreState): AddressMap[] | undefined => {
@@ -265,8 +269,13 @@ export const useCoreStore = defineStore({
             // reset state  
             this.playerId = "0"
             this.playerState = {} as Player
+            this.originalState = {} as Player
             this.clanState = null
             this.inventory = []
+            this.queuedActions = []
+        },
+        resetPlayerState() {
+            this.playerState = JSON.parse(JSON.stringify(this.originalState))
         },
         async getAllPlayerInfo(playerId: string) {
             this.playerId = playerId
@@ -286,6 +295,7 @@ export const useCoreStore = defineStore({
 
             const inventory = await getUserItemNFTs(this.playerState.owner, allFullAttireBonuses.flatMap(x => x.itemTokenIds))
             this.inventory = inventory.userItemNFTs
+            this.originalState = JSON.parse(JSON.stringify(this.playerState))
 
             this.addHeroToRoster(this.playerState)
         },

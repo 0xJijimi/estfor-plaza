@@ -1,5 +1,6 @@
 <template>
     <BoostPanel :hide-combat="true" />
+    <ItemSearch class="my-10 lg:hidden" />
     <template v-if="actionsWithItemSearch.length == 0">
         <div class="card bg-base-100-50 shadow-xl rounded-lg my-5">
             <div class="card-body text-center">
@@ -60,6 +61,7 @@ import { useSkillStore, RelevantAction, skillNames, ActionType } from '../store/
 import { MEDIA_URL, useCoreStore, fullAttireMultiplier, heroAvatarMultiplier } from '../store/core'
 import { computed, ref } from 'vue'
 import BoostPanel from './BoostPanel.vue';
+import ItemSearch from './ItemSearch.vue';
 import ActionInfo from './dialogs/ActionInfo.vue';
 import ActionChoiceInfo from './dialogs/ActionChoiceInfo.vue';
 import { useItemStore } from '../store/items';

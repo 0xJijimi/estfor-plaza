@@ -35,7 +35,7 @@ export default {
         ".card": {
           border: "2px solid #44b3a8",
         },
-        ".select": {
+        ".select, .input": {
           background: "rgba(33,72,80,0.6)"
         },
       }

@@ -19,6 +19,7 @@
     </div>
     <HeroStats class="my-10" />
     <BoostPanel :hide-non-combat="true" class="my-10" />
+    <ItemSearch class="my-10 lg:hidden" />
     <MonsterRankings />
 </template>
 
@@ -28,6 +29,7 @@ import { useItemStore } from '../store/items'
 import Avatar from './Avatar.vue'
 import HeroStats from './HeroStats.vue'
 import BoostPanel from './BoostPanel.vue'
+import ItemSearch from './ItemSearch.vue'
 import ItemSelect from './inputs/ItemSelect.vue'
 import { computed, nextTick, ref } from "vue"
 import MonsterRankings from "./MonsterRankings.vue"
