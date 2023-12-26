@@ -14,6 +14,11 @@
                 <ItemSelect v-if="isMagic" :items="magicBagItems" label="Magic Bag" @update:model-value="onUpdate" v-model="equippedItems.magicBag" :empty-equipment="false" />
                 <ItemSelect v-if="isRanged" :items="quiverItems" label="Quiver" @update:model-value="onUpdate" v-model="equippedItems.quiver" disabled :empty-equipment="false" />
                 <ItemSelect :items="foodItems" label="Food" @update:model-value="onUpdate" v-model="equippedItems.food" />
+                <div class="md:flex-row flex-col flex justify-stretch w-full gap-2">
+                    <button class="btn btn-primary grow btn-xs md:btn-md" @click.prevent="equipFullMelee">Full Melee</button>
+                    <button class="btn btn-primary grow btn-xs md:btn-md" @click.prevent="equipFullRanged">Full Ranged</button>
+                    <button class="btn btn-primary grow btn-xs md:btn-md" @click.prevent="equipFullMagic">Full Magic</button>
+                </div>
             </div>
         </div>
     </div>
@@ -24,7 +29,7 @@
 </template>
 
 <script setup lang="ts">
-import { EquipPosition, Skill } from "@paintswap/estfor-definitions/types"
+import { EquipPosition, ItemInput, Skill } from "@paintswap/estfor-definitions/types"
 import { useItemStore } from '../store/items'
 import Avatar from './Avatar.vue'
 import HeroStats from './HeroStats.vue'
@@ -51,6 +56,15 @@ const quiverItems = computed(() => itemStore.getItemsForSlotAndXP(EquipPosition.
 const magicBagItems = computed(() => itemStore.getMagicActionChoicesForXP)
 const foodItems = computed(() => itemStore.getItemsForSlotAndXP(EquipPosition.FOOD))
 
+const findLast = (arr: any[], criteria: any) => {
+    for (let i = arr.length - 1; i >= 0; i--) {
+        if (criteria(arr[i])) {
+            return arr[i];
+        }
+    }
+    return null;
+}
+
 const onUpdate = async () => {
     await nextTick() // wait for the model to update
     if (isRanged.value) {
@@ -67,6 +81,38 @@ const onUpdate = async () => {
         equippedItems.value.magicBag = undefined
     }
     itemStore.updateEquippedItems(equippedItems.value as any)
+}
+
+const equipFullMelee = () => {
+    equippedItems.value.head = findLast(headItems.value, (x: ItemInput) => x.skill === Skill.DEFENCE)?.tokenId
+    equippedItems.value.rightHand = findLast(rightHandItems.value, (x: ItemInput) => x.skill === Skill.MELEE)?.tokenId
+    equippedItems.value.leftHand = findLast(leftHandItems.value, (x: ItemInput) => x.skill === Skill.DEFENCE)?.tokenId
+    equippedItems.value.body = findLast(bodyItems.value, (x: ItemInput) => x.skill === Skill.DEFENCE)?.tokenId
+    equippedItems.value.legs = findLast(legItems.value, (x: ItemInput) => x.skill === Skill.DEFENCE)?.tokenId
+    equippedItems.value.arms = findLast(armItems.value, (x: ItemInput) => x.skill === Skill.DEFENCE)?.tokenId
+    equippedItems.value.feet = findLast(feetItems.value, (x: ItemInput) => x.skill === Skill.DEFENCE)?.tokenId
+    onUpdate()
+}
+
+const equipFullRanged = () => {
+    equippedItems.value.head = findLast(headItems.value, (x: ItemInput) => x.skill === Skill.RANGED)?.tokenId
+    equippedItems.value.rightHand = findLast(rightHandItems.value, (x: ItemInput) => x.skill === Skill.RANGED)?.tokenId
+    equippedItems.value.body = findLast(bodyItems.value, (x: ItemInput) => x.skill === Skill.RANGED)?.tokenId
+    equippedItems.value.legs = findLast(legItems.value, (x: ItemInput) => x.skill === Skill.RANGED)?.tokenId
+    equippedItems.value.arms = findLast(armItems.value, (x: ItemInput) => x.skill === Skill.RANGED)?.tokenId
+    equippedItems.value.feet = findLast(feetItems.value, (x: ItemInput) => x.skill === Skill.RANGED)?.tokenId
+    onUpdate()
+}
+
+const equipFullMagic = () => {
+    equippedItems.value.head = findLast(headItems.value, (x: ItemInput) => x.skill === Skill.MAGIC)?.tokenId
+    equippedItems.value.rightHand = findLast(rightHandItems.value, (x: ItemInput) => x.skill === Skill.MAGIC)?.tokenId
+    equippedItems.value.body = findLast(bodyItems.value, (x: ItemInput) => x.skill === Skill.MAGIC)?.tokenId
+    equippedItems.value.legs = findLast(legItems.value, (x: ItemInput) => x.skill === Skill.MAGIC)?.tokenId
+    equippedItems.value.arms = findLast(armItems.value, (x: ItemInput) => x.skill === Skill.MAGIC)?.tokenId
+    equippedItems.value.feet = findLast(feetItems.value, (x: ItemInput) => x.skill === Skill.MAGIC)?.tokenId
+    equippedItems.value.magicBag = findLast(magicBagItems.value, (x: ItemInput) => x.skill === Skill.MAGIC)?.tokenId
+    onUpdate()
 }
 
 const isMelee = computed(() => {
