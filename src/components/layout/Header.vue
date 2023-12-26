@@ -6,20 +6,20 @@ import broochAbi from '../../abi/brooch.json'
 import Donate from "../dialogs/Donate.vue"
 import { HOMEMADE_BROOCH_ADDRESS } from "../../utils/addresses"
 import { useRoute } from "vue-router"
-import { useBroochStore } from "../../store/brooch"
+// import { useBroochStore } from "../../store/brooch"
 
 const itemStore = useItemStore()
-const broochStore = useBroochStore()
+// const broochStore = useBroochStore()
 
 const route = useRoute()
 
 const donateRef = ref<typeof Donate>()
 
-const showBrooch = () => {
-    if (broochStore.brooch(0).balance === 0) {
-        donateRef.value?.openDialog()
-    }
-}
+// const showBrooch = () => {
+//     if (broochStore.brooch(0).balance === 0) {
+//         donateRef.value?.openDialog()
+//     }
+// }
 
 const allItemNames = computed(() => {
     return Object.values(itemNames)
