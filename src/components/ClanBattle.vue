@@ -48,7 +48,7 @@
                             <th class="w-[80px]"></th>
                             <th class="w-[80px] text-center">Avatar</th>
                             <th>Name</th>
-                            <th class="text-right">Combined Rank</th>
+                            <th class="text-right">Combined Level</th>
                             <th class="text-right">Max Points</th>
                         </tr>
                         </thead>
@@ -87,7 +87,7 @@
                             <th class="w-[80px]"></th>
                             <th class="w-[80px] text-center">Avatar</th>
                             <th>Name</th>
-                            <th class="text-right">Combined Rank</th>
+                            <th class="text-right">Combined Level</th>
                             <th class="text-right">Max Points</th>
                         </tr>
                         </thead>
