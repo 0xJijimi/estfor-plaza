@@ -34,6 +34,10 @@ export const useBroochStore = defineStore({
         },
     },
     actions: {
+        disconnect() {
+            this.brooches = []
+            this.initialised = false
+        },
         async getBroochData(tokenId: number) {
             const account = getAccount()
             const result = await Promise.all([

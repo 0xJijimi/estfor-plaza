@@ -10,6 +10,7 @@ import { allItems } from "../data/items"
 import { allFullAttireBonuses } from "../data/fullAttireBonuses"
 import { HOMEMADE_BROOCH_ADDRESS } from "../utils/addresses"
 import { fantom } from 'viem/chains'
+import { useBroochStore } from "./brooch"
 
 export const NATIVE_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
 export const MEDIA_URL = 'https://media.estfor.com'
@@ -273,6 +274,9 @@ export const useCoreStore = defineStore({
             this.clanState = null
             this.inventory = []
             this.queuedActions = []
+
+            const broochStore = useBroochStore()
+            broochStore.disconnect()
         },
         resetPlayerState() {
             this.playerState = JSON.parse(JSON.stringify(this.originalState))
@@ -293,11 +297,13 @@ export const useCoreStore = defineStore({
                 this.playerState = soloPlayerState.player
             }
 
-            const inventory = await getUserItemNFTs(this.playerState.owner, allFullAttireBonuses.flatMap(x => x.itemTokenIds))
-            this.inventory = inventory.userItemNFTs
-            this.originalState = JSON.parse(JSON.stringify(this.playerState))
+            if (this.playerState) {
+                const inventory = await getUserItemNFTs(this.playerState.owner, allFullAttireBonuses.flatMap(x => x.itemTokenIds))
+                this.inventory = inventory.userItemNFTs
+                this.originalState = JSON.parse(JSON.stringify(this.playerState))
 
-            this.addHeroToRoster(this.playerState)
+                this.addHeroToRoster(this.playerState)
+            }
         },
         async getActivePlayer() {
             const playerAddress = this.getAddress(Address.estforPlayers)
@@ -312,6 +318,11 @@ export const useCoreStore = defineStore({
                 functionName: 'activePlayer',
                 args: [account.address],
             })
+
+            if (!activePlayer) {
+                this.disconnect()
+                return
+            }
 
             await this.getAllPlayerInfo(activePlayer as unknown as string)
 

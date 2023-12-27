@@ -62,7 +62,7 @@ router.beforeEach(async (to) => {
             await broochStore.getBroochData(0)
         }
         if (broochStore.brooch(0).balance === 0) {
-            return false
+            return router.push('/')
         }
     }
 })

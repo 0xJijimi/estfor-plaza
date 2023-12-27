@@ -1,24 +1,28 @@
 <template>
-    <div class="card bg-base-100-50 shadow-xl rounded-lg mt-10 mx-auto md:w-[650px]">
+    <div class="card bg-base-100-50 shadow-xl rounded-lg mt-10 mx-auto md:w-[760px]">
         <div class="card-body">
             <h3 class="font-bold text-lg text-center">Clan Battle Simulator</h3>
             <p class="mt-5">Select the clans and their members to simulate multiple battles for a territory and find out your chances to win.</p>
             <p class="mt-5">Rules of battle:</p>
-            <ol class="list-decimal list-inside">
+            <ol class="list-decimal list-inside text-justify">
                 <li>Clans post a maximum of 20 members to a battle</li>
-                <li>If one clan has more members in a battle, the extra members will auto-win their roll</li>
+                <li>If one clan has more members in a battle, the extra members will auto-win their fight</li>
                 <li>Clan members fight a single member from the opposing clan in a random skill</li>
-                <li>Clan members get 1 dice plus an additional dice for every 20 levels in that skill</li>
+                <li>Clan members get 1 point plus an additional point for every 20 levels in that skill</li>
                 <!-- <li>Highest number rolled on all dice is the winner</li> -->
-                <li>Random byte array is rolled for each member (e.g. 0, 1, 1, 0, 1, 0, 0, 1) and the dice rolls equate to the number of bits you get from the byte. For example, if you have 2 dice rolls you get 2 numbers from right to left (resulting in a score of 1). If you have 4 dice rolls you get 4 numbers from right to left (resulting in a score of 2 in the example byte). Highest score wins</li>
-                <li>Clan with the most wins captures the territory (or the defender wins if it's a draw)</li>
+                <li>Random byte array is rolled for each member (e.g. 0, 1, 1, 0, 1, 0, 0, 1) and the points equate to the number of bits you get from the byte. For example, if you have 2 points you get 2 numbers from right to left (resulting in a score of 1). If you have 4 points you get 4 numbers from right to left (resulting in a score of 2 in the example byte). Highest score wins</li>
+                <li>If the attackers obtain the most wins they capture the territory/steals from the locked vault (if it's a draw or the defender wins then nothing happens)</li>
             </ol>
             <div class="flex justify-start mt-5">
                 <label class="form-control w-full">
                     <div class="label">
                         <span class="label-text">Simulations</span>
                     </div>
-                    <input type="number" step="1" min="1" max="1000" class="input input-sm input-bordered bg-base-100-50" v-model="simulationCount" />
+                    <input type="number" step="1000" min="1" max="100000" class="input input-sm input-bordered bg-base-100-50" v-model="simulationCount" />
+                    <div class="label">
+                        <span class="label-text-alt"></span>
+                        <span class="label-text-alt">Increase for accuracy, takes longer</span>
+                    </div>
                 </label>
             </div>
             <button type="button" class="btn btn-primary" :disabled="!clanASelectionValid || !clanBSelectionValid" @click.prevent="simulateBattles">Calculate Battles</button>
@@ -44,14 +48,15 @@
                             <th class="w-[80px]"></th>
                             <th class="w-[80px] text-center">Avatar</th>
                             <th>Name</th>
-                            <th class="text-right">Dice Rolls</th>
+                            <th class="text-right">Combined Rank</th>
+                            <th class="text-right">Max Points</th>
                         </tr>
                         </thead>
                         <tbody v-if="loadingA" class="mx-auto my-[100px] w-full text-center">
                             <tr><td colspan="3"><span class="loading loading-spinner text-primary loading-md mx-auto"></span></td></tr>
                         </tbody>
                         <tbody v-else>
-                        <tr v-for="p in clanARanked" :key="p.id" @click.prevent="p.selected = !p.selected" class="cursor-pointer hover:bg-base-100-50">
+                        <tr v-for="p in clanARanked" :key="p.id" @click.stop="p.selected = !p.selected" class="cursor-pointer hover:bg-base-100-50">
                             <td class="text-center">
                                 <input type="checkbox" class="checkbox checkbox-primary" v-model="p.selected" />
                             </td>                          
@@ -61,6 +66,7 @@
                                 </div>
                             </td>
                             <td>{{ p.name }}</td>
+                            <td class="text-right">{{ p.totalLevel}}</td>
                             <td class="text-right">{{ p.diceRolls}}</td>
                         </tr>
                         </tbody>
@@ -81,14 +87,15 @@
                             <th class="w-[80px]"></th>
                             <th class="w-[80px] text-center">Avatar</th>
                             <th>Name</th>
-                            <th class="text-right">Dice Rolls</th>
+                            <th class="text-right">Combined Rank</th>
+                            <th class="text-right">Max Points</th>
                         </tr>
                         </thead>
                         <tbody v-if="loadingB" class="mx-auto my-[100px] w-full text-center">
                             <tr><td colspan="3"><span class="loading loading-spinner text-primary loading-md mx-auto"></span></td></tr>
                         </tbody>
                         <tbody v-else>
-                        <tr v-for="p in clanBRanked" :key="p.id" @click.prevent="p.selected = !p.selected" class="cursor-pointer hover:bg-base-100-50">
+                        <tr v-for="p in clanBRanked" :key="p.id" @click.stop="p.selected = !p.selected" class="cursor-pointer hover:bg-base-100-50">
                             <td class="text-center">
                                 <input type="checkbox" class="checkbox checkbox-primary" v-model="p.selected" />
                             </td>    
@@ -98,6 +105,7 @@
                                 </div>
                             </td>
                             <td>{{ p.name }}</td>
+                            <td class="text-right">{{ p.totalLevel}}</td>
                             <td class="text-right">{{ p.diceRolls}}</td>
                         </tr>
                         </tbody>
@@ -226,6 +234,10 @@ const onUpdateClanB = async (name: string) => {
 }
 
 const simulateBattles = async () => {
+    if (simulationCount.value > 100000) {
+        simulationCount.value = 100000
+    }
+
     const clanAMembers = clanARanked.value.filter(x => x.selected)
     const clanBMembers = clanBRanked.value.filter(x => x.selected)
 

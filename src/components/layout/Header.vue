@@ -1,17 +1,16 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue"
-import { readContract, getAccount, watchAccount } from '@wagmi/core'
+import { computed, ref, watch } from "vue"
+import { getAccount } from '@wagmi/core'
 import { useItemStore, itemNames } from "../../store/items"
-import broochAbi from '../../abi/brooch.json'
 import Donate from "../dialogs/Donate.vue"
-import { HOMEMADE_BROOCH_ADDRESS } from "../../utils/addresses"
 import { useRoute } from "vue-router"
-// import { useBroochStore } from "../../store/brooch"
+import { useBroochStore } from "../../store/brooch"
 
 const itemStore = useItemStore()
-// const broochStore = useBroochStore()
+const broochStore = useBroochStore()
 
 const route = useRoute()
+const broochTimeout = ref<number>(0)
 
 const donateRef = ref<typeof Donate>()
 
@@ -27,16 +26,11 @@ const allItemNames = computed(() => {
 
 const init = async () => {
     try {
+        window.clearTimeout(broochTimeout.value)
         const account = getAccount()
         if (account.isConnected) {
-            const balance = await readContract({
-                address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
-                abi: broochAbi,
-                functionName: 'balanceOf',
-                args: [account.address, 0],
-            }) as unknown as number
-            if (balance < 1) {
-                setTimeout(() => {
+            if (broochStore.brooch(0).balance < 1) {
+                broochTimeout.value = window.setTimeout(() => {
                     donateRef.value?.openDialog()
                 }, 60000 * 5) // 5 minutes
             }
@@ -46,8 +40,7 @@ const init = async () => {
     }
 }
 
-watchAccount(init)
-onMounted(init)
+watch(() => broochStore.brooch(0).balance, init)
 </script>
 
 <template>
