@@ -46,7 +46,7 @@
                         <thead>
                         <tr>
                             <th class="w-[80px]"></th>
-                            <th class="w-[80px] text-center">Avatar</th>
+                            <th class="w-[80px] text-center"></th>
                             <th>Name</th>
                             <th class="text-right">Combined Level</th>
                             <th class="text-right">Max Points</th>
@@ -85,7 +85,7 @@
                         <thead>
                         <tr>
                             <th class="w-[80px]"></th>
-                            <th class="w-[80px] text-center">Avatar</th>
+                            <th class="w-[80px] text-center"></th>
                             <th>Name</th>
                             <th class="text-right">Combined Level</th>
                             <th class="text-right">Max Points</th>
