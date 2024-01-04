@@ -22,7 +22,7 @@
                 <button class="btn btn-primary" @click="open()">Connect Wallet</button>
             </div>
         </div>
-        <div v-else-if="loading" class="mx-auto my-[100px] w-[500px] text-center">
+        <div v-else-if="loading || app.loadingRoute" class="mx-auto my-[100px] w-[500px] text-center">
             <span class="loading loading-spinner text-primary loading-md mx-auto"></span>
         </div>
         <div v-else-if="coreStore.playerId == '0'" class="card md:w-[500px] bg-base-100-50 shadow-xl mx-auto my-[100px] p-10">
@@ -42,11 +42,7 @@
             </div>
         </div>
         <div v-else>
-            <router-view v-slot="{ Component, route }">
-                <transition name="fade">
-                    <component :is="Component" :key="route.path" />
-                </transition>
-            </router-view>
+            <RouterView />
         </div>
     </div>
 </template>

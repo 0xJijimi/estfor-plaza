@@ -11,6 +11,7 @@ export interface AppState {
     theme: string
     toasts: Toast[]
     id: number
+    loadingRoute: boolean
 }
 
 export const useAppStore = defineStore({
@@ -20,6 +21,7 @@ export const useAppStore = defineStore({
             theme: localStorage.getItem("theme") || "notheme",
             toasts: [],
             id: 0,
+            loadingRoute: false,
         } as AppState),
     getters: {
     },

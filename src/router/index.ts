@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router"
 import { useBroochStore } from "../store/brooch"
 import Base from "../components/Base.vue"
+import { useAppStore } from "../store/app"
 
 declare module "vue-router" {
     interface RouteMeta {
@@ -56,7 +57,10 @@ const router = createRouter({
     routes,
 })
 
-router.beforeEach(async (to) => {    
+router.beforeEach(async (to) => {  
+    const appStore = useAppStore()
+    appStore.loadingRoute = true
+    
     if (to.meta.requiresEmeraldBrooch) {
         const broochStore = useBroochStore()
         if (broochStore.initialised === false) {
@@ -66,6 +70,11 @@ router.beforeEach(async (to) => {
             return router.push('/')
         }
     }
+})
+
+router.afterEach(() => {
+    const appStore = useAppStore()
+    appStore.loadingRoute = false
 })
 
 router.onError((error) => {
