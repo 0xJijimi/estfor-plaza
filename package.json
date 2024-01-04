@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@heroicons/vue": "^2.0.18",
-    "@paintswap/estfor-definitions": "^1.0.82",
+    "@paintswap/estfor-definitions": "^1.0.93",
     "@vueuse/core": "^10.7.0",
     "@vueuse/head": "^2.0.0",
     "@wagmi/core": "^1.4.12",

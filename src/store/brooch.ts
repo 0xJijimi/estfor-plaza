@@ -40,6 +40,8 @@ export const useBroochStore = defineStore({
         },
         async getBroochData(tokenId: number) {
             const account = getAccount()
+            if (!account.isConnected) return
+            
             const result = await Promise.all([
                 readContract({
                     address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,

@@ -42,7 +42,11 @@
             </div>
         </div>
         <div v-else>
-            <RouterView />
+            <router-view v-slot="{ Component, route }">
+                <transition name="fade">
+                    <component :is="Component" :key="route.path" />
+                </transition>
+            </router-view>
         </div>
     </div>
 </template>

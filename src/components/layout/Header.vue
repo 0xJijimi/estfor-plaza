@@ -62,13 +62,13 @@ watch(() => broochStore.brooch(0).balance, init)
                     </details>
                 </li>
             </ul>
-            <div class="md:hidden dropdown">
-                <div tabindex="0" role="button" class="btn m-1 border-0">
+            <div class="dropdown">
+                <div tabindex="0" role="button" class="btn m-1 border-0 md:hidden">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                     </svg>
                 </div>
-                <ul class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                <ul tabindex="0" class="z-[1] menu dropdown-content p-2 shadow bg-base-100 rounded-box w-52">
                     <li><router-link to="/hero-select">Hero Select</router-link></li>
                     <li><router-link to="/combat">Combat Calculator</router-link> </li>
                     <li><router-link to="/skills">Skill Training</router-link></li>

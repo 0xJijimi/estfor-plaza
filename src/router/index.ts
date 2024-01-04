@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router"
 import { useBroochStore } from "../store/brooch"
+import Base from "../components/Base.vue"
 
 declare module "vue-router" {
     interface RouteMeta {
@@ -11,7 +12,7 @@ declare module "vue-router" {
 const routes: Array<RouteRecordRaw> = [
     {
         path: "/",
-        component: () => import("../components/Base.vue"),
+        component: Base,
         children: [
             {
                 path: "",
@@ -65,6 +66,10 @@ router.beforeEach(async (to) => {
             return router.push('/')
         }
     }
+})
+
+router.onError((error) => {
+    console.error(error)
 })
 
 export default router
