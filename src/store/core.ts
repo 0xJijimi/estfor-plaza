@@ -59,6 +59,8 @@ export const boostTypeNames = {
     [BoostType.ABSENCE]: "Absence Bonus",
     [BoostType.NONE]: "None",
     [BoostType.PASSIVE_SKIP_CHANCE]: "Passive Skip Chance",
+    [BoostType.PVP_BLOCK]: "PvP Block",
+    [BoostType.PVP_REATTACK]: "PvP Reattack",
 }
 
 export const avatarBoostSkills = {

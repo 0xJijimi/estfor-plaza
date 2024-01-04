@@ -125,7 +125,7 @@ const hoursUntilClanBoostEnd = computed(() => {
 })
 
 const boostOptions = computed(() => {
-    return itemStore.items.filter(x => x.equipPosition === EquipPosition.BOOST_VIAL)
+    return itemStore.items.filter(x => x.equipPosition === EquipPosition.BOOST_VIAL).filter(x => x.boostValue > 0)
 })
 
 const wishingWellBoost = computed(() => {
