@@ -437,7 +437,7 @@ export const useItemStore = defineStore({
             const stats = new CombatStats()
             const localEquippedItems = state.equippedItems.find(x => x.playerId === Number(playerState.id)) as any || {}
             Object.keys(localEquippedItems).forEach((key) => {
-                if (key !== 'magicBag') { // skip magic bag as they require special calculations
+                if (key !== 'magicBag' && key !== 'playerId') { // skip magic bag as they require special calculations
                     const item = state.items.find(x => x.tokenId === localEquippedItems[key])
                     if (item) { 
                         stats.melee += item.combatStats.melee
@@ -464,7 +464,7 @@ export const useItemStore = defineStore({
             const stats = new CombatStats()
             const localEquippedItems = state.equippedItems.find(x => x.playerId === Number(playerState.id)) as any || {}
             Object.keys(localEquippedItems).forEach((key) => {
-                if (key !== 'magicBag') { // skip magic bag as they require special calculations
+                if (key !== 'magicBag' && key !== 'playerId') { // skip magic bag as they require special calculations
                     const item = state.items.find(x => x.tokenId === localEquippedItems[key])
                     if (item) { 
                         stats.melee += item.combatStats.melee
