@@ -164,33 +164,29 @@ const simulationComplete = ref(false)
 const clanASimulationWinPercentage = ref('0')
 const clanBSimulationWinPercentage = ref('0')
 
-const getDiceRollForRank = (rank: number) => {
+const getDiceRollForRank = (rank: number, isEvolved: boolean) => {
     // get 1 dice roll every 20 ranks, start with 1 by default
-    return Math.floor(rank / 20) + 1
+    return Math.floor(rank / 20) + 1 + (isEvolved ? 1 : 0)
 }
 
 const getDiceRolls = (player: Player) => {
     let diceRolls = 0
-    diceRolls += getDiceRollForRank(getLevel(player.woodcuttingXP))
-    diceRolls += getDiceRollForRank(getLevel(player.miningXP))
-    diceRolls += getDiceRollForRank(getLevel(player.fishingXP))
-    diceRolls += getDiceRollForRank(getLevel(player.cookingXP))
-    diceRolls += getDiceRollForRank(getLevel(player.smithingXP))
-    diceRolls += getDiceRollForRank(getLevel(player.fletchingXP))
-    diceRolls += getDiceRollForRank(getLevel(player.craftingXP))
-    diceRolls += getDiceRollForRank(getLevel(player.healthXP))
-    diceRolls += getDiceRollForRank(getLevel(player.meleeXP))
-    diceRolls += getDiceRollForRank(getLevel(player.defenceXP))
-    diceRolls += getDiceRollForRank(getLevel(player.rangedXP))
-    diceRolls += getDiceRollForRank(getLevel(player.magicXP))
-    diceRolls += getDiceRollForRank(getLevel(player.alchemyXP))
-    diceRolls += getDiceRollForRank(getLevel(player.firemakingXP))
-    diceRolls += getDiceRollForRank(getLevel(player.thievingXP))
-    diceRolls += getDiceRollForRank(getLevel(player.forgingXP))
-
-    if (player.isFullMode) {
-        diceRolls += 16
-    }
+    diceRolls += getDiceRollForRank(getLevel(player.woodcuttingXP), player.isFullMode)
+    diceRolls += getDiceRollForRank(getLevel(player.miningXP), player.isFullMode)
+    diceRolls += getDiceRollForRank(getLevel(player.fishingXP), player.isFullMode)
+    diceRolls += getDiceRollForRank(getLevel(player.cookingXP), player.isFullMode)
+    diceRolls += getDiceRollForRank(getLevel(player.smithingXP), player.isFullMode)
+    diceRolls += getDiceRollForRank(getLevel(player.fletchingXP), player.isFullMode)
+    diceRolls += getDiceRollForRank(getLevel(player.craftingXP), player.isFullMode)
+    diceRolls += getDiceRollForRank(getLevel(player.healthXP), player.isFullMode)
+    diceRolls += getDiceRollForRank(getLevel(player.meleeXP), player.isFullMode)
+    diceRolls += getDiceRollForRank(getLevel(player.defenceXP), player.isFullMode)
+    diceRolls += getDiceRollForRank(getLevel(player.rangedXP), player.isFullMode)
+    diceRolls += getDiceRollForRank(getLevel(player.magicXP), player.isFullMode)
+    diceRolls += getDiceRollForRank(getLevel(player.alchemyXP), player.isFullMode)
+    diceRolls += getDiceRollForRank(getLevel(player.firemakingXP), player.isFullMode)
+    diceRolls += getDiceRollForRank(getLevel(player.thievingXP), player.isFullMode)
+    diceRolls += getDiceRollForRank(getLevel(player.forgingXP), player.isFullMode)
     return diceRolls
 }
 
@@ -372,8 +368,8 @@ const simulateBattles = async () => {
             let highestADiceRoll = 0
             let highestBDiceRoll = 0
 
-            const clanAMemberDiceRoll = getDiceRollForRank(getLevel(clanAMember[skillsArray[j]]))
-            const clanBMemberDiceRoll = getDiceRollForRank(getLevel(clanBMember[skillsArray[j]]))
+            const clanAMemberDiceRoll = getDiceRollForRank(getLevel(clanAMember[skillsArray[j]]), clanAMember.isFullMode)
+            const clanBMemberDiceRoll = getDiceRollForRank(getLevel(clanBMember[skillsArray[j]]), clanBMember.isFullMode)
 
             const clanAByteArray = getByteArray()
             const clanBByteArray = getByteArray()
