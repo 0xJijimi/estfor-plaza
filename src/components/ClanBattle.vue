@@ -8,7 +8,7 @@
                 <li>Clans post a maximum of 20 members to a battle</li>
                 <li>If one clan has more members in a battle, the extra members will auto-win their fight</li>
                 <li>Clan members fight a single member from the opposing clan in a random skill</li>
-                <li>Clan members get 1 point plus an additional point for every 20 levels in that skill</li>
+                <li>Clan members get 1 point (2 points if evolved) plus an additional point for every 20 levels in that skill</li>
                 <!-- <li>Highest number rolled on all dice is the winner</li> -->
                 <li>Random byte array is rolled for each member (e.g. 0, 1, 1, 0, 1, 0, 0, 1) and the points equate to the number of bits you get from the byte. For example, if you have 2 points you get 2 numbers from right to left (resulting in a score of 1). If you have 4 points you get 4 numbers from right to left (resulting in a score of 2 in the example byte). Highest score wins</li>
                 <li>If the attackers obtain the most wins they capture the territory/steals from the locked vault (if it's a draw or the defender wins then nothing happens)</li>
@@ -38,6 +38,15 @@
         <div class="card bg-base-100-50 shadow-xl rounded-lg mt-10 grow">
             <div class="card-body">
                 <ClanSearch class="w-full" @update:model-value="onUpdateClanA" v-model="clanAName" />
+                <div class="w-full">
+                    <div class="flex justify-end items-center">
+                        <div class="me-2">Select Roster</div>
+                        <select class="select select-bordered select-sm" v-model="clanARosterSelect">
+                            <option value="Territory">Territory</option>
+                            <option value="Vault">Vault</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="overflow-x-auto">
                     <table class="table md:table-md table-xs">
                         <caption v-if="!loadingA && clanANameFixed" class="caption-top mb-5 text-lg" :class="{'text-error': !clanASelectionValid}">
@@ -77,6 +86,15 @@
         <div class="card bg-base-100-50 shadow-xl rounded-lg mt-10 grow">
             <div class="card-body">
                 <ClanSearch class="w-full" @update:model-value="onUpdateClanB" v-model="clanBName" />
+                <div class="w-full">
+                    <div class="flex justify-end items-center">
+                        <div class="me-2">Select Roster</div>
+                        <select class="select select-bordered select-sm" v-model="clanBRosterSelect">
+                            <option value="Territory">Territory</option>
+                            <option value="Vault">Vault</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="overflow-x-auto">
                     <table class="table md:table-md table-xs">
                         <caption v-if="!loadingB && clanBNameFixed" class="caption-top mb-5 text-lg" :class="{'text-error': !clanBSelectionValid}">
@@ -117,11 +135,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue"
+import { computed, onMounted, ref, watch } from "vue"
 import { getLevel, useCoreStore } from "../store/core"
 import { useClanStore } from "../store/clan"
 import { getClanMembers } from "../utils/api"
-import { Player } from "@paintswap/estfor-definitions/types"
+import { Clan, Player } from "@paintswap/estfor-definitions/types"
 import ClanSearch from "./inputs/ClanSearch.vue"
 
 const coreStore = useCoreStore()
@@ -135,10 +153,13 @@ const simulationCount = ref(10000)
 const clanA = ref<Player[]>([])
 const clanAName = ref('')
 const clanANameFixed = ref('')
+const clanAClan = ref<Clan>()
 
 const clanB = ref<Player[]>([])
 const clanBName = ref('')
 const clanBNameFixed = ref('')
+const clanBClan = ref<Clan>()
+
 const simulationComplete = ref(false)
 const clanASimulationWinPercentage = ref('0')
 const clanBSimulationWinPercentage = ref('0')
@@ -166,18 +187,23 @@ const getDiceRolls = (player: Player) => {
     diceRolls += getDiceRollForRank(getLevel(player.firemakingXP))
     diceRolls += getDiceRollForRank(getLevel(player.thievingXP))
     diceRolls += getDiceRollForRank(getLevel(player.forgingXP))
+
+    if (player.isFullMode) {
+        diceRolls += 16
+    }
     return diceRolls
 }
 
 const clanARanked = ref<any[]>([])
 const clanBRanked = ref<any[]>([])
+const clanARosterSelect = ref('Territory')
+const clanBRosterSelect = ref('Territory')
 
 const clanASelectionValid = computed(() => clanARanked.value.filter(x => x.selected).length <= 20 && clanARanked.value.filter(x => x.selected).length > 0)
 const clanBSelectionValid = computed(() => clanBRanked.value.filter(x => x.selected).length <= 20 && clanBRanked.value.filter(x => x.selected).length > 0)
 
-const loadClanA = async (id: string) => {    
-    const clanMembersResult = await getClanMembers(id)
-    clanA.value = clanMembersResult.clanMembers.map(x => x.player)
+const updateClanARoster = () => {
+    const currentRoster = (clanARosterSelect.value === 'Territory' ? clanAClan.value?.territoryCombatants?.map(x => x.id) : clanAClan.value?.lockedVaultCombatants?.map(x => x.id)) || []
     clanARanked.value = clanA.value.map((x) => {
         return {
             ...x,
@@ -188,15 +214,13 @@ const loadClanA = async (id: string) => {
     .map((x, i) => {
         return {
             ...x,
-            selected: i < 20
+            selected: currentRoster.length > 0 ? currentRoster.includes(x.id) : i < 20
         }
     })
-    clanANameFixed.value = clanMembersResult.clanMembers[0]?.clan?.name || ''
 }
 
-const loadClanB = async (id: string) => {    
-    const clanMembersResult = await getClanMembers(id)
-    clanB.value = clanMembersResult.clanMembers.map(x => x.player)
+const updateClanBRoster = () => {
+    const currentRoster = (clanBRosterSelect.value === 'Territory' ? clanBClan.value?.territoryCombatants?.map(x => x.id) : clanBClan.value?.lockedVaultCombatants?.map(x => x.id)) || []
     clanBRanked.value = clanB.value.map((x) => {
         return {
             ...x,
@@ -207,28 +231,43 @@ const loadClanB = async (id: string) => {
     .map((x, i) => {
         return {
             ...x,
-            selected: i < 20
+            selected: currentRoster.length > 0 ? currentRoster.includes(x.id) : i < 20
         }
     })
+}
+
+const loadClanA = async (clan: Clan) => {
+    const clanMembersResult = await getClanMembers(clan.id)
+    clanAClan.value = clan
+    clanA.value = clanMembersResult.clanMembers.map(x => x.player)
+    clanANameFixed.value = clanMembersResult.clanMembers[0]?.clan?.name || ''
+    updateClanARoster()
+}
+
+const loadClanB = async (clan: Clan) => {    
+    const clanMembersResult = await getClanMembers(clan.id)
+    clanBClan.value = clan
+    clanB.value = clanMembersResult.clanMembers.map(x => x.player)
     clanBNameFixed.value = clanMembersResult.clanMembers[0]?.clan?.name || ''
+    updateClanBRoster()
 }
 
 const onUpdateClanA = async (name: string) => {
-    const clanId = clanStore.clans.find(x => x.name.toLowerCase() === name.toLowerCase())?.id
-    if (clanId) {
+    const clan = clanStore.clans.find(x => x.name.toLowerCase() === name.toLowerCase())
+    if (clan?.id) {
         simulationComplete.value = false
         loadingA.value = true
-        await loadClanA(clanId)
+        await loadClanA(clan)
         loadingA.value = false
     }
 }
 
 const onUpdateClanB = async (name: string) => {
-    const clanId = clanStore.clans.find(x => x.name.toLowerCase() === name.toLowerCase())?.id
-    if (clanId) {
+    const clan = clanStore.clans.find(x => x.name.toLowerCase() === name.toLowerCase())
+    if (clan?.id) {
         simulationComplete.value = false
         loadingB.value = true
-        await loadClanB(clanId)
+        await loadClanB(clan)
         loadingB.value = false
     }
 }
@@ -386,12 +425,13 @@ const init = async () => {
 
     await clanStore.getAllClans()
     if (coreStore.clanState) {
-        await loadClanA(coreStore.clanState.id)
+        await loadClanA(coreStore.clanState)
     }
 
     loadingA.value = false
 }
 
 onMounted(init)
-
+watch(() => clanARosterSelect.value, updateClanARoster)
+watch(() => clanBRosterSelect.value, updateClanBRoster)
 </script>
