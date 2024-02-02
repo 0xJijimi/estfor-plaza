@@ -30,6 +30,7 @@ createWeb3Modal({
     wagmiConfig, 
     projectId, 
     chains, 
+    defaultChain: fantom,
     excludeWalletIds: ['19177a98252e07ddfc9af2083ba8e07ef627cb6103467ffebb3f8f4205fd7927'], // exclude ledger
     themeVariables: {
         '--w3m-accent': '#214850'

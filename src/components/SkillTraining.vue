@@ -38,7 +38,14 @@
                         </div>
                         <div class="flex-col flex justify-between">
                             <div class="flex flex-col">
-                                <div class="text-2xl font-bold">{{ hoursUntilNextAction(action.relevantAction) }} hour{{ hoursUntilNextAction(action.relevantAction) > 1 ? 's' : '' }}</div>
+                                <div class="text-2xl font-bold">
+                                    {{ hoursUntilNextAction(action.relevantAction) }} hour{{ hoursUntilNextAction(action.relevantAction) > 1 ? 's' : '' }}
+                                    <div v-if="hoursUntilNextLevel20(action.relevantAction) > 0" class="tooltip tooltip-primary tooltip-bottom" :data-tip="`${hoursUntilNextLevel20(action.relevantAction)} hour${hoursUntilNextLevel20(action.relevantAction) > 1 ? 's': ''} until next level 20 boundary`">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                                        </svg>
+                                    </div>
+                                </div>
                                 <div class="text-sm text-gray-400">Until next action unlock</div>
                             </div>
                             <div v-if="action.relevantAction.nextAction" class="flex flex-col mt-5">
@@ -58,7 +65,7 @@
 <script setup lang="ts">
 import { BoostType, Skill } from '@paintswap/estfor-definitions/types'
 import { useSkillStore, RelevantAction, skillNames, ActionType } from '../store/skills'
-import { MEDIA_URL, useCoreStore, fullAttireMultiplier, heroAvatarMultiplier } from '../store/core'
+import { MEDIA_URL, useCoreStore, fullAttireMultiplier, heroAvatarMultiplier, xpBoundaries } from '../store/core'
 import { computed, ref } from 'vue'
 import BoostPanel from './BoostPanel.vue';
 import ItemSearch from './ItemSearch.vue';
@@ -98,5 +105,21 @@ const hoursUntilNextAction = (relevantAction: RelevantAction) => {
     }
     const xpToNextAction = relevantAction.nextAction.minXP - relevantAction.currentXPForSkill
     return Math.ceil(xpToNextAction / (relevantAction.currentAction.xpPerHour * coreStore.getXPBoostMultiplier(relevantAction.skill, BoostType.NON_COMBAT_XP)))
+}
+
+const hoursUntilNextLevel20 = (relevantAction: RelevantAction) => {
+    if (!relevantAction.nextAction) {
+        return 0 // max level
+    }
+    const xpToNextAction = relevantAction.nextAction.minXP - relevantAction.currentXPForSkill
+    // get xps of level 20, 40, 60, 80, 100
+    const relevantXpBoundaries = [xpBoundaries[19], xpBoundaries[39], xpBoundaries[59], xpBoundaries[79], xpBoundaries[99]]
+    const nextXpBoundary = Math.min(...relevantXpBoundaries.filter(x => x > relevantAction.currentXPForSkill)) || 0
+    console.log(nextXpBoundary)
+    console.log(relevantAction)
+    if (xpToNextAction < nextXpBoundary - relevantAction.currentXPForSkill) {
+        return 0 // next upgrade action is closer than the level 20 boundary
+    }
+    return Math.ceil((nextXpBoundary - relevantAction.currentXPForSkill) / (relevantAction.currentAction.xpPerHour * coreStore.getXPBoostMultiplier(relevantAction.skill, BoostType.NON_COMBAT_XP)))
 }
 </script>

@@ -65,7 +65,7 @@
                             <tr><td colspan="3"><span class="loading loading-spinner text-primary loading-md mx-auto"></span></td></tr>
                         </tbody>
                         <tbody v-else>
-                        <tr v-for="p in clanARanked" :key="p.id" @click.stop="p.selected = !p.selected" class="cursor-pointer hover:bg-base-100-50">
+                        <tr v-for="(p, i) in clanARanked" :key="p.id" @click.stop="p.selected = !p.selected" class="cursor-pointer hover:bg-base-100-50" :class="{'text-gray-400': i > 40}">
                             <td class="text-center">
                                 <input type="checkbox" class="checkbox checkbox-primary" v-model="p.selected" />
                             </td>                          
@@ -113,7 +113,7 @@
                             <tr><td colspan="3"><span class="loading loading-spinner text-primary loading-md mx-auto"></span></td></tr>
                         </tbody>
                         <tbody v-else>
-                        <tr v-for="p in clanBRanked" :key="p.id" @click.stop="p.selected = !p.selected" class="cursor-pointer hover:bg-base-100-50">
+                        <tr v-for="(p, i) in clanBRanked" :key="p.id" @click.stop="p.selected = !p.selected" class="cursor-pointer hover:bg-base-100-50" :class="{'text-gray-400': i > 40}">
                             <td class="text-center">
                                 <input type="checkbox" class="checkbox checkbox-primary" v-model="p.selected" />
                             </td>    
@@ -137,7 +137,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue"
 import { getLevel, useCoreStore } from "../store/core"
-import { useClanStore } from "../store/clan"
+import { getDiceRollForRank, getDiceRolls, useClanStore } from "../store/clan"
 import { getClanMembers } from "../utils/api"
 import { Clan, Player } from "@paintswap/estfor-definitions/types"
 import ClanSearch from "./inputs/ClanSearch.vue"
@@ -163,32 +163,6 @@ const clanBClan = ref<Clan>()
 const simulationComplete = ref(false)
 const clanASimulationWinPercentage = ref('0')
 const clanBSimulationWinPercentage = ref('0')
-
-const getDiceRollForRank = (rank: number, isEvolved: boolean) => {
-    // get 1 dice roll every 20 ranks, start with 1 by default
-    return Math.floor(rank / 20) + 1 + (isEvolved ? 1 : 0)
-}
-
-const getDiceRolls = (player: Player) => {
-    let diceRolls = 0
-    diceRolls += getDiceRollForRank(getLevel(player.woodcuttingXP), player.isFullMode)
-    diceRolls += getDiceRollForRank(getLevel(player.miningXP), player.isFullMode)
-    diceRolls += getDiceRollForRank(getLevel(player.fishingXP), player.isFullMode)
-    diceRolls += getDiceRollForRank(getLevel(player.cookingXP), player.isFullMode)
-    diceRolls += getDiceRollForRank(getLevel(player.smithingXP), player.isFullMode)
-    diceRolls += getDiceRollForRank(getLevel(player.fletchingXP), player.isFullMode)
-    diceRolls += getDiceRollForRank(getLevel(player.craftingXP), player.isFullMode)
-    diceRolls += getDiceRollForRank(getLevel(player.healthXP), player.isFullMode)
-    diceRolls += getDiceRollForRank(getLevel(player.meleeXP), player.isFullMode)
-    diceRolls += getDiceRollForRank(getLevel(player.defenceXP), player.isFullMode)
-    diceRolls += getDiceRollForRank(getLevel(player.rangedXP), player.isFullMode)
-    diceRolls += getDiceRollForRank(getLevel(player.magicXP), player.isFullMode)
-    diceRolls += getDiceRollForRank(getLevel(player.alchemyXP), player.isFullMode)
-    diceRolls += getDiceRollForRank(getLevel(player.firemakingXP), player.isFullMode)
-    diceRolls += getDiceRollForRank(getLevel(player.thievingXP), player.isFullMode)
-    diceRolls += getDiceRollForRank(getLevel(player.forgingXP), player.isFullMode)
-    return diceRolls
-}
 
 const clanARanked = ref<any[]>([])
 const clanBRanked = ref<any[]>([])

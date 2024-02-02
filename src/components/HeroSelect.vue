@@ -13,6 +13,7 @@
                     <tr>
                         <th class="w-[100px] text-center">Avatar</th>
                         <th>Name</th>
+                        <th class="w-[100px] text-right">Battle Points</th>
                         <th class="w-[210px]"></th>
                     </tr>
                     </thead>
@@ -20,6 +21,7 @@
                     <tr v-for="h in coreStore.heroRoster" :key="h.id">
                         <td><img :src="`https://media.estfor.com/characters/${h.avatarId}.jpg`" class="rounded-lg" /> </td>
                         <td>{{ h.name }}</td>
+                        <td class="w-[100px] text-right">{{ getDiceRolls(h) }}</td>
                         <td>
                             <button type="button" class="btn btn-primary mr-2" :disabled="coreStore.playerId == h.id" @click.prevent="selectHero(h)">Select</button>
                             <button type="button" class="btn btn-error btn-outline" :disabled="coreStore.playerId == h.id" @click.prevent="coreStore.removeHeroFromRoster(h)">Remove</button>
@@ -73,6 +75,7 @@ import { useAppStore } from '../store/app';
 import { useCoreStore } from '../store/core';
 import EmeraldBroochPaywall from './dialogs/EmeraldBroochPaywall.vue';
 import { Player } from '@paintswap/estfor-definitions/types';
+import { getDiceRolls } from '../store/clan';
 
 const app = useAppStore()
 const coreStore = useCoreStore()
