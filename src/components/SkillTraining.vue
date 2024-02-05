@@ -33,7 +33,7 @@
                             </div>
                             <div class="flex flex-col mt-5">
                                 <div class="text-2xl font-bold">{{ (action.relevantAction.currentAction.xpPerHour * coreStore.getXPBoostMultiplier(action.skill, BoostType.NON_COMBAT_XP)).toFixed(0) }} XP/hour</div>
-                                <div class="text-sm text-gray-400">Current action</div>
+                                <div class="text-sm text-gray-400">Level {{ getLevel(action.relevantAction.currentXPForSkill.toString()) }}</div>
                             </div>
                         </div>
                         <div class="flex-col flex justify-between">
@@ -50,7 +50,7 @@
                             </div>
                             <div v-if="action.relevantAction.nextAction" class="flex flex-col mt-5">
                                 <div class="text-2xl font-bold">{{ (action.relevantAction.nextAction?.xpPerHour * coreStore.getXPBoostMultiplier(action.skill, BoostType.NON_COMBAT_XP)).toFixed(0) }} XP/hour</div>
-                                <div class="text-sm text-gray-400">Next action</div>
+                                <div class="text-sm text-gray-400">Next action at level {{ getLevel(action.relevantAction.nextAction.minXP.toString()) }}</div>
                             </div>
                         </div>
                     </div>
@@ -65,7 +65,7 @@
 <script setup lang="ts">
 import { BoostType, Skill } from '@paintswap/estfor-definitions/types'
 import { useSkillStore, RelevantAction, skillNames, ActionType } from '../store/skills'
-import { MEDIA_URL, useCoreStore, fullAttireMultiplier, heroAvatarMultiplier, xpBoundaries } from '../store/core'
+import { MEDIA_URL, useCoreStore, fullAttireMultiplier, heroAvatarMultiplier, xpBoundaries, getLevel } from '../store/core'
 import { computed, ref } from 'vue'
 import BoostPanel from './BoostPanel.vue';
 import ItemSearch from './ItemSearch.vue';
@@ -115,8 +115,7 @@ const hoursUntilNextLevel20 = (relevantAction: RelevantAction) => {
     // get xps of level 20, 40, 60, 80, 100
     const relevantXpBoundaries = [xpBoundaries[19], xpBoundaries[39], xpBoundaries[59], xpBoundaries[79], xpBoundaries[99]]
     const nextXpBoundary = Math.min(...relevantXpBoundaries.filter(x => x > relevantAction.currentXPForSkill)) || 0
-    console.log(nextXpBoundary)
-    console.log(relevantAction)
+
     if (xpToNextAction < nextXpBoundary - relevantAction.currentXPForSkill) {
         return 0 // next upgrade action is closer than the level 20 boundary
     }

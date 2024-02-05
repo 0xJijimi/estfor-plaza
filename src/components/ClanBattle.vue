@@ -65,7 +65,7 @@
                             <tr><td colspan="3"><span class="loading loading-spinner text-primary loading-md mx-auto"></span></td></tr>
                         </tbody>
                         <tbody v-else>
-                        <tr v-for="(p, i) in clanARanked" :key="p.id" @click.stop="p.selected = !p.selected" class="cursor-pointer hover:bg-base-100-50" :class="{'text-gray-400': i > 40}">
+                        <tr v-for="(p, i) in clanARanked" :key="p.id" @click.stop="p.selected = !p.selected" class="cursor-pointer hover:bg-base-100-50" :class="{'text-gray-400': i >= 40}">
                             <td class="text-center">
                                 <input type="checkbox" class="checkbox checkbox-primary" v-model="p.selected" />
                             </td>                          
@@ -113,7 +113,7 @@
                             <tr><td colspan="3"><span class="loading loading-spinner text-primary loading-md mx-auto"></span></td></tr>
                         </tbody>
                         <tbody v-else>
-                        <tr v-for="(p, i) in clanBRanked" :key="p.id" @click.stop="p.selected = !p.selected" class="cursor-pointer hover:bg-base-100-50" :class="{'text-gray-400': i > 40}">
+                        <tr v-for="(p, i) in clanBRanked" :key="p.id" @click.stop="p.selected = !p.selected" class="cursor-pointer hover:bg-base-100-50" :class="{'text-gray-400': i >= 40}">
                             <td class="text-center">
                                 <input type="checkbox" class="checkbox checkbox-primary" v-model="p.selected" />
                             </td>    
