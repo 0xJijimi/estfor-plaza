@@ -63,6 +63,11 @@
                     <li>Search for the hero name</li>
                     <li>Click on the hero portrait you wish to load</li>
                 </ol>
+                <div class="mt-5">Or</div>
+                <ol class="list-decimal list-inside mt-5">
+                    <li>Search for a clan name</li>
+                    <li>Click on Add Clan to Roster button to add all the members to your roster</li>
+                </ol>
             </div>
 
             <div v-if="loading" class="mx-auto my-[100px] w-full text-center">
