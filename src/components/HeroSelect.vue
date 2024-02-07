@@ -43,11 +43,18 @@
     </div>
     <div class="card bg-base-100-50 shadow-xl rounded-lg mt-10">
         <div class="card-body">
-            <div class="join items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-2 text-primary">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                </svg>
-                <input type="text" placeholder="Hero Search" class="input input-bordered bg-base-100-50" v-model="heroSearch" />
+            <div class="flex flex-row justify-evenly items-center">
+                <div class="join items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-2 text-primary">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                    </svg>
+                    <input type="text" placeholder="Hero Search" class="input input-bordered bg-base-100-50" v-model="heroSearch" />
+                </div>
+
+                <div class="items-center flex gap-2">
+                    <ClanSearch container-class="justify-center" input-class="input-md" @update:model-value="onUpdateClanName" v-model="clanName" />
+                    <button type="button" class="btn btn-primary" @click.prevent="addClanToRoster" :disabled="!selectedClan || loading">Add Clan to Roster</button>
+                </div>                
             </div>
 
             <div class="text-center mt-5">
@@ -74,21 +81,25 @@
 
 <script setup lang="ts">
 import Avatar from './Avatar.vue'
-import { ref } from "vue"
+import { ref, onMounted } from "vue"
 import { watchDebounced } from '@vueuse/core'
-import { getPlayers } from '../utils/api';
+import { getClanMembers, getPlayers } from '../utils/api';
 import { useAppStore } from '../store/app';
 import { getLevel, useCoreStore } from '../store/core';
 import EmeraldBroochPaywall from './dialogs/EmeraldBroochPaywall.vue';
-import { Player } from '@paintswap/estfor-definitions/types';
-import { getDiceRolls } from '../store/clan';
+import { Clan, Player } from '@paintswap/estfor-definitions/types';
+import { getDiceRolls, useClanStore } from '../store/clan';
+import ClanSearch from './inputs/ClanSearch.vue'
 
 const app = useAppStore()
 const coreStore = useCoreStore()
+const clanStore = useClanStore()
 
 const heroSearch = ref('')
 const heroSearchResults = ref<Player[]>([])
 const loading = ref(false)
+const clanName = ref('')
+const selectedClan = ref<Clan | null>(null)
 
 const emeraldBroochPaywallRef = ref<typeof EmeraldBroochPaywall>()
 
@@ -126,6 +137,29 @@ const selectHero = async (player: Player) => {
     } finally {
         // case when selecting the hero with the same name as the search term
         if (previousHeroSearchValue === heroSearch.value) {
+            loading.value = false
+        }
+    }
+}
+
+const onUpdateClanName = async (name: string) => {
+    selectedClan.value = null
+    const clan = clanStore.clans.find(x => x.name.toLowerCase() === name.toLowerCase())
+    if (clan?.id) {
+        selectedClan.value = clan
+    }
+}
+
+const addClanToRoster = async () => {
+    if (selectedClan.value) {
+        loading.value = true
+        try {
+            const clanMembersResult = await getClanMembers(selectedClan.value.id)
+            heroSearchResults.value = clanMembersResult.clanMembers.map(x => x.player)
+            for (const p of clanMembersResult.clanMembers) {
+                await coreStore.addHeroToRoster(p.player)
+            }
+        } finally {
             loading.value = false
         }
     }
@@ -176,4 +210,15 @@ const exportHeroes = async () => {
     a.click()
     window.URL.revokeObjectURL(url)
 }
+
+const init = async () => {
+    loading.value = true
+    try {
+        await clanStore.getAllClans()
+    } finally {
+        loading.value = false
+    }
+}
+
+onMounted(init)
 </script>
