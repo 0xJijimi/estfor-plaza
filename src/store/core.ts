@@ -331,6 +331,15 @@ export const useCoreStore = defineStore({
             const globalState = await getGlobalData()
             this.coreData = globalState.coreData
         },
+        async refreshHeroRoster() {
+            const p = []
+            for (const hero of this.heroRoster) {
+                p.push(getSoloPlayerState(hero.id))
+            }
+            const heroes = await Promise.all(p)
+            this.heroRoster = heroes.map(x => x.player)
+            localStorage.setItem('heroRoster', JSON.stringify(this.heroRoster))
+        },
         async loadPlayer(playerId: string) {
             const account = getAccount()
             const balance = await readContract({

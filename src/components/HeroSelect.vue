@@ -220,6 +220,7 @@ const init = async () => {
     loading.value = true
     try {
         await clanStore.getAllClans()
+        await coreStore.refreshHeroRoster()
     } finally {
         loading.value = false
     }
