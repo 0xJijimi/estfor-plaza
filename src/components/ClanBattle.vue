@@ -25,6 +25,14 @@
                     </div>
                 </label>
             </div>
+            <div class="form-control items-end">
+                    <label class="label cursor-pointer">
+                        <span class="label-text mr-2 items-center flex">
+                            Use Sharpened Claw (+1 to max points for VAULT attacker)
+                        </span> 
+                        <input type="checkbox" class="checkbox checkbox-primary" v-model="addOneMaxPoint" @update:model-value="updateClanARoster()" />
+                    </label>
+                </div>
             <button type="button" class="btn btn-primary" :disabled="!clanASelectionValid || !clanBSelectionValid" @click.prevent="simulateBattles">Calculate Battles</button>
             <div v-if="simulationComplete" class="mt-5 text-right">
                 As the attacker, {{ clanANameFixed }} wins <span class="text-xl" :class="{'text-error': clanASimulationWinPercentage < clanBSimulationWinPercentage, 'text-green-400': clanASimulationWinPercentage > clanBSimulationWinPercentage}">{{ clanASimulationWinPercentage }}</span>% of the time
@@ -37,7 +45,10 @@
     <div class="flex max-xl:flex-col flex-row justify-evenly xl:gap-10">
         <div class="card bg-base-100-50 shadow-xl rounded-lg mt-10 grow">
             <div class="card-body">
-                <ClanSearch class="w-full" @update:model-value="onUpdateClanA" v-model="clanAName" />
+                <div class="flex justify-between">
+                    <button type="button" @click.prevent="switchClanAWithB" class="btn btn-primary btn-sm" :disabled="loadingA || loadingB">Switch Attackers to Defenders</button>
+                    <ClanSearch class="w-full" @update:model-value="onUpdateClanA" v-model="clanAName" />
+                </div>
                 <div class="w-full">
                     <div class="flex justify-end items-center">
                         <div class="me-2">Select Roster</div>
@@ -149,6 +160,7 @@ const loadingA = ref(false)
 const loadingB = ref(false)
 
 const simulationCount = ref(10000)
+const addOneMaxPoint = ref(false)
 
 const clanA = ref<Player[]>([])
 const clanAName = ref('')
@@ -177,7 +189,7 @@ const updateClanARoster = () => {
     clanARanked.value = clanA.value.map((x) => {
         return {
             ...x,
-            diceRolls: getDiceRolls(x),
+            diceRolls: getDiceRolls(x, addOneMaxPoint.value),
         }    
     })
     .sort((a, b) => b.diceRolls > a.diceRolls ? 1 : b.diceRolls < a.diceRolls ? -1 : 0)
@@ -342,7 +354,7 @@ const simulateBattles = async () => {
             let highestADiceRoll = 0
             let highestBDiceRoll = 0
 
-            const clanAMemberDiceRoll = getDiceRollForRank(getLevel(clanAMember[skillsArray[j]]), clanAMember.isFullMode)
+            const clanAMemberDiceRoll = getDiceRollForRank(getLevel(clanAMember[skillsArray[j]]), clanAMember.isFullMode) + (addOneMaxPoint.value ? 1 : 0)
             const clanBMemberDiceRoll = getDiceRollForRank(getLevel(clanBMember[skillsArray[j]]), clanBMember.isFullMode)
 
             const clanAByteArray = getByteArray()
@@ -380,14 +392,47 @@ const simulateBattles = async () => {
         } else if (clanBWins > clanAWins) {
             clanBTotalWins++
         } else {
-            // draw, defender wins
-            clanBTotalWins++
+            // draw, attacker wins
+            clanATotalWins++
         }
     }
 
     clanASimulationWinPercentage.value = ((clanATotalWins / simulationCount.value) * 100).toFixed(1)
     clanBSimulationWinPercentage.value = ((clanBTotalWins / simulationCount.value) * 100).toFixed(1)
     simulationComplete.value = true
+}
+
+const switchClanAWithB = () => {
+    let tempClan
+    let tempClanNameFixed = ''
+    let tempClanMembers
+    if (clanAClan.value) {
+        tempClan = JSON.parse(JSON.stringify(clanAClan.value))
+        tempClanNameFixed = clanANameFixed.value
+        tempClanMembers = JSON.parse(JSON.stringify(clanA.value))
+    } else {
+        tempClan = {} as Clan
+        tempClanMembers = []
+    }
+
+    if (clanBClan.value) {
+        clanAClan.value = JSON.parse(JSON.stringify(clanBClan.value))
+        clanA.value = JSON.parse(JSON.stringify(clanB.value))
+        clanANameFixed.value = clanBNameFixed.value
+    } else {
+        clanAClan.value = {} as Clan
+        clanA.value = []
+        clanANameFixed.value = ''
+    }
+
+    if (clanAClan.value) {
+        clanBClan.value = tempClan
+        clanB.value = tempClanMembers
+        clanBNameFixed.value = tempClanNameFixed 
+    }
+    updateClanARoster()
+    updateClanBRoster()
+    simulateBattles()
 }
 
 const init = async () => {

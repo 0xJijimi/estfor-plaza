@@ -15,11 +15,16 @@
                         <th>Name</th>
                         <th class="w-[100px] text-right">Battle Points</th>
                         <th class="w-[210px] text-right">
-                            <button type="button" class="btn btn-primary btn-outline mr-2" @click.prevent="exportHeroes">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#fff" class="w-6 h-6">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                                </svg>
-                            </button>
+                            <div class="items-center flex justify-end">
+                                <button type="button" class="btn btn-primary btn-outline btn-sm mr-2" @click.prevent="exportHeroes">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#fff" class="w-6 h-6">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                    </svg>
+                                </button>
+                                <button type="button" class="btn btn-error btn-outline btn-sm mr-2" @click.prevent="clearRoster">
+                                    Clear Roster
+                                </button>
+                            </div>
                         </th>
                     </tr>
                     </thead>
@@ -214,6 +219,18 @@ const exportHeroes = async () => {
     document.body.appendChild(a)
     a.click()
     window.URL.revokeObjectURL(url)
+}
+
+const clearRoster = async () => {
+    loading.value = true
+    try {
+        await coreStore.getActivePlayer()
+        for (const h of coreStore.heroRoster.filter(x => x.id !== coreStore.playerId.toString())) {
+            coreStore.removeHeroFromRoster(h)
+        }
+    } finally {
+        loading.value = false    
+    }
 }
 
 const init = async () => {
