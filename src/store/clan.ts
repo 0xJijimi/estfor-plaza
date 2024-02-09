@@ -53,7 +53,7 @@ export const useClanStore = defineStore({
             let localClans: Clan[] = []
             while (moreToFetch) {
                 const clans = await getClans(numToSkip)
-                if (clans.clans.length === 0) {
+                if (clans.clans.length === 0 || clans.clans.length < 100) {
                     moreToFetch = false
                 } else {
                     localClans.push(...clans.clans)
