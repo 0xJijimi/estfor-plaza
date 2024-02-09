@@ -11,7 +11,7 @@
                 <li>Clan members get 1 point (2 points if evolved) plus an additional point for every 20 levels in that skill</li>
                 <!-- <li>Highest number rolled on all dice is the winner</li> -->
                 <li>Random byte array is rolled for each member (e.g. 0, 1, 1, 0, 1, 0, 0, 1) and the points equate to the number of bits you get from the byte. For example, if you have 2 points you get 2 numbers from right to left (resulting in a score of 1). If you have 4 points you get 4 numbers from right to left (resulting in a score of 2 in the example byte). Highest score wins</li>
-                <li>If the attackers obtain the most wins/draw they capture the territory/steals from the locked vault (if the defender wins then nothing happens)</li>
+                <li>If the attackers obtain the most wins they capture the territory, or if the attacker wins or draws attacking a vault they steal from the locked vault (if the defender wins, or draws a territory battle, then nothing happens)</li>
             </ol>
             <div class="flex justify-start mt-5">
                 <label class="form-control w-full">
@@ -25,6 +25,13 @@
                     </div>
                 </label>
             </div>
+            <div class="flex justify-end items-center">
+                        <div class="me-2">Battle Arena</div>
+                        <select class="select select-bordered select-sm" v-model="battleArena">
+                            <option value="Territory">Territory</option>
+                            <option value="Vault">Vault</option>
+                        </select>
+                    </div>
             <div class="form-control items-end">
                     <label class="label cursor-pointer">
                         <span class="label-text mr-2 items-center flex">
@@ -180,6 +187,7 @@ const clanARanked = ref<any[]>([])
 const clanBRanked = ref<any[]>([])
 const clanARosterSelect = ref('Territory')
 const clanBRosterSelect = ref('Territory')
+const battleArena = ref('Territory')
 
 const clanASelectionValid = computed(() => clanARanked.value.filter(x => x.selected).length <= 20 && clanARanked.value.filter(x => x.selected).length > 0)
 const clanBSelectionValid = computed(() => clanBRanked.value.filter(x => x.selected).length <= 20 && clanBRanked.value.filter(x => x.selected).length > 0)
@@ -392,8 +400,8 @@ const simulateBattles = async () => {
         } else if (clanBWins > clanAWins) {
             clanBTotalWins++
         } else {
-            // draw, attacker wins
-            clanATotalWins++
+            // draw, attacker wins for vault, or defender wins for territory
+            battleArena.value === 'Territory' ? clanBTotalWins++ : clanATotalWins++
         }
     }
 
