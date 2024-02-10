@@ -362,7 +362,7 @@ const simulateBattles = async () => {
             let highestADiceRoll = 0
             let highestBDiceRoll = 0
 
-            const clanAMemberDiceRoll = getDiceRollForRank(getLevel(clanAMember[skillsArray[j]]), clanAMember.isFullMode) + (addOneMaxPoint.value ? 1 : 0)
+            const clanAMemberDiceRoll = getDiceRollForRank(getLevel(clanAMember[skillsArray[j]]), clanAMember.isFullMode) + (addOneMaxPoint.value && battleArena.value === 'Vault' ? 1 : 0)
             const clanBMemberDiceRoll = getDiceRollForRank(getLevel(clanBMember[skillsArray[j]]), clanBMember.isFullMode)
 
             const clanAByteArray = getByteArray()
