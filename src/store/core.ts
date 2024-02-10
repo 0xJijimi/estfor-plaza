@@ -61,6 +61,7 @@ export const boostTypeNames = {
     [BoostType.PASSIVE_SKIP_CHANCE]: "Passive Skip Chance",
     [BoostType.PVP_BLOCK]: "PvP Block",
     [BoostType.PVP_REATTACK]: "PvP Reattack",
+    [BoostType.PVP_SUPER_ATTACK]: "Sharpened Claw",
 }
 
 export const avatarBoostSkills = {
