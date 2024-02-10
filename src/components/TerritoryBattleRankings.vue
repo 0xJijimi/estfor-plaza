@@ -21,7 +21,7 @@
                         <tr><td colspan="4"><span class="loading loading-spinner text-primary loading-md mx-auto"></span></td></tr>
                     </tbody>
                     <tbody v-else>
-                        <tr v-for="territory in sortedTerritories" :key="territory.id" :class="{'text-success': territory.owner == coreStore.clanState?.name}">
+                        <tr v-for="territory in sortedTerritories" :key="territory.id" :class="{'text-success': territory.owner == coreStore.clanState?.name, 'text-warning': territory.owner == 'Unclaimed'}">
                             <td>{{ territory.owner }}</td>
                             <td class="text-right">{{ territory.percentageEmissions / 10 }}%</td>
                             <td class="text-right">{{ BigInt(territory.unclaimedEmissions) / BigInt(10**18) }}</td>
