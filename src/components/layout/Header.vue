@@ -58,6 +58,7 @@ watch(() => broochStore.brooch(0).balance, init)
                             <li><router-link to="/skills">Skill Training</router-link></li>
                             <li><router-link to="/lotteries">Wishing Well Ranking</router-link></li>
                             <li><router-link to="/clan-battle" @click="showBrooch">Clan Battle <img src="/src/assets/emerald_brooch_icon.png" class="rounded-lg w-[20px] inline cursor-pointer" alt="Emerald Brooch" /></router-link></li>
+                            <li><router-link to="/territory-rankings" @click="showBrooch">Battle Rankings <img src="/src/assets/emerald_brooch_icon.png" class="rounded-lg w-[20px] inline cursor-pointer" alt="Emerald Brooch" /></router-link></li>
                         </ul>
                     </details>
                 </li>
@@ -73,7 +74,8 @@ watch(() => broochStore.brooch(0).balance, init)
                     <li><router-link to="/combat">Combat Calculator</router-link> </li>
                     <li><router-link to="/skills">Skill Training</router-link></li>
                     <li><router-link to="/lotteries">Wishing Well Ranking</router-link></li>
-                    <li><router-link to="/clan-battle" @click="showBrooch">Clan Battle <img src="/src/assets/emerald_brooch_icon.png" class="rounded-lg w-[20px] inline cursor-pointer" alt="Emerald Brooch" /></router-link></li>
+                    <li><router-link to="/clan-battle" @click="showBrooch">Clan Battle <img src="/src/assets/emerald_brooch_icon.png" class="rounded-lg w-[20px] inline cursor-pointer" alt="Emerald Brooch" /></router-link></li>                    
+                    <li><router-link to="/territory-rankings" @click="showBrooch">Battle Rankings <img src="/src/assets/emerald_brooch_icon.png" class="rounded-lg w-[20px] inline cursor-pointer" alt="Emerald Brooch" /></router-link></li>
                 </ul>
             </div>
         </div>

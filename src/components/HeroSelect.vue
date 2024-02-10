@@ -236,7 +236,7 @@ const clearRoster = async () => {
 const init = async () => {
     loading.value = true
     try {
-        await clanStore.getAllClans()
+        await clanStore.getAllClanInfo()
         await coreStore.refreshHeroRoster()
     } finally {
         loading.value = false

@@ -26,20 +26,20 @@
                 </label>
             </div>
             <div class="flex justify-end items-center">
-                        <div class="me-2">Battle Arena</div>
-                        <select class="select select-bordered select-sm" v-model="battleArena">
-                            <option value="Territory">Territory</option>
-                            <option value="Vault">Vault</option>
-                        </select>
-                    </div>
+                <div class="me-2">Battle Arena</div>
+                <select class="select select-bordered select-sm" v-model="battleArena">
+                    <option value="Territory">Territory</option>
+                    <option value="Vault">Vault</option>
+                </select>
+            </div>
             <div class="form-control items-end">
-                    <label class="label cursor-pointer">
-                        <span class="label-text mr-2 items-center flex">
-                            Use Sharpened Claw (+1 to max points for VAULT attacker)
-                        </span> 
-                        <input type="checkbox" class="checkbox checkbox-primary" v-model="addOneMaxPoint" @update:model-value="updateClanARoster()" />
-                    </label>
-                </div>
+                <label class="label cursor-pointer">
+                    <span class="label-text mr-2 items-center flex">
+                        Use Sharpened Claw (+1 to max points for VAULT attacker)
+                    </span> 
+                    <input type="checkbox" class="checkbox checkbox-primary" v-model="addOneMaxPoint" @update:model-value="updateClanARoster()" />
+                </label>
+            </div>
             <button type="button" class="btn btn-primary" :disabled="!clanASelectionValid || !clanBSelectionValid" @click.prevent="simulateBattles">Calculate Battles</button>
             <div v-if="simulationComplete" class="mt-5 text-right">
                 As the attacker, {{ clanANameFixed }} wins <span class="text-xl" :class="{'text-error': clanASimulationWinPercentage < clanBSimulationWinPercentage, 'text-green-400': clanASimulationWinPercentage > clanBSimulationWinPercentage}">{{ clanASimulationWinPercentage }}</span>% of the time
@@ -80,7 +80,7 @@
                         </tr>
                         </thead>
                         <tbody v-if="loadingA" class="mx-auto my-[100px] w-full text-center">
-                            <tr><td colspan="3"><span class="loading loading-spinner text-primary loading-md mx-auto"></span></td></tr>
+                            <tr><td colspan="5"><span class="loading loading-spinner text-primary loading-md mx-auto"></span></td></tr>
                         </tbody>
                         <tbody v-else>
                         <tr v-for="(p, i) in clanARanked" :key="p.id" @click.stop="p.selected = !p.selected" class="cursor-pointer hover:bg-base-100-50" :class="{'text-gray-400': i >= 40}">
@@ -128,7 +128,7 @@
                         </tr>
                         </thead>
                         <tbody v-if="loadingB" class="mx-auto my-[100px] w-full text-center">
-                            <tr><td colspan="3"><span class="loading loading-spinner text-primary loading-md mx-auto"></span></td></tr>
+                            <tr><td colspan="5"><span class="loading loading-spinner text-primary loading-md mx-auto"></span></td></tr>
                         </tbody>
                         <tbody v-else>
                         <tr v-for="(p, i) in clanBRanked" :key="p.id" @click.stop="p.selected = !p.selected" class="cursor-pointer hover:bg-base-100-50" :class="{'text-gray-400': i >= 40}">
@@ -154,8 +154,8 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue"
-import { getLevel, useCoreStore } from "../store/core"
-import { getDiceRollForRank, getDiceRolls, useClanStore } from "../store/clan"
+import { useCoreStore } from "../store/core"
+import { calculateBattleChances, getDiceRolls, useClanStore } from "../store/clan"
 import { getClanMembers } from "../utils/api"
 import { Clan, Player } from "@paintswap/estfor-definitions/types"
 import ClanSearch from "./inputs/ClanSearch.vue"
@@ -267,146 +267,10 @@ const simulateBattles = async () => {
         simulationCount.value = 100000
     }
 
-    const clanAMembers = clanARanked.value.filter(x => x.selected)
-    const clanBMembers = clanBRanked.value.filter(x => x.selected)
+    const results = calculateBattleChances(simulationCount.value, clanARanked.value.filter(x => x.selected), clanBRanked.value.filter(x => x.selected), addOneMaxPoint.value, battleArena.value)
 
-    // pad out the smaller clan with auto-losses
-    if (clanAMembers.length < clanBMembers.length) {
-        const difference = clanBMembers.length - clanAMembers.length
-        for (let i = 0; i < difference; i++) {
-            clanAMembers.push({
-                diceRolls: 0
-            })
-        }
-    } else if (clanBMembers.length < clanAMembers.length) {
-        const difference = clanAMembers.length - clanBMembers.length
-        for (let i = 0; i < difference; i++) {
-            clanBMembers.push({
-                diceRolls: 0
-            })
-        }
-    }
-
-    const shuffleArray = (array: any[]) => {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-    }
-
-    const getByteArray = () => {
-        const byteArray = []
-        // create an array of random 0 and 1s of length 8
-        for (let i = 0; i < 8; i++) {
-            byteArray.push(Math.round(Math.random()))
-        }
-        return byteArray
-    }
-
-    let clanATotalWins = 0
-    let clanBTotalWins = 0
-
-    for (let i = 0; i < simulationCount.value; i++) {
-        let clanAWins = 0
-        let clanBWins = 0
-
-        // shuffle member arrays
-        shuffleArray(clanAMembers)
-        shuffleArray(clanBMembers)
-
-        // make an array of skills the same length as clan members
-        const skills = [
-            'woodcuttingXP',
-            'miningXP',
-            'fishingXP',
-            'cookingXP',
-            'smithingXP',
-            'fletchingXP',
-            'craftingXP',
-            'healthXP',
-            'meleeXP',
-            'defenceXP',
-            'rangedXP',
-            'magicXP',
-            'alchemyXP',
-            'firemakingXP',
-            'thievingXP',
-            'forgingXP',
-        ]
-
-        const skillsArray = []
-        for (let j = 0; j < clanAMembers.length; j++) {
-            // pick random skill and push to skillsArray
-            const skill = skills[Math.floor(Math.random() * skills.length)]
-            skillsArray.push(skill)
-        }
-
-        // loop through clan members and roll dice
-        for (let j = 0; j < clanAMembers.length; j++) {
-            const clanAMember = clanAMembers[j]
-            const clanBMember = clanBMembers[j]
-
-            if (clanAMember.diceRolls === 0) {
-                // auto-loss
-                clanBWins++
-                continue
-            }
-
-            if (clanBMember.diceRolls === 0) {
-                // auto-loss
-                clanAWins++
-                continue
-            }
-
-            // each dice roll is a d20. make an array of d20 dice rolls and the highest number wins
-            let highestADiceRoll = 0
-            let highestBDiceRoll = 0
-
-            const clanAMemberDiceRoll = getDiceRollForRank(getLevel(clanAMember[skillsArray[j]]), clanAMember.isFullMode) + (addOneMaxPoint.value && battleArena.value === 'Vault' ? 1 : 0)
-            const clanBMemberDiceRoll = getDiceRollForRank(getLevel(clanBMember[skillsArray[j]]), clanBMember.isFullMode)
-
-            const clanAByteArray = getByteArray()
-            const clanBByteArray = getByteArray()
-
-            for (let k = 0; k < clanAMemberDiceRoll; k++) {
-                // the following is based on a d20 roll
-                // const diceRoll = Math.floor(Math.random() * 20) + 1
-                // if (diceRoll > highestADiceRoll) {
-                //     highestADiceRoll = diceRoll
-                // }
-
-                highestADiceRoll += clanAByteArray[k] === 1 ? 1 : 0
-            }
-
-            for (let k = 0; k < clanBMemberDiceRoll; k++) {
-                // the following is based on a d20 roll
-                // const diceRoll = Math.floor(Math.random() * 20) + 1
-                // if (diceRoll > highestBDiceRoll) {
-                //     highestBDiceRoll = diceRoll
-                // }
-
-                highestBDiceRoll += clanBByteArray[k] === 1 ? 1 : 0
-            }
-
-            if (highestADiceRoll > highestBDiceRoll) {
-                clanAWins++
-            } else if (highestBDiceRoll > highestADiceRoll) {
-                clanBWins++
-            }
-        }
-
-        if (clanAWins > clanBWins) {
-            clanATotalWins++
-        } else if (clanBWins > clanAWins) {
-            clanBTotalWins++
-        } else {
-            // draw, attacker wins for vault, or defender wins for territory
-            battleArena.value === 'Territory' ? clanBTotalWins++ : clanATotalWins++
-        }
-    }
-
-    clanASimulationWinPercentage.value = ((clanATotalWins / simulationCount.value) * 100).toFixed(1)
-    clanBSimulationWinPercentage.value = ((clanBTotalWins / simulationCount.value) * 100).toFixed(1)
+    clanASimulationWinPercentage.value = results.clanA
+    clanBSimulationWinPercentage.value = results.clanB
     simulationComplete.value = true
 }
 
@@ -446,7 +310,7 @@ const switchClanAWithB = () => {
 const init = async () => {
     loadingA.value = true
 
-    await clanStore.getAllClans()
+    await clanStore.getAllClanInfo()
     if (coreStore.clanState) {
         await loadClanA(coreStore.clanState)
     }

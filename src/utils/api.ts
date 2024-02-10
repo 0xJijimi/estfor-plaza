@@ -1,4 +1,4 @@
-import { BoostType, Clan, Lottery, Player, QueuedAction, RaffleEntry, UserItemNFT } from "@paintswap/estfor-definitions/types"
+import { BoostType, Clan, Lottery, Player, QueuedAction, RaffleEntry, Territory, UserItemNFT } from "@paintswap/estfor-definitions/types"
 
 const baseUrl = 'https://api.estfor.com'
 
@@ -54,6 +54,10 @@ export interface RaffleEntryResult {
 
 export interface SearchQueuedActionsResult {
     queuedActions: QueuedAction[]
+}
+
+export interface TerritoriesResult {
+    territories: Territory[]
 }
 
 export const getPlayerState = async (
@@ -131,6 +135,13 @@ export const getClans = async (numToSkip: number): Promise<ClansResult> => {
 export const searchQueuedActions = async (playerId: string): Promise<SearchQueuedActionsResult> => {
     const response = await fetch(
         `${baseUrl}/queued-actions?playerId=${playerId}&isActive=true`
+    )
+    return response.json()
+}
+
+export const getTerritories = async (): Promise<TerritoriesResult> => {
+    const response = await fetch(
+        `${baseUrl}/territories`
     )
     return response.json()
 }

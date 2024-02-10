@@ -47,6 +47,20 @@ const routes: Array<RouteRecordRaw> = [
                 meta: {
                     requiresEmeraldBrooch: true,
                 },
+            },            
+            {
+                path: 'territory-rankings',
+                component: () => import("../components/TerritoryBattleRankings.vue"),
+                meta: {
+                    requiresEmeraldBrooch: true,
+                },
+            },            
+            {
+                path: 'vault-rankings',
+                component: () => import("../components/VaultBattleRankings.vue"),
+                meta: {
+                    requiresEmeraldBrooch: true,
+                },
             },
         ],
     },    
