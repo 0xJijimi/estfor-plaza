@@ -222,8 +222,18 @@ export const useClanStore = defineStore({
         sortedVaults(state: ClanState) {
             const clans = [...state.clans]
             clans.sort((a: Clan, b: Clan) => {
-                const aTotal = a.lockedVaults.reduce((acc, curr) => acc + BigInt(curr.amount), BigInt(0))
-                const bTotal = b.lockedVaults.reduce((acc, curr) => acc + BigInt(curr.amount), BigInt(0))
+                const aTotal = a.lockedVaults.reduce((acc, curr) => {
+                    if (parseInt(curr.unlockTimestamp) < new Date().getTime() / 1000) {
+                        return acc
+                    }
+                    return acc + BigInt(curr.amount) 
+                }, BigInt(0))
+                const bTotal = b.lockedVaults.reduce((acc, curr) => {
+                    if (parseInt(curr.unlockTimestamp) < new Date().getTime() / 1000) {
+                        return acc
+                    }
+                    return acc + BigInt(curr.amount) 
+                }, BigInt(0))
                 if (aTotal > bTotal) {
                     return -1
                 }
@@ -235,7 +245,12 @@ export const useClanStore = defineStore({
             return clans.slice(0, 25).map(c => {
                 return {
                     name: c.name,
-                    total: c.lockedVaults.reduce((acc, curr) => acc + BigInt(curr.amount), BigInt(0)),
+                    total: c.lockedVaults.reduce((acc, curr) => {
+                        if (parseInt(curr.unlockTimestamp) < new Date().getTime() / 1000) {
+                            return acc
+                        }
+                        return acc + BigInt(curr.amount) 
+                    }, BigInt(0)),
                     combatants: c.lockedVaultCombatants || [],
                     chanceToWin: null,
                 }
