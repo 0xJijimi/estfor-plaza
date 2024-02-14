@@ -335,7 +335,9 @@ export const useCoreStore = defineStore({
         async refreshHeroRoster() {
             const p = []
             for (const hero of this.heroRoster) {
-                p.push(getSoloPlayerState(hero.id))
+                if (hero && hero.id) {
+                    p.push(getSoloPlayerState(hero.id))
+                }
             }
             const heroes = await Promise.all(p)
             this.heroRoster = heroes.map(x => x.player)
