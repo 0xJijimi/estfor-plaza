@@ -12,9 +12,11 @@ import {
 const baseUrl = "https://api.estfor.com"
 
 export interface ClanMember {
+    id: string
     player: Player
     clan: Clan | null
     joinedTimestamp: string
+    totalDonated: string
 }
 
 export interface ClanMemberResult {

@@ -38,7 +38,7 @@
             </thead>
             <tbody v-if="loading" class="mx-auto my-[100px] w-full text-center">
                 <tr>
-                    <td colspan="4">
+                    <td colspan="5">
                         <span
                             class="loading loading-spinner text-primary loading-md mx-auto"
                         ></span>
@@ -47,8 +47,8 @@
             </tbody>
             <tbody v-else>
                 <tr
-                    v-for="(m, i) in sortedMembers"
-                    :key="m.id"
+                    v-for="(m) in sortedMembers"
+                    :key="m.player.id"
                     class="hover:bg-base-100-50"
                     :class="{
                         'text-warning': m.daysDonated + 2 === date,
@@ -82,7 +82,6 @@
 
 <script setup lang="ts">
 import { computed, ref, onMounted } from "vue"
-import { useCoreStore } from "../../store/core"
 import { ClanMember } from "../../utils/api"
 import DateSelect from "../inputs/DateSelect.vue"
 import { getRaffleEntries } from "../../utils/api"
@@ -94,7 +93,6 @@ import {
 } from "@heroicons/vue/24/solid"
 import { formatDate } from "../../utils/time"
 
-const core = useCoreStore()
 const date = ref(7)
 const raffleEntries = ref<RaffleEntry[]>([])
 const loading = ref(false)
@@ -112,7 +110,7 @@ const sortedMembers = computed(() => {
         return {
             ...m,
             daysDonated: raffleEntries.value.filter(
-                (x) => x.playerId.toString() === m.id.toString()
+                (x) => x.playerId.toString() === m.player.id.toString()
             ).length,
         }
     })
@@ -156,7 +154,7 @@ const onDateUpdate = async () => {
         timestamp.setDate(timestamp.getDate() - date.value)
 
         raffleEntries.value = raffleResults
-            .filter((x) => x.timestamp.valueOf() >= timestamp.valueOf() / 1000)
+            .filter((x) => parseInt(x.timestamp) >= timestamp.valueOf() / 1000)
             .filter((x) =>
                 props.members.map((x) => x.player.id).includes(x.playerId)
             )
