@@ -1,5 +1,3 @@
 import fantom from "../assets/fantom.svg"
 
-export const icons = [
-    { name: "fantom", icon: fantom },
-]
+export const icons = [{ name: "fantom", icon: fantom }]

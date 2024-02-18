@@ -2,8 +2,13 @@
     <div class="flex max-xl:flex-col flex-row justify-evenly xl:gap-10">
         <div class="card bg-base-100-50 shadow-xl rounded-lg mt-10 grow">
             <div class="card-body">
-                <div v-if="loading" class="mx-auto my-[100px] w-full text-center">
-                    <span class="loading loading-spinner text-primary loading-md mx-auto"></span>
+                <div
+                    v-if="loading"
+                    class="mx-auto my-[100px] w-full text-center"
+                >
+                    <span
+                        class="loading loading-spinner text-primary loading-md mx-auto"
+                    ></span>
                 </div>
                 <div v-else>
                     <div class="overflow-x-auto">
@@ -12,26 +17,34 @@
                                 Wishing Well Luckiest Heroes
                             </caption>
                             <thead>
-                            <tr>
-                                <th class="w-[80px] text-center">Avatar</th>
-                                <th>Name</th>
-                                <th class="text-right">Times Won</th>
-                                <th class="text-right">Times Entered</th>
-                                <th class="max-sm:w-[90px] text-right">% Won</th>
-                            </tr>
+                                <tr>
+                                    <th class="w-[80px] text-center">Avatar</th>
+                                    <th>Name</th>
+                                    <th class="text-right">Times Won</th>
+                                    <th class="text-right">Times Entered</th>
+                                    <th class="max-sm:w-[90px] text-right">
+                                        % Won
+                                    </th>
+                                </tr>
                             </thead>
                             <tbody>
-                            <tr v-for="w in winners" :key="w.playerId">
-                                <td class="avatar">
-                                    <div class="mask mask-square rounded-lg w-12 h-12">
-                                        <img :src="`https://media.estfor.com/characters/${w.avatarId}.jpg`" />
-                                    </div>
-                                </td>
-                                <td>{{ w.name }}</td>
-                                <td class="text-right">{{ w.count}}</td>
-                                <td class="text-right">{{ w.attempts }}</td>
-                                <td class="text-right">{{ (w.luck * 100).toFixed(2) }} %</td>
-                            </tr>
+                                <tr v-for="w in winners" :key="w.playerId">
+                                    <td class="avatar">
+                                        <div
+                                            class="mask mask-square rounded-lg w-12 h-12"
+                                        >
+                                            <img
+                                                :src="`https://media.estfor.com/characters/${w.avatarId}.jpg`"
+                                            />
+                                        </div>
+                                    </td>
+                                    <td>{{ w.name }}</td>
+                                    <td class="text-right">{{ w.count }}</td>
+                                    <td class="text-right">{{ w.attempts }}</td>
+                                    <td class="text-right">
+                                        {{ (w.luck * 100).toFixed(2) }} %
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -40,8 +53,13 @@
         </div>
         <div class="card bg-base-100-50 shadow-xl rounded-lg mt-10 grow">
             <div class="card-body">
-                <div v-if="loading" class="mx-auto my-[100px] w-full text-center">
-                    <span class="loading loading-spinner text-primary loading-md mx-auto"></span>
+                <div
+                    v-if="loading"
+                    class="mx-auto my-[100px] w-full text-center"
+                >
+                    <span
+                        class="loading loading-spinner text-primary loading-md mx-auto"
+                    ></span>
                 </div>
                 <div v-else>
                     <div class="overflow-x-auto">
@@ -50,26 +68,32 @@
                                 Wishing Well Unluckiest Heroes
                             </caption>
                             <thead>
-                            <tr>
-                                <th class="w-[80px] text-center">Avatar</th>
-                                <th>Name</th>
-                                <th class="text-right">Times Won</th>
-                                <th class="text-right">Times Entered</th>
-                                <th class="text-right">% Won</th>
-                            </tr>
+                                <tr>
+                                    <th class="w-[80px] text-center">Avatar</th>
+                                    <th>Name</th>
+                                    <th class="text-right">Times Won</th>
+                                    <th class="text-right">Times Entered</th>
+                                    <th class="text-right">% Won</th>
+                                </tr>
                             </thead>
                             <tbody>
-                            <tr v-for="l in losers" :key="l.playerId">
-                                <td class="avatar">
-                                    <div class="mask mask-square rounded-lg w-12 h-12">
-                                        <img :src="`https://media.estfor.com/characters/${l.avatarId}.jpg`" />
-                                    </div>
-                                </td>
-                                <td>{{ l.name }}</td>
-                                <td class="text-right">{{ l.count}}</td>
-                                <td class="text-right">{{ l.attempts }}</td>
-                                <td class="text-right">{{ (l.luck * 100).toFixed(2) }} %</td>
-                            </tr>
+                                <tr v-for="l in losers" :key="l.playerId">
+                                    <td class="avatar">
+                                        <div
+                                            class="mask mask-square rounded-lg w-12 h-12"
+                                        >
+                                            <img
+                                                :src="`https://media.estfor.com/characters/${l.avatarId}.jpg`"
+                                            />
+                                        </div>
+                                    </td>
+                                    <td>{{ l.name }}</td>
+                                    <td class="text-right">{{ l.count }}</td>
+                                    <td class="text-right">{{ l.attempts }}</td>
+                                    <td class="text-right">
+                                        {{ (l.luck * 100).toFixed(2) }} %
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -135,8 +159,10 @@ const init = async () => {
     }
 
     const lotteryRanks = raffleEntries.reduce((acc, curr) => {
-        const winningRaffle = lotteryRawResults.find(x => x.raffleIdWinner === curr.raffleId && x.id === curr.lotteryId)
-        const r = acc.find(x => x.playerId === curr.playerId)
+        const winningRaffle = lotteryRawResults.find(
+            (x) => x.raffleIdWinner === curr.raffleId && x.id === curr.lotteryId
+        )
+        const r = acc.find((x) => x.playerId === curr.playerId)
         if (r) {
             r.attempts++
             if (winningRaffle) {
@@ -150,27 +176,54 @@ const init = async () => {
                 count: winningRaffle ? 1 : 0,
                 avatarId: "",
                 name: "",
-                luck: winningRaffle ? 1 : 0
+                luck: winningRaffle ? 1 : 0,
             })
         }
         return acc
     }, [] as LotteryRank[])
 
-    const topWinners = lotteryRanks.sort((a, b) => b.count < a.count ? -1 : b.count > a.count ? 1 : b.luck < a.luck ? -1 : b.luck > a.luck ? 1 : 0).slice(0, 10)
-    const topLosers = lotteryRanks.sort((a, b) => b.count > a.count ? -1 : b.count < a.count ? 1 : b.attempts < a.attempts ? -1 : b.attempts > a.attempts ? 1 : 0).slice(0, 10)
+    const topWinners = lotteryRanks
+        .sort((a, b) =>
+            b.count < a.count
+                ? -1
+                : b.count > a.count
+                  ? 1
+                  : b.luck < a.luck
+                    ? -1
+                    : b.luck > a.luck
+                      ? 1
+                      : 0
+        )
+        .slice(0, 10)
+    const topLosers = lotteryRanks
+        .sort((a, b) =>
+            b.count > a.count
+                ? -1
+                : b.count < a.count
+                  ? 1
+                  : b.attempts < a.attempts
+                    ? -1
+                    : b.attempts > a.attempts
+                      ? 1
+                      : 0
+        )
+        .slice(0, 10)
 
-    const playerResult = await getPlayersByIds([...topWinners.map(x => x.playerId), ...topLosers.map(x => x.playerId)])
+    const playerResult = await getPlayersByIds([
+        ...topWinners.map((x) => x.playerId),
+        ...topLosers.map((x) => x.playerId),
+    ])
     for (const p of playerResult.players) {
-        const rank = topWinners.find(x => x.playerId === p.id)
+        const rank = topWinners.find((x) => x.playerId === p.id)
         if (rank) {
             rank.avatarId = p.avatarId
-            rank.name = p.name            
+            rank.name = p.name
         }
 
-        const loserRank = topLosers.find(x => x.playerId === p.id)
+        const loserRank = topLosers.find((x) => x.playerId === p.id)
         if (loserRank) {
             loserRank.avatarId = p.avatarId
-            loserRank.name = p.name            
+            loserRank.name = p.name
         }
     }
     winners.value = topWinners
@@ -180,5 +233,4 @@ const init = async () => {
 }
 
 onMounted(init)
-
 </script>

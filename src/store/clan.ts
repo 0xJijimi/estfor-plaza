@@ -17,26 +17,64 @@ export const getDiceRollForRank = (rank: number, isEvolved: boolean) => {
 
 export const getDiceRolls = (player: Player, addPoint = false) => {
     let diceRolls = 0
-    diceRolls += getDiceRollForRank(getLevel(player.woodcuttingXP), player.isFullMode) + (addPoint ? 1 : 0)
-    diceRolls += getDiceRollForRank(getLevel(player.miningXP), player.isFullMode) + (addPoint ? 1 : 0)
-    diceRolls += getDiceRollForRank(getLevel(player.fishingXP), player.isFullMode) + (addPoint ? 1 : 0)
-    diceRolls += getDiceRollForRank(getLevel(player.cookingXP), player.isFullMode) + (addPoint ? 1 : 0)
-    diceRolls += getDiceRollForRank(getLevel(player.smithingXP), player.isFullMode) + (addPoint ? 1 : 0)
-    diceRolls += getDiceRollForRank(getLevel(player.fletchingXP), player.isFullMode) + (addPoint ? 1 : 0)
-    diceRolls += getDiceRollForRank(getLevel(player.craftingXP), player.isFullMode) + (addPoint ? 1 : 0)
-    diceRolls += getDiceRollForRank(getLevel(player.healthXP), player.isFullMode) + (addPoint ? 1 : 0)
-    diceRolls += getDiceRollForRank(getLevel(player.meleeXP), player.isFullMode) + (addPoint ? 1 : 0)
-    diceRolls += getDiceRollForRank(getLevel(player.defenceXP), player.isFullMode) + (addPoint ? 1 : 0)
-    diceRolls += getDiceRollForRank(getLevel(player.rangedXP), player.isFullMode) + (addPoint ? 1 : 0)
-    diceRolls += getDiceRollForRank(getLevel(player.magicXP), player.isFullMode) + (addPoint ? 1 : 0)
-    diceRolls += getDiceRollForRank(getLevel(player.alchemyXP), player.isFullMode) + (addPoint ? 1 : 0)
-    diceRolls += getDiceRollForRank(getLevel(player.firemakingXP), player.isFullMode) + (addPoint ? 1 : 0)
-    diceRolls += getDiceRollForRank(getLevel(player.thievingXP), player.isFullMode) + (addPoint ? 1 : 0)
-    diceRolls += getDiceRollForRank(getLevel(player.forgingXP), player.isFullMode) + (addPoint ? 1 : 0)
+    diceRolls +=
+        getDiceRollForRank(getLevel(player.woodcuttingXP), player.isFullMode) +
+        (addPoint ? 1 : 0)
+    diceRolls +=
+        getDiceRollForRank(getLevel(player.miningXP), player.isFullMode) +
+        (addPoint ? 1 : 0)
+    diceRolls +=
+        getDiceRollForRank(getLevel(player.fishingXP), player.isFullMode) +
+        (addPoint ? 1 : 0)
+    diceRolls +=
+        getDiceRollForRank(getLevel(player.cookingXP), player.isFullMode) +
+        (addPoint ? 1 : 0)
+    diceRolls +=
+        getDiceRollForRank(getLevel(player.smithingXP), player.isFullMode) +
+        (addPoint ? 1 : 0)
+    diceRolls +=
+        getDiceRollForRank(getLevel(player.fletchingXP), player.isFullMode) +
+        (addPoint ? 1 : 0)
+    diceRolls +=
+        getDiceRollForRank(getLevel(player.craftingXP), player.isFullMode) +
+        (addPoint ? 1 : 0)
+    diceRolls +=
+        getDiceRollForRank(getLevel(player.healthXP), player.isFullMode) +
+        (addPoint ? 1 : 0)
+    diceRolls +=
+        getDiceRollForRank(getLevel(player.meleeXP), player.isFullMode) +
+        (addPoint ? 1 : 0)
+    diceRolls +=
+        getDiceRollForRank(getLevel(player.defenceXP), player.isFullMode) +
+        (addPoint ? 1 : 0)
+    diceRolls +=
+        getDiceRollForRank(getLevel(player.rangedXP), player.isFullMode) +
+        (addPoint ? 1 : 0)
+    diceRolls +=
+        getDiceRollForRank(getLevel(player.magicXP), player.isFullMode) +
+        (addPoint ? 1 : 0)
+    diceRolls +=
+        getDiceRollForRank(getLevel(player.alchemyXP), player.isFullMode) +
+        (addPoint ? 1 : 0)
+    diceRolls +=
+        getDiceRollForRank(getLevel(player.firemakingXP), player.isFullMode) +
+        (addPoint ? 1 : 0)
+    diceRolls +=
+        getDiceRollForRank(getLevel(player.thievingXP), player.isFullMode) +
+        (addPoint ? 1 : 0)
+    diceRolls +=
+        getDiceRollForRank(getLevel(player.forgingXP), player.isFullMode) +
+        (addPoint ? 1 : 0)
     return diceRolls
 }
 
-export const calculateBattleChances = (simulationCount: number, clanA: any[], clanB: any[], addOneMaxPoint: boolean, battleArena: string) => {
+export const calculateBattleChances = (
+    simulationCount: number,
+    clanA: any[],
+    clanB: any[],
+    addOneMaxPoint: boolean,
+    battleArena: string
+) => {
     if (simulationCount > 100000) {
         simulationCount = 100000
     }
@@ -46,22 +84,22 @@ export const calculateBattleChances = (simulationCount: number, clanA: any[], cl
         const difference = clanB.length - clanA.length
         for (let i = 0; i < difference; i++) {
             clanA.push({
-                diceRolls: 0
+                diceRolls: 0,
             })
         }
     } else if (clanB.length < clanA.length) {
         const difference = clanA.length - clanB.length
         for (let i = 0; i < difference; i++) {
             clanB.push({
-                diceRolls: 0
+                diceRolls: 0,
             })
         }
     }
 
     const shuffleArray = (array: any[]) => {
         for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
+            const j = Math.floor(Math.random() * (i + 1))
+            ;[array[i], array[j]] = [array[j], array[i]]
         }
     }
 
@@ -87,22 +125,22 @@ export const calculateBattleChances = (simulationCount: number, clanA: any[], cl
 
         // make an array of skills the same length as clan members
         const skills = [
-            'woodcuttingXP',
-            'miningXP',
-            'fishingXP',
-            'cookingXP',
-            'smithingXP',
-            'fletchingXP',
-            'craftingXP',
-            'healthXP',
-            'meleeXP',
-            'defenceXP',
-            'rangedXP',
-            'magicXP',
-            'alchemyXP',
-            'firemakingXP',
-            'thievingXP',
-            'forgingXP',
+            "woodcuttingXP",
+            "miningXP",
+            "fishingXP",
+            "cookingXP",
+            "smithingXP",
+            "fletchingXP",
+            "craftingXP",
+            "healthXP",
+            "meleeXP",
+            "defenceXP",
+            "rangedXP",
+            "magicXP",
+            "alchemyXP",
+            "firemakingXP",
+            "thievingXP",
+            "forgingXP",
         ]
 
         const skillsArray = []
@@ -133,8 +171,15 @@ export const calculateBattleChances = (simulationCount: number, clanA: any[], cl
             let highestADiceRoll = 0
             let highestBDiceRoll = 0
 
-            const clanAMemberDiceRoll = getDiceRollForRank(getLevel(clanAMember[skillsArray[j]]), clanAMember.isFullMode) + (addOneMaxPoint && battleArena === 'Vault' ? 1 : 0)
-            const clanBMemberDiceRoll = getDiceRollForRank(getLevel(clanBMember[skillsArray[j]]), clanBMember.isFullMode)
+            const clanAMemberDiceRoll =
+                getDiceRollForRank(
+                    getLevel(clanAMember[skillsArray[j]]),
+                    clanAMember.isFullMode
+                ) + (addOneMaxPoint && battleArena === "Vault" ? 1 : 0)
+            const clanBMemberDiceRoll = getDiceRollForRank(
+                getLevel(clanBMember[skillsArray[j]]),
+                clanBMember.isFullMode
+            )
 
             const clanAByteArray = getByteArray()
             const clanBByteArray = getByteArray()
@@ -172,22 +217,25 @@ export const calculateBattleChances = (simulationCount: number, clanA: any[], cl
             clanBTotalWins++
         } else {
             // draw, attacker wins for vault, or defender wins for territory
-            battleArena === 'Territory' ? clanBTotalWins++ : clanATotalWins++
+            battleArena === "Territory" ? clanBTotalWins++ : clanATotalWins++
         }
     }
 
-    return { clanA: ((clanATotalWins / simulationCount) * 100).toFixed(1), clanB: ((clanBTotalWins / simulationCount) * 100).toFixed(1) }
+    return {
+        clanA: ((clanATotalWins / simulationCount) * 100).toFixed(1),
+        clanB: ((clanBTotalWins / simulationCount) * 100).toFixed(1),
+    }
 }
 
 export const useClanStore = defineStore({
-    id: 'clan',
-    state: () => 
+    id: "clan",
+    state: () =>
         ({
             clans: [] as Clan[],
             territories: [] as Territory[],
             initialised: false,
             initialisedAt: null,
-        } as ClanState),
+        }) as ClanState,
     getters: {
         clanNames(state: ClanState) {
             return state.clans.map((clan) => clan.name)
@@ -208,11 +256,11 @@ export const useClanStore = defineStore({
                 }
                 return 0
             })
-            return state.territories.map(t => {
+            return state.territories.map((t) => {
                 return {
                     id: t.territoryId,
                     percentageEmissions: t.percentageEmissions,
-                    owner: t.clanOccupier?.name || 'Unclaimed',
+                    owner: t.clanOccupier?.name || "Unclaimed",
                     unclaimedEmissions: t.unclaimedEmissions,
                     combatants: t.clanOccupier?.territoryCombatants || [],
                     chanceToWin: null,
@@ -223,16 +271,22 @@ export const useClanStore = defineStore({
             const clans = [...state.clans]
             clans.sort((a: Clan, b: Clan) => {
                 const aTotal = a.lockedVaults.reduce((acc, curr) => {
-                    if (parseInt(curr.unlockTimestamp) < new Date().getTime() / 1000) {
+                    if (
+                        parseInt(curr.unlockTimestamp) <
+                        new Date().getTime() / 1000
+                    ) {
                         return acc
                     }
-                    return acc + BigInt(curr.amount) 
+                    return acc + BigInt(curr.amount)
                 }, BigInt(0))
                 const bTotal = b.lockedVaults.reduce((acc, curr) => {
-                    if (parseInt(curr.unlockTimestamp) < new Date().getTime() / 1000) {
+                    if (
+                        parseInt(curr.unlockTimestamp) <
+                        new Date().getTime() / 1000
+                    ) {
                         return acc
                     }
-                    return acc + BigInt(curr.amount) 
+                    return acc + BigInt(curr.amount)
                 }, BigInt(0))
                 if (aTotal > bTotal) {
                     return -1
@@ -242,14 +296,17 @@ export const useClanStore = defineStore({
                 }
                 return 0
             })
-            return clans.slice(0, 25).map(c => {
+            return clans.slice(0, 25).map((c) => {
                 return {
                     name: c.name,
                     total: c.lockedVaults.reduce((acc, curr) => {
-                        if (parseInt(curr.unlockTimestamp) < new Date().getTime() / 1000) {
+                        if (
+                            parseInt(curr.unlockTimestamp) <
+                            new Date().getTime() / 1000
+                        ) {
                             return acc
                         }
-                        return acc + BigInt(curr.amount) 
+                        return acc + BigInt(curr.amount)
                     }, BigInt(0)),
                     combatants: c.lockedVaultCombatants || [],
                     chanceToWin: null,
@@ -259,7 +316,12 @@ export const useClanStore = defineStore({
     },
     actions: {
         async getAllClanInfo() {
-            if (this.initialised && this.initialisedAt && new Date().getTime() - this.initialisedAt.getTime() < 1000 * 60 * 10) {
+            if (
+                this.initialised &&
+                this.initialisedAt &&
+                new Date().getTime() - this.initialisedAt.getTime() <
+                    1000 * 60 * 10
+            ) {
                 return
             }
             let numToSkip = 0

@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build",
+    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,vue}\"",
     "preview": "vite preview",
     "build:scripts": "tsx ./scripts/copyDataFiles.ts"
   },

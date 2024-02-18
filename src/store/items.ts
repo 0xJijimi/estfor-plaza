@@ -1,8 +1,17 @@
-import { ActionChoiceInput, CombatStats, EquipPosition, ItemInput, Skill } from "@paintswap/estfor-definitions/types"
+import {
+    ActionChoiceInput,
+    CombatStats,
+    EquipPosition,
+    ItemInput,
+    Skill,
+} from "@paintswap/estfor-definitions/types"
 import { defineStore } from "pinia"
 
-import { allItems } from '../data/items'
-import { allActionChoicesRanged, allActionChoicesMagic } from "../data/actionChoices"
+import { allItems } from "../data/items"
+import {
+    allActionChoicesRanged,
+    allActionChoicesMagic,
+} from "../data/actionChoices"
 import { getLevel, useCoreStore } from "./core"
 import { EstforConstants } from "@paintswap/estfor-definitions"
 
@@ -17,13 +26,13 @@ const magicSpellNames = [
     "AIR BALL",
     "FURY FISTS",
     "CONCUSSION BEAMS",
-    "ICE SPIKES", 
+    "ICE SPIKES",
 ]
 
 export const itemNames = {
     // taken from the outputTokenId in each object from  ../data/actionChoices
     [EstforConstants.ASH]: "Ash",
-    [EstforConstants.BRONZE_BAR]: "Bronze Bar",    
+    [EstforConstants.BRONZE_BAR]: "Bronze Bar",
     [EstforConstants.BRONZE_HELMET]: "Bronze Helmet",
     [EstforConstants.BRONZE_ARMOR]: "Bronze Armor",
     [EstforConstants.BRONZE_GAUNTLETS]: "Bronze Gauntlets",
@@ -36,7 +45,7 @@ export const itemNames = {
     [EstforConstants.BRONZE_AXE]: "Bronze Axe",
     [EstforConstants.BRONZE_PICKAXE]: "Bronze Pickaxe",
 
-    [EstforConstants.IRON_BAR]: "Iron Bar",    
+    [EstforConstants.IRON_BAR]: "Iron Bar",
     [EstforConstants.IRON_HELMET]: "Iron Helmet",
     [EstforConstants.IRON_ARMOR]: "Iron Armor",
     [EstforConstants.IRON_GAUNTLETS]: "Iron Gauntlets",
@@ -49,7 +58,7 @@ export const itemNames = {
     [EstforConstants.IRON_AXE]: "Iron Axe",
     [EstforConstants.IRON_PICKAXE]: "Iron Pickaxe",
 
-    [EstforConstants.MITHRIL_BAR]: "Mithril Bar",    
+    [EstforConstants.MITHRIL_BAR]: "Mithril Bar",
     [EstforConstants.MITHRIL_HELMET]: "Mithril Helmet",
     [EstforConstants.MITHRIL_ARMOR]: "Mithril Armor",
     [EstforConstants.MITHRIL_GAUNTLETS]: "Mithril Gauntlets",
@@ -62,7 +71,7 @@ export const itemNames = {
     [EstforConstants.MITHRIL_AXE]: "Mithril Axe",
     [EstforConstants.MITHRIL_PICKAXE]: "Mithril Pickaxe",
 
-    [EstforConstants.ADAMANTINE_BAR]: "Adamantine Bar",    
+    [EstforConstants.ADAMANTINE_BAR]: "Adamantine Bar",
     [EstforConstants.ADAMANTINE_HELMET]: "Adamantine Helmet",
     [EstforConstants.ADAMANTINE_ARMOR]: "Adamantine Armor",
     [EstforConstants.ADAMANTINE_GAUNTLETS]: "Adamantine Gauntlets",
@@ -75,7 +84,7 @@ export const itemNames = {
     [EstforConstants.ADAMANTINE_AXE]: "Adamantine Axe",
     [EstforConstants.ADAMANTINE_PICKAXE]: "Adamantine Pickaxe",
 
-    [EstforConstants.RUNITE_BAR]: "Runite Bar",    
+    [EstforConstants.RUNITE_BAR]: "Runite Bar",
     [EstforConstants.RUNITE_HELMET]: "Runite Helmet",
     [EstforConstants.RUNITE_ARMOR]: "Runite Armor",
     [EstforConstants.RUNITE_GAUNTLETS]: "Runite Gauntlets",
@@ -88,7 +97,7 @@ export const itemNames = {
     [EstforConstants.RUNITE_AXE]: "Runite Axe",
     [EstforConstants.RUNITE_PICKAXE]: "Runite Pickaxe",
 
-    [EstforConstants.TITANIUM_BAR]: "Titanium Bar",    
+    [EstforConstants.TITANIUM_BAR]: "Titanium Bar",
     [EstforConstants.TITANIUM_HELMET]: "Titanium Helmet",
     [EstforConstants.TITANIUM_ARMOR]: "Titanium Armor",
     [EstforConstants.TITANIUM_GAUNTLETS]: "Titanium Gauntlets",
@@ -101,7 +110,7 @@ export const itemNames = {
     [EstforConstants.TITANIUM_AXE]: "Titanium Axe",
     [EstforConstants.TITANIUM_PICKAXE]: "Titanium Pickaxe",
 
-    [EstforConstants.ORICHALCUM_BAR]: "Oricalcum Bar",    
+    [EstforConstants.ORICHALCUM_BAR]: "Oricalcum Bar",
     [EstforConstants.ORICHALCUM_HELMET]: "Oricalcum Helmet",
     [EstforConstants.ORICHALCUM_ARMOR]: "Oricalcum Armor",
     [EstforConstants.ORICHALCUM_GAUNTLETS]: "Oricalcum Gauntlets",
@@ -360,30 +369,29 @@ export const itemNames = {
     [EstforConstants.RAW_CHODFISH]: "Raw Chodfish",
     [EstforConstants.RAW_DOUBTFISH]: "Raw Doubtfish",
     [EstforConstants.RAW_ROSEFIN]: "Raw Rosefin",
-
 }
 
 export interface EquippedItems {
-    head: number | undefined,
-    neck: number | undefined,
-    body: number | undefined,
-    arms: number | undefined,
-    legs: number | undefined,
-    feet: number | undefined,
-    rightHand: number | undefined,
-    leftHand: number | undefined,
-    magicBag: number | undefined,
-    quiver: number | undefined,
-    food: number | undefined,
-    playerId: number | undefined,
+    head: number | undefined
+    neck: number | undefined
+    body: number | undefined
+    arms: number | undefined
+    legs: number | undefined
+    feet: number | undefined
+    rightHand: number | undefined
+    leftHand: number | undefined
+    magicBag: number | undefined
+    quiver: number | undefined
+    food: number | undefined
+    playerId: number | undefined
 }
 
 export interface ItemState {
-    items: ItemInput[],
-    rangedActionChoices: ActionChoiceInput[],
-    magicActionChoices: ActionChoiceInput[],
-    equippedItems: EquippedItems[],
-    itemSearch: string,
+    items: ItemInput[]
+    rangedActionChoices: ActionChoiceInput[]
+    magicActionChoices: ActionChoiceInput[]
+    equippedItems: EquippedItems[]
+    itemSearch: string
 }
 
 export const useItemStore = defineStore({
@@ -393,53 +401,80 @@ export const useItemStore = defineStore({
             items: allItems as ItemInput[],
             rangedActionChoices: allActionChoicesRanged as ActionChoiceInput[],
             magicActionChoices: allActionChoicesMagic as ActionChoiceInput[],
-            equippedItems: localStorage.getItem('equippedItemsMulti') ? JSON.parse(localStorage.getItem('equippedItemsMulti') as string) : [] as EquippedItems[],
-            itemSearch: '',
-        } as ItemState),
+            equippedItems: localStorage.getItem("equippedItemsMulti")
+                ? JSON.parse(
+                      localStorage.getItem("equippedItemsMulti") as string
+                  )
+                : ([] as EquippedItems[]),
+            itemSearch: "",
+        }) as ItemState,
     getters: {
         getCurrentEquippedItems(state: ItemState) {
-            const coreStore = useCoreStore()            
+            const coreStore = useCoreStore()
             const playerState = coreStore.playerState
 
-            return state.equippedItems.find(x => x.playerId === Number(playerState.id))
+            return state.equippedItems.find(
+                (x) => x.playerId === Number(playerState.id)
+            )
         },
         getItemsForSlotAndXP: (state: ItemState) => {
             return (position: EquipPosition) => {
                 const coreStore = useCoreStore()
                 const playerState = coreStore.playerState
-                
-                return state.items.filter(x => x.equipPosition === position && (
-                    (x.skill == Skill.DEFENCE && x.minXP <= playerState.defenceXP) ||
-                    (x.skill == Skill.MELEE && x.minXP <= playerState.meleeXP) ||
-                    (x.skill == Skill.RANGED && x.minXP <= playerState.rangedXP) ||
-                    (x.skill == Skill.MAGIC && x.minXP <= playerState.magicXP) ||
-                    (x.skill == Skill.NONE) &&
-                    (playerState.isFullMode ? true : !x.isFullModeOnly)
-                ))
+
+                return state.items.filter(
+                    (x) =>
+                        x.equipPosition === position &&
+                        ((x.skill == Skill.DEFENCE &&
+                            x.minXP <= playerState.defenceXP) ||
+                            (x.skill == Skill.MELEE &&
+                                x.minXP <= playerState.meleeXP) ||
+                            (x.skill == Skill.RANGED &&
+                                x.minXP <= playerState.rangedXP) ||
+                            (x.skill == Skill.MAGIC &&
+                                x.minXP <= playerState.magicXP) ||
+                            (x.skill == Skill.NONE &&
+                                (playerState.isFullMode
+                                    ? true
+                                    : !x.isFullModeOnly)))
+                )
             }
         },
         getMagicActionChoicesForXP(state: ItemState) {
             const coreStore = useCoreStore()
             const playerState = coreStore.playerState
 
-            return state.magicActionChoices.filter(x => x.minXPs.every(y => y <= playerState.magicXP)).map((x, i) => ({
-                ...x,
-                tokenId: x.skillDiff,
-                name: magicSpellNames[i].split(' ')
-                    .map(w => w[0].toUpperCase() + w.substring(1).toLowerCase())
-                    .join(' '),
-            }))
+            return state.magicActionChoices
+                .filter((x) => x.minXPs.every((y) => y <= playerState.magicXP))
+                .map((x, i) => ({
+                    ...x,
+                    tokenId: x.skillDiff,
+                    name: magicSpellNames[i]
+                        .split(" ")
+                        .map(
+                            (w) =>
+                                w[0].toUpperCase() +
+                                w.substring(1).toLowerCase()
+                        )
+                        .join(" "),
+                }))
         },
         getAggregatedCombatStats(state: ItemState) {
-            const coreStore = useCoreStore()            
+            const coreStore = useCoreStore()
             const playerState = coreStore.playerState
 
             const stats = new CombatStats()
-            const localEquippedItems = state.equippedItems.find(x => x.playerId === Number(playerState.id)) as any || {}
+            const localEquippedItems =
+                (state.equippedItems.find(
+                    (x) => x.playerId === Number(playerState.id)
+                ) as any) || {}
             Object.keys(localEquippedItems).forEach((key) => {
-                if (key !== 'magicBag' && key !== 'playerId') { // skip magic bag as they require special calculations
-                    const item = state.items.find(x => x.tokenId === localEquippedItems[key])
-                    if (item) { 
+                if (key !== "magicBag" && key !== "playerId") {
+                    // skip magic bag as they require special calculations
+                    const item = state.items.find(
+                        (x) => x.tokenId === localEquippedItems[key]
+                    )
+                    if (item) {
                         stats.melee += item.combatStats.melee
                         stats.magic += item.combatStats.magic
                         stats.ranged += item.combatStats.ranged
@@ -450,23 +485,29 @@ export const useItemStore = defineStore({
                     }
                 }
             })
-        
+
             if (localEquippedItems.magicBag) {
                 stats.magic += localEquippedItems.magicBag
             }
-            
+
             return stats
         },
         getTotalCombatStats(state: ItemState) {
-            const coreStore = useCoreStore()            
+            const coreStore = useCoreStore()
             const playerState = coreStore.playerState
 
             const stats = new CombatStats()
-            const localEquippedItems = state.equippedItems.find(x => x.playerId === Number(playerState.id)) as any || {}
+            const localEquippedItems =
+                (state.equippedItems.find(
+                    (x) => x.playerId === Number(playerState.id)
+                ) as any) || {}
             Object.keys(localEquippedItems).forEach((key) => {
-                if (key !== 'magicBag' && key !== 'playerId') { // skip magic bag as they require special calculations
-                    const item = state.items.find(x => x.tokenId === localEquippedItems[key])
-                    if (item) { 
+                if (key !== "magicBag" && key !== "playerId") {
+                    // skip magic bag as they require special calculations
+                    const item = state.items.find(
+                        (x) => x.tokenId === localEquippedItems[key]
+                    )
+                    if (item) {
                         stats.melee += item.combatStats.melee
                         stats.magic += item.combatStats.magic
                         stats.ranged += item.combatStats.ranged
@@ -477,7 +518,7 @@ export const useItemStore = defineStore({
                     }
                 }
             })
-        
+
             if (localEquippedItems.magicBag) {
                 stats.magic += localEquippedItems.magicBag
             }
@@ -495,8 +536,10 @@ export const useItemStore = defineStore({
     },
     actions: {
         updateEquippedItems(equippedItems: EquippedItems) {
-            const coreStore = useCoreStore()            
-            const e = this.equippedItems.find(x => x.playerId === Number(coreStore.playerId))
+            const coreStore = useCoreStore()
+            const e = this.equippedItems.find(
+                (x) => x.playerId === Number(coreStore.playerId)
+            )
             if (e) {
                 e.head = equippedItems.head
                 e.neck = equippedItems.neck
@@ -513,7 +556,10 @@ export const useItemStore = defineStore({
                 equippedItems.playerId = Number(coreStore.playerId)
                 this.equippedItems.push(equippedItems)
             }
-            localStorage.setItem('equippedItemsMulti', JSON.stringify(this.equippedItems))
+            localStorage.setItem(
+                "equippedItemsMulti",
+                JSON.stringify(this.equippedItems)
+            )
         },
     },
 })

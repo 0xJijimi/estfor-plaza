@@ -1,14 +1,44 @@
 <template>
     <dialog id="donate_modal" class="modal">
         <div class="modal-box bg-base-100 border-2 border-primary">
-            <h3 class="font-bold text-lg text-center">Hey, enjoying the plaza?</h3>
-            <p v-if="brooch.balance < 1" class="my-5">This information doesn't come free you know, I have eggs to incubate and fires to upkeep! Now why don't you buy one of my Emerald brooches and I'll stop pestering you, what do you say?</p>
-            <p v-if="brooch.balance < 1" class="my-5">It's better to buy them early because I increase the price after each one sold!</p>
-            <p v-if="brooch.balance >= 1" class="my-5">Oh, you already have {{ brooch.balance }} of my brooches... would you like another one perchance?</p>
-            <img src="/src/assets/emerald_brooch_web.png" class="rounded-lg" alt="Emerald Brooch" />
+            <h3 class="font-bold text-lg text-center">
+                Hey, enjoying the plaza?
+            </h3>
+            <p v-if="brooch.balance < 1" class="my-5">
+                This information doesn't come free you know, I have eggs to
+                incubate and fires to upkeep! Now why don't you buy one of my
+                Emerald brooches and I'll stop pestering you, what do you say?
+            </p>
+            <p v-if="brooch.balance < 1" class="my-5">
+                It's better to buy them early because I increase the price after
+                each one sold!
+            </p>
+            <p v-if="brooch.balance >= 1" class="my-5">
+                Oh, you already have {{ brooch.balance }} of my brooches...
+                would you like another one perchance?
+            </p>
+            <img
+                src="/src/assets/emerald_brooch_web.png"
+                class="rounded-lg"
+                alt="Emerald Brooch"
+            />
             <div class="flex mt-5">
-                <button type="button" class="btn btn-primary btn-lg grow sm:mr-5" :disabled="loading" @click.prevent="mintNFT">Mint Emerald Brooch ({{ mintPrice }} FTM)</button>
-                <a href="https://paintswap.finance/marketplace/fantom/collections/deif's-quality-brooches/nfts" target="_blank" class="max-sm:hidden"><button type="button" class="btn btn-primary btn-lg">View NFT</button></a>                
+                <button
+                    type="button"
+                    class="btn btn-primary btn-lg grow sm:mr-5"
+                    :disabled="loading"
+                    @click.prevent="mintNFT"
+                >
+                    Mint Emerald Brooch ({{ mintPrice }} FTM)
+                </button>
+                <a
+                    href="https://paintswap.finance/marketplace/fantom/collections/deif's-quality-brooches/nfts"
+                    target="_blank"
+                    class="max-sm:hidden"
+                    ><button type="button" class="btn btn-primary btn-lg">
+                        View NFT
+                    </button></a
+                >
             </div>
         </div>
         <form method="dialog" class="modal-backdrop">
@@ -18,10 +48,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { getAccount, waitForTransaction } from '@wagmi/core'
-import { useAppStore } from '../../store/app'
-import { useBroochStore } from '../../store/brooch'
+import { computed, ref } from "vue"
+import { getAccount, waitForTransaction } from "@wagmi/core"
+import { useAppStore } from "../../store/app"
+import { useBroochStore } from "../../store/brooch"
 
 const app = useAppStore()
 const broochStore = useBroochStore()
@@ -39,8 +69,7 @@ const init = async () => {
             loading.value = true
             await broochStore.getBroochData(0)
         }
-    }
-    finally {
+    } finally {
         loading.value = false
     }
 }
@@ -51,13 +80,17 @@ const openDialog = (_monsterId: number) => {
         return
     }
 
-    const dialog = document.getElementById('donate_modal') as HTMLDialogElement
+    const dialog = document.getElementById("donate_modal") as HTMLDialogElement
     dialog.showModal()
     init()
 }
 
 const mintPrice = computed(() => {
-    return ((BigInt(brooch.value.totalSupply) * BigInt(10 ** 18)) + BigInt(brooch.value.baseTokenPrice)) / BigInt(10 ** 18)
+    return (
+        (BigInt(brooch.value.totalSupply) * BigInt(10 ** 18) +
+            BigInt(brooch.value.baseTokenPrice)) /
+        BigInt(10 ** 18)
+    )
 })
 
 const mintNFT = async () => {
@@ -65,19 +98,21 @@ const mintNFT = async () => {
     try {
         const data = await broochStore.mintNFT(0)
         await waitForTransaction({ hash: data.hash })
-        app.addToast('Thank you for your support!', 'alert-success', 5000)
-    } catch (error) {  
-        // app.addToast('Failed to mint brooch', 'alert-error', 50000)      
+        app.addToast("Thank you for your support!", "alert-success", 5000)
+    } catch (error) {
+        // app.addToast('Failed to mint brooch', 'alert-error', 50000)
         console.log(error)
     } finally {
         loading.value = false
-        const dialog = document.getElementById('donate_modal') as HTMLDialogElement
+        const dialog = document.getElementById(
+            "donate_modal"
+        ) as HTMLDialogElement
         dialog.close()
         init()
     }
 }
 
 defineExpose({
-    openDialog
+    openDialog,
 })
 </script>

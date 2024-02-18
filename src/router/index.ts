@@ -27,43 +27,63 @@ const routes: Array<RouteRecordRaw> = [
                 },
             },
             {
-                path: 'skills',
+                path: "skills",
                 component: () => import("../components/SkillTraining.vue"),
                 meta: {
                     showItemSearch: true,
                 },
             },
             {
-                path: 'hero-select',
+                path: "hero-select",
                 component: () => import("../components/HeroSelect.vue"),
             },
             {
-                path: 'lotteries',
+                path: "lotteries",
                 component: () => import("../components/LotteryRanking.vue"),
             },
             {
-                path: 'clan-battle',
+                path: "clan-battle",
                 component: () => import("../components/ClanBattle.vue"),
                 meta: {
                     requiresEmeraldBrooch: true,
                 },
-            },            
+            },
             {
-                path: 'territory-rankings',
-                component: () => import("../components/TerritoryBattleRankings.vue"),
-                meta: {
-                    requiresEmeraldBrooch: true,
-                },
-            },            
-            {
-                path: 'vault-rankings',
-                component: () => import("../components/VaultBattleRankings.vue"),
+                path: "territory-rankings",
+                component: () =>
+                    import("../components/TerritoryBattleRankings.vue"),
                 meta: {
                     requiresEmeraldBrooch: true,
                 },
             },
+            {
+                path: "vault-rankings",
+                component: () =>
+                    import("../components/VaultBattleRankings.vue"),
+                meta: {
+                    requiresEmeraldBrooch: true,
+                },
+            },
+            {
+                path: "clan-management",
+                component: () => import("../components/ClanManagement.vue"),
+                redirect: "/clan-management/wishing-well",
+                children: [
+                    {
+                        path: "wishing-well",
+                        component: () =>
+                            import(
+                                "../components/clan-management/WishContributions.vue"
+                            ),
+                        meta: {
+                            requiresEmeraldBrooch: true,
+                        },
+                        props: true,
+                    },
+                ],
+            },
         ],
-    },    
+    },
 ]
 
 const router = createRouter({
@@ -71,17 +91,17 @@ const router = createRouter({
     routes,
 })
 
-router.beforeEach(async (to) => {  
+router.beforeEach(async (to) => {
     const appStore = useAppStore()
     appStore.loadingRoute = true
-    
+
     if (to.meta.requiresEmeraldBrooch) {
         const broochStore = useBroochStore()
         if (broochStore.initialised === false) {
             await broochStore.getBroochData(0)
         }
         if (broochStore.brooch(0).balance === 0) {
-            return router.push('/')
+            return router.push("/")
         }
     }
 })

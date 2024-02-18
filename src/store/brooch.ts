@@ -1,7 +1,7 @@
 import { getAccount, readContract, writeContract } from "@wagmi/core"
 import { defineStore } from "pinia"
 import { HOMEMADE_BROOCH_ADDRESS } from "../utils/addresses"
-import broochAbi from '../abi/brooch.json'
+import broochAbi from "../abi/brooch.json"
 import { solidityPacked } from "ethers"
 
 export interface Brooch {
@@ -21,15 +21,17 @@ export const useBroochStore = defineStore({
         ({
             brooches: [] as Brooch[],
             initialised: false,
-        } as BroochState),
+        }) as BroochState,
     getters: {
         brooch(state: BroochState) {
             return (tokenId: number) => {
-                return state.brooches[tokenId] || {
-                    balance: 0,
-                    totalSupply: 0,
-                    baseTokenPrice: 0,
-                }
+                return (
+                    state.brooches[tokenId] || {
+                        balance: 0,
+                        totalSupply: 0,
+                        baseTokenPrice: 0,
+                    }
+                )
             }
         },
     },
@@ -41,31 +43,40 @@ export const useBroochStore = defineStore({
         async getBroochData(tokenId: number) {
             const account = getAccount()
             if (!account.isConnected) return
-            
+
             const result = await Promise.all([
                 readContract({
                     address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
                     abi: broochAbi,
-                    functionName: 'tokenSupply',
+                    functionName: "tokenSupply",
                     args: [0],
                 }),
                 readContract({
                     address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
                     abi: broochAbi,
-                    functionName: 'baseTokenPrice',
+                    functionName: "baseTokenPrice",
                     args: [0],
                 }),
                 readContract({
                     address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
                     abi: broochAbi,
-                    functionName: 'balanceOf',
+                    functionName: "balanceOf",
                     args: [account.address, 0],
                 }),
             ])
             const brooch = this.brooches[tokenId] || {}
-            brooch.totalSupply = parseInt((result[0] as unknown as bigint).toString(), 10)
-            brooch.baseTokenPrice = parseInt((result[1] as unknown as bigint).toString(), 10)
-            brooch.balance = parseInt((result[2] as unknown as bigint).toString(), 10)
+            brooch.totalSupply = parseInt(
+                (result[0] as unknown as bigint).toString(),
+                10
+            )
+            brooch.baseTokenPrice = parseInt(
+                (result[1] as unknown as bigint).toString(),
+                10
+            )
+            brooch.balance = parseInt(
+                (result[2] as unknown as bigint).toString(),
+                10
+            )
 
             this.brooches[tokenId] = brooch
             this.initialised = true
@@ -75,10 +86,18 @@ export const useBroochStore = defineStore({
             return writeContract({
                 address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
                 abi: broochAbi,
-                functionName: 'mintBatch',
-                args: [account.address, [0], [1], solidityPacked(['bytes'], ['0x'])],
-                value: (BigInt(this.brooches[tokenId]?.totalSupply) * BigInt(10 ** 18)) + BigInt(this.brooches[tokenId]?.baseTokenPrice),                
+                functionName: "mintBatch",
+                args: [
+                    account.address,
+                    [0],
+                    [1],
+                    solidityPacked(["bytes"], ["0x"]),
+                ],
+                value:
+                    BigInt(this.brooches[tokenId]?.totalSupply) *
+                        BigInt(10 ** 18) +
+                    BigInt(this.brooches[tokenId]?.baseTokenPrice),
             })
-        }
+        },
     },
 })

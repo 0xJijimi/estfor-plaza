@@ -1,22 +1,29 @@
 <template>
     <div class="flex items-center justify-center flex-col">
-        <div class="border-2 bg-base-100-50 border-solid rounded-lg border-primary w-full text-center p-5 my-5">{{ props.name }}</div>
-        <img :src="avatarSrc" class="rounded-lg border-solid border-2 border-primary" />        
+        <div
+            class="border-2 bg-base-100-50 border-solid rounded-lg border-primary w-full text-center p-5 my-5"
+        >
+            {{ props.name }}
+        </div>
+        <img
+            :src="avatarSrc"
+            class="rounded-lg border-solid border-2 border-primary"
+        />
     </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed } from "vue"
 
 const props = defineProps({
     id: {
         type: String,
-        required: true
+        required: true,
     },
     name: {
         type: String,
         required: false,
-        default: ''
+        default: "",
     },
 })
 
@@ -27,7 +34,7 @@ const avatarSrc = computed(() => {
 
 <style scoped>
 img {
-    object-fit:contain;
+    object-fit: contain;
     height: auto;
     width: 100%;
 }

@@ -22,28 +22,38 @@ export const useAppStore = defineStore({
             toasts: [],
             id: 0,
             loadingRoute: false,
-        } as AppState),
-    getters: {
-    },
+        }) as AppState,
+    getters: {},
     actions: {
         setTheme(theme: string) {
             this.theme = theme
             localStorage.setItem("theme", theme)
         },
         addToast(message: string, classStr: string, timeout: number = 0) {
-            const toast = { text: message, class: classStr, timeout, id: this.id }
+            const toast = {
+                text: message,
+                class: classStr,
+                timeout,
+                id: this.id,
+            }
             this.toasts.push(toast)
             if (timeout > 0) {
                 setTimeout(() => {
-                    this.toasts.splice(this.toasts.findIndex(x => x.id === toast.id), 1)
+                    this.toasts.splice(
+                        this.toasts.findIndex((x) => x.id === toast.id),
+                        1
+                    )
                 }, timeout)
             }
             this.id++
             return toast.id
         },
         removeToast(id: number) {
-            if (this.toasts.findIndex(x => x.id === id) === -1) return
-            this.toasts.splice(this.toasts.findIndex(x => x.id === id), 1)
+            if (this.toasts.findIndex((x) => x.id === id) === -1) return
+            this.toasts.splice(
+                this.toasts.findIndex((x) => x.id === id),
+                1
+            )
         },
     },
 })

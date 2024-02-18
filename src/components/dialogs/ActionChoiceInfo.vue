@@ -1,36 +1,106 @@
 <template>
     <dialog id="action_choice_modal" class="modal">
-        <div class="modal-box bg-base-100 border-2 border-primary md:w-4/5 max-w-full">
+        <div
+            class="modal-box bg-base-100 border-2 border-primary md:w-4/5 max-w-full"
+        >
             <h3 class="font-bold text-lg text-center">{{ skillName }}</h3>
-            <img :src="imgSource" :alt="skillName" class="w-full mx-auto mt-5 max-w-[800px] rounded-lg" />
+            <img
+                :src="imgSource"
+                :alt="skillName"
+                class="w-full mx-auto mt-5 max-w-[800px] rounded-lg"
+            />
 
             <div class="overflow-x-auto mt-5">
                 <table class="table md:table-md table-xs">
                     <thead>
-                    <tr>
-                        <th class="text-left">Item</th>
-                        <th class="text-right">Level</th>
-                        <th class="text-right">XP (per hour)</th>
-                        <th class="text-right">Inputs (per hour)</th>
-                        <th class="text-right">Output (per hour)</th>
-                    </tr>
+                        <tr>
+                            <th class="text-left">Item</th>
+                            <th class="text-right">Level</th>
+                            <th class="text-right">XP (per hour)</th>
+                            <th class="text-right">Inputs (per hour)</th>
+                            <th class="text-right">Output (per hour)</th>
+                        </tr>
                     </thead>
                     <tbody>
-                    <tr v-for="(a, i) in actions" :key="i" :class="{'text-gray-400': (a.minXPs[a.minSkills.findIndex(s => s === skillId)] || 0) > playerXp}">
-                        <td class="text-left cursor-pointer" @click.prevent="itemStore.itemSearch = itemNames[a.outputTokenId]">{{ itemNames[a.outputTokenId] }}</td>
-                        <td class="text-right">{{ getLevel(a.minXPs[a.minSkills.findIndex(s => s === skillId)] || 0) }}</td> 
-                        <td class="text-right">{{ a.xpPerHour }}</td> 
-                        <td class="text-left">
-                            <div v-for="(x, i) in a.inputTokenIds" :key="x" class="flex justify-between cursor-pointer" @click.prevent="itemStore.itemSearch = itemNames[x]">
-                                <div>{{ itemNames[x] }}</div>
-                                <div>{{ a.inputAmounts[i] * a.rate / 1000 }}</div>
-                            </div>
-                        </td>
-                        <td class="text-right">
-                            <span v-if="a.successPercent < 100">{{ (a.outputAmount * a.rate / 1000 * (Math.min(90, a.successPercent + Math.max(0, getLevel(playerXp) - getLevel(a.minXPs[a.minSkills.findIndex(s => s === skillId)] || 0))) / 100)).toFixed(1) }}</span>
-                            <span v-else>{{ a.outputAmount * a.rate / 1000 }}</span>
-                        </td> 
-                    </tr>
+                        <tr
+                            v-for="(a, i) in actions"
+                            :key="i"
+                            :class="{
+                                'text-gray-400':
+                                    (a.minXPs[
+                                        a.minSkills.findIndex(
+                                            (s) => s === skillId
+                                        )
+                                    ] || 0) > playerXp,
+                            }"
+                        >
+                            <td
+                                class="text-left cursor-pointer"
+                                @click.prevent="
+                                    itemStore.itemSearch =
+                                        itemNames[a.outputTokenId]
+                                "
+                            >
+                                {{ itemNames[a.outputTokenId] }}
+                            </td>
+                            <td class="text-right">
+                                {{
+                                    getLevel(
+                                        a.minXPs[
+                                            a.minSkills.findIndex(
+                                                (s) => s === skillId
+                                            )
+                                        ] || 0
+                                    )
+                                }}
+                            </td>
+                            <td class="text-right">{{ a.xpPerHour }}</td>
+                            <td class="text-left">
+                                <div
+                                    v-for="(x, i) in a.inputTokenIds"
+                                    :key="x"
+                                    class="flex justify-between cursor-pointer"
+                                    @click.prevent="
+                                        itemStore.itemSearch = itemNames[x]
+                                    "
+                                >
+                                    <div>{{ itemNames[x] }}</div>
+                                    <div>
+                                        {{
+                                            (a.inputAmounts[i] * a.rate) / 1000
+                                        }}
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-right">
+                                <span v-if="a.successPercent < 100">{{
+                                    (
+                                        ((a.outputAmount * a.rate) / 1000) *
+                                        (Math.min(
+                                            90,
+                                            a.successPercent +
+                                                Math.max(
+                                                    0,
+                                                    getLevel(playerXp) -
+                                                        getLevel(
+                                                            a.minXPs[
+                                                                a.minSkills.findIndex(
+                                                                    (s) =>
+                                                                        s ===
+                                                                        skillId
+                                                                )
+                                                            ] || 0
+                                                        )
+                                                )
+                                        ) /
+                                            100)
+                                    ).toFixed(1)
+                                }}</span>
+                                <span v-else>{{
+                                    (a.outputAmount * a.rate) / 1000
+                                }}</span>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -42,11 +112,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { skillNames, useSkillStore } from '../../store/skills'
-import { MEDIA_URL, getLevel, useCoreStore, skillToXPMap } from '../../store/core'
-import { itemNames, useItemStore } from '../../store/items'
-import { ActionChoiceInput, Skill } from '@paintswap/estfor-definitions/types'
+import { computed, ref } from "vue"
+import { skillNames, useSkillStore } from "../../store/skills"
+import {
+    MEDIA_URL,
+    getLevel,
+    useCoreStore,
+    skillToXPMap,
+} from "../../store/core"
+import { itemNames, useItemStore } from "../../store/items"
+import { ActionChoiceInput, Skill } from "@paintswap/estfor-definitions/types"
 
 const coreStore = useCoreStore()
 const skillId = ref(0)
@@ -86,18 +161,36 @@ const actions = computed(() => {
             return []
     }
     a.sort((a, b) => {
-        if ((a.minXPs[a.minSkills.findIndex(s => s === skillId.value)] || 0) > (b.minXPs[b.minSkills.findIndex(s => s === skillId.value)] || 0))
+        if (
+            (a.minXPs[a.minSkills.findIndex((s) => s === skillId.value)] || 0) >
+            (b.minXPs[b.minSkills.findIndex((s) => s === skillId.value)] || 0)
+        )
             return 1
-        if ((a.minXPs[a.minSkills.findIndex(s => s === skillId.value)] || 0) < (b.minXPs[b.minSkills.findIndex(s => s === skillId.value)] || 0))
+        if (
+            (a.minXPs[a.minSkills.findIndex((s) => s === skillId.value)] || 0) <
+            (b.minXPs[b.minSkills.findIndex((s) => s === skillId.value)] || 0)
+        )
             return -1
         return 0
     })
-    return a.filter(x => 
-        itemStore.itemSearch === '' ||
-        x.inputTokenIds.some(y => itemNames[y]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase())) || 
-        itemNames[x.outputTokenId]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase()) ||
-        itemNames[x.handItemTokenIdRangeMax]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase()) ||
-        itemNames[x.handItemTokenIdRangeMax]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase())
+    return a.filter(
+        (x) =>
+            itemStore.itemSearch === "" ||
+            x.inputTokenIds.some(
+                (y) =>
+                    itemNames[y]
+                        ?.toLowerCase()
+                        .includes(itemStore.itemSearch.toLowerCase())
+            ) ||
+            itemNames[x.outputTokenId]
+                ?.toLowerCase()
+                .includes(itemStore.itemSearch.toLowerCase()) ||
+            itemNames[x.handItemTokenIdRangeMax]
+                ?.toLowerCase()
+                .includes(itemStore.itemSearch.toLowerCase()) ||
+            itemNames[x.handItemTokenIdRangeMax]
+                ?.toLowerCase()
+                .includes(itemStore.itemSearch.toLowerCase())
     )
 })
 
@@ -108,16 +201,20 @@ const skillName = computed(() => {
 
 const imgSource = computed(() => {
     // @ts-ignore
-    return `${MEDIA_URL}/landscape/${skillNames[skillId.value].toLowerCase()}.jpg`
+    return `${MEDIA_URL}/landscape/${skillNames[
+        skillId.value
+    ].toLowerCase()}.jpg`
 })
 
 const openDialog = (_skillId: Skill) => {
     skillId.value = _skillId
-    const dialog = document.getElementById('action_choice_modal') as HTMLDialogElement
+    const dialog = document.getElementById(
+        "action_choice_modal"
+    ) as HTMLDialogElement
     dialog.showModal()
 }
 
 defineExpose({
-    openDialog
+    openDialog,
 })
 </script>

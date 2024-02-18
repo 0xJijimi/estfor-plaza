@@ -1,24 +1,36 @@
-import { ActionChoiceInput, ActionInput, Skill } from "@paintswap/estfor-definitions/types"
+import {
+    ActionChoiceInput,
+    ActionInput,
+    Skill,
+} from "@paintswap/estfor-definitions/types"
 import { defineStore } from "pinia"
 
-import { allActions } from '../data/actions'
+import { allActions } from "../data/actions"
 import { useCoreStore } from "./core"
 import { EstforConstants } from "@paintswap/estfor-definitions"
-import { allActionChoicesAlchemy, allActionChoicesCooking, allActionChoicesCrafting, allActionChoicesFiremaking, allActionChoicesFletching, allActionChoicesForging, allActionChoicesSmithing } from "../data/actionChoices"
+import {
+    allActionChoicesAlchemy,
+    allActionChoicesCooking,
+    allActionChoicesCrafting,
+    allActionChoicesFiremaking,
+    allActionChoicesFletching,
+    allActionChoicesForging,
+    allActionChoicesSmithing,
+} from "../data/actionChoices"
 import { itemNames, useItemStore } from "./items"
 
 export interface SkillState {
-    woodcutting: ActionInput[],
-    mining: ActionInput[],
-    fishing: ActionInput[],
-    cooking: ActionChoiceInput[],
-    crafting: ActionChoiceInput[],
-    smithing: ActionChoiceInput[],
-    firemaking: ActionChoiceInput[],
-    alchemy: ActionChoiceInput[],
-    forging: ActionChoiceInput[],
-    fletching: ActionChoiceInput[],
-    thieving: ActionInput[],
+    woodcutting: ActionInput[]
+    mining: ActionInput[]
+    fishing: ActionInput[]
+    cooking: ActionChoiceInput[]
+    crafting: ActionChoiceInput[]
+    smithing: ActionChoiceInput[]
+    firemaking: ActionChoiceInput[]
+    alchemy: ActionChoiceInput[]
+    forging: ActionChoiceInput[]
+    fletching: ActionChoiceInput[]
+    thieving: ActionInput[]
 }
 
 export const skillNames = {
@@ -131,10 +143,10 @@ export const actionNames = {
 }
 
 export interface RelevantActionInput {
-    minXP: number,
-    xpPerHour: number,
-    actionId: number,
-    name: string,
+    minXP: number
+    xpPerHour: number
+    actionId: number
+    name: string
 }
 
 export enum ActionType {
@@ -143,21 +155,27 @@ export enum ActionType {
 }
 
 export interface RelevantAction {
-    currentAction: RelevantActionInput,
-    nextAction: RelevantActionInput | undefined,
-    currentXPForSkill: number,
-    skill: Skill,
-    actionType: ActionType,
-    hasItemSearch: boolean,
+    currentAction: RelevantActionInput
+    nextAction: RelevantActionInput | undefined
+    currentXPForSkill: number
+    skill: Skill
+    actionType: ActionType
+    hasItemSearch: boolean
 }
 
 export const useSkillStore = defineStore({
     id: "skills",
     state: () =>
         ({
-            woodcutting: allActions.filter(x => x.info.skill === Skill.WOODCUTTING) as ActionInput[],
-            mining: allActions.filter(x => x.info.skill === Skill.MINING) as ActionInput[],
-            fishing: allActions.filter(x => x.info.skill === Skill.FISHING) as ActionInput[],
+            woodcutting: allActions.filter(
+                (x) => x.info.skill === Skill.WOODCUTTING
+            ) as ActionInput[],
+            mining: allActions.filter(
+                (x) => x.info.skill === Skill.MINING
+            ) as ActionInput[],
+            fishing: allActions.filter(
+                (x) => x.info.skill === Skill.FISHING
+            ) as ActionInput[],
             cooking: allActionChoicesCooking,
             crafting: allActionChoicesCrafting,
             smithing: allActionChoicesSmithing,
@@ -165,8 +183,10 @@ export const useSkillStore = defineStore({
             alchemy: allActionChoicesAlchemy,
             forging: allActionChoicesForging,
             fletching: allActionChoicesFletching,
-            thieving: allActions.filter(x => x.info.skill === Skill.THIEVING) as ActionInput[],
-        } as SkillState),
+            thieving: allActions.filter(
+                (x) => x.info.skill === Skill.THIEVING
+            ) as ActionInput[],
+        }) as SkillState,
     getters: {
         getCurrentAndNextActionForSkill: (state: SkillState) => {
             return (skill: Skill): RelevantAction => {
@@ -181,7 +201,10 @@ export const useSkillStore = defineStore({
                 switch (skill) {
                     case Skill.WOODCUTTING:
                         inputs = state.woodcutting
-                        currentXPForSkill = parseInt(playerState.woodcuttingXP, 10)
+                        currentXPForSkill = parseInt(
+                            playerState.woodcuttingXP,
+                            10
+                        )
                         break
                     case Skill.MINING:
                         inputs = state.mining
@@ -208,7 +231,10 @@ export const useSkillStore = defineStore({
                         break
                     case Skill.FIREMAKING:
                         inputChoices = state.firemaking
-                        currentXPForSkill = parseInt(playerState.firemakingXP, 10)
+                        currentXPForSkill = parseInt(
+                            playerState.firemakingXP,
+                            10
+                        )
                         isActionChoice = true
                         break
                     case Skill.ALCHEMY:
@@ -223,7 +249,10 @@ export const useSkillStore = defineStore({
                         break
                     case Skill.FLETCHING:
                         inputChoices = state.fletching
-                        currentXPForSkill = parseInt(playerState.fletchingXP, 10)
+                        currentXPForSkill = parseInt(
+                            playerState.fletchingXP,
+                            10
+                        )
                         isActionChoice = true
                         break
                     case Skill.THIEVING:
@@ -236,21 +265,17 @@ export const useSkillStore = defineStore({
                     minXP: 0,
                     xpPerHour: 0,
                     actionId: 0,
-                    name: '',
+                    name: "",
                 }
                 let nextAction: RelevantActionInput | undefined
 
                 if (!isActionChoice) {
                     inputs.sort((a, b) => {
-                        if (b.info.xpPerHour > a.info.xpPerHour)
-                            return -1
-                        if (b.info.xpPerHour < a.info.xpPerHour)
-                            return 1
+                        if (b.info.xpPerHour > a.info.xpPerHour) return -1
+                        if (b.info.xpPerHour < a.info.xpPerHour) return 1
 
-                        if (b.info.minXP > a.info.minXP)
-                            return -1
-                        if (b.info.minXP < a.info.minXP)
-                            return 1
+                        if (b.info.minXP > a.info.minXP) return -1
+                        if (b.info.minXP < a.info.minXP) return 1
 
                         return 0
                     })
@@ -261,26 +286,31 @@ export const useSkillStore = defineStore({
                         actionId: inputs[0].actionId,
                         name: actionNames[inputs[0].actionId],
                     }
-                    const availableActionsToPlayer = inputs.filter(x => x.info.minXP <= currentXPForSkill)
+                    const availableActionsToPlayer = inputs.filter(
+                        (x) => x.info.minXP <= currentXPForSkill
+                    )
                     if (availableActionsToPlayer.length > 0) {
-                        const lastAction = availableActionsToPlayer[availableActionsToPlayer.length - 1]
+                        const lastAction =
+                            availableActionsToPlayer[
+                                availableActionsToPlayer.length - 1
+                            ]
                         currentAction.minXP = lastAction.info.minXP
                         currentAction.xpPerHour = lastAction.info.xpPerHour
                         currentAction.actionId = lastAction.actionId
                         currentAction.name = actionNames[lastAction.actionId]
                     }
-                    const nextActions = inputs.filter(x => x.info.minXP > currentAction.minXP && x.info.xpPerHour > currentAction.xpPerHour)
+                    const nextActions = inputs.filter(
+                        (x) =>
+                            x.info.minXP > currentAction.minXP &&
+                            x.info.xpPerHour > currentAction.xpPerHour
+                    )
                     if (nextActions.length > 1) {
                         nextActions.sort((a, b) => {
-                            if (b.info.minXP > a.info.minXP)
-                                return -1
-                            if (b.info.minXP < a.info.minXP)
-                                return 1
+                            if (b.info.minXP > a.info.minXP) return -1
+                            if (b.info.minXP < a.info.minXP) return 1
 
-                            if (b.info.xpPerHour > a.info.xpPerHour)
-                                return -1
-                            if (b.info.xpPerHour < a.info.xpPerHour)
-                                return 1
+                            if (b.info.xpPerHour > a.info.xpPerHour) return -1
+                            if (b.info.xpPerHour < a.info.xpPerHour) return 1
                             return 0
                         })
                         nextAction = {
@@ -292,25 +322,52 @@ export const useSkillStore = defineStore({
                     }
 
                     if (
-                        inputs.some(x =>
-                            x.guaranteedRewards.some(y => itemNames[y.itemTokenId]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase())) || 
-                            x.randomRewards.some(y => itemNames[y.itemTokenId]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase())) ||
-                            itemNames[x.info.handItemTokenIdRangeMax]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase()) ||
-                            itemNames[x.info.handItemTokenIdRangeMax]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase())
-                        ) 
+                        inputs.some(
+                            (x) =>
+                                x.guaranteedRewards.some(
+                                    (y) =>
+                                        itemNames[y.itemTokenId]
+                                            ?.toLowerCase()
+                                            .includes(
+                                                itemStore.itemSearch.toLowerCase()
+                                            )
+                                ) ||
+                                x.randomRewards.some(
+                                    (y) =>
+                                        itemNames[y.itemTokenId]
+                                            ?.toLowerCase()
+                                            .includes(
+                                                itemStore.itemSearch.toLowerCase()
+                                            )
+                                ) ||
+                                itemNames[x.info.handItemTokenIdRangeMax]
+                                    ?.toLowerCase()
+                                    .includes(
+                                        itemStore.itemSearch.toLowerCase()
+                                    ) ||
+                                itemNames[x.info.handItemTokenIdRangeMax]
+                                    ?.toLowerCase()
+                                    .includes(
+                                        itemStore.itemSearch.toLowerCase()
+                                    )
+                        )
                     ) {
                         hasItemSearch = true
                     }
                 } else {
                     inputChoices.sort((a, b) => {
-                        if (b.xpPerHour > a.xpPerHour)
-                            return -1
-                        if (b.xpPerHour < a.xpPerHour)
-                            return 1
+                        if (b.xpPerHour > a.xpPerHour) return -1
+                        if (b.xpPerHour < a.xpPerHour) return 1
 
-                        if (b.minXPs[b.minSkills.indexOf(skill)] > a.minXPs[b.minSkills.indexOf(skill)])
+                        if (
+                            b.minXPs[b.minSkills.indexOf(skill)] >
+                            a.minXPs[b.minSkills.indexOf(skill)]
+                        )
                             return -1
-                        if (b.minXPs[b.minSkills.indexOf(skill)] < a.minXPs[b.minSkills.indexOf(skill)])
+                        if (
+                            b.minXPs[b.minSkills.indexOf(skill)] <
+                            a.minXPs[b.minSkills.indexOf(skill)]
+                        )
                             return 1
                         return 0
                     })
@@ -319,33 +376,63 @@ export const useSkillStore = defineStore({
                         minXP: inputChoices[0].minXPs[0],
                         xpPerHour: inputChoices[0].xpPerHour,
                         actionId: inputChoices[0].outputTokenId,
-                        name: itemNames[inputChoices[0].outputTokenId],               
-                    }                    
+                        name: itemNames[inputChoices[0].outputTokenId],
+                    }
 
-                    const availableActionsToPlayer = inputChoices.filter(x => x.minXPs.every((y, i) => y <= currentXPForSkill && x.minSkills[i] === skill))
+                    const availableActionsToPlayer = inputChoices.filter((x) =>
+                        x.minXPs.every(
+                            (y, i) =>
+                                y <= currentXPForSkill &&
+                                x.minSkills[i] === skill
+                        )
+                    )
                     if (availableActionsToPlayer.length > 0) {
-                        const lastAction = availableActionsToPlayer[availableActionsToPlayer.length - 1]
-                        currentAction.minXP = lastAction.minXPs[lastAction.minSkills.findIndex(x => x === lastAction.skill)] || 0
+                        const lastAction =
+                            availableActionsToPlayer[
+                                availableActionsToPlayer.length - 1
+                            ]
+                        currentAction.minXP =
+                            lastAction.minXPs[
+                                lastAction.minSkills.findIndex(
+                                    (x) => x === lastAction.skill
+                                )
+                            ] || 0
                         currentAction.xpPerHour = lastAction.xpPerHour
                         currentAction.actionId = lastAction.outputTokenId
                         currentAction.name = itemNames[lastAction.outputTokenId]
                     }
-                    const nextActions = inputChoices.filter(x => x.minXPs.some((y, i) => y > currentAction.minXP && x.minSkills[i] === skill) && x.xpPerHour > currentAction.xpPerHour)
+                    const nextActions = inputChoices.filter(
+                        (x) =>
+                            x.minXPs.some(
+                                (y, i) =>
+                                    y > currentAction.minXP &&
+                                    x.minSkills[i] === skill
+                            ) && x.xpPerHour > currentAction.xpPerHour
+                    )
                     if (nextActions.length > 1) {
                         nextActions.sort((a, b) => {
-                            if (b.minXPs[b.minSkills.indexOf(skill)] > a.minXPs[b.minSkills.indexOf(skill)])
+                            if (
+                                b.minXPs[b.minSkills.indexOf(skill)] >
+                                a.minXPs[b.minSkills.indexOf(skill)]
+                            )
                                 return -1
-                            if (b.minXPs[b.minSkills.indexOf(skill)] < a.minXPs[b.minSkills.indexOf(skill)])
+                            if (
+                                b.minXPs[b.minSkills.indexOf(skill)] <
+                                a.minXPs[b.minSkills.indexOf(skill)]
+                            )
                                 return 1
-    
-                            if (b.xpPerHour > a.xpPerHour)
-                                return -1
-                            if (b.xpPerHour < a.xpPerHour)
-                                return 1
+
+                            if (b.xpPerHour > a.xpPerHour) return -1
+                            if (b.xpPerHour < a.xpPerHour) return 1
                             return 0
                         })
                         nextAction = {
-                            minXP: nextActions[0].minXPs[nextActions[0].minSkills.findIndex(x => x === skill)] || 0,
+                            minXP:
+                                nextActions[0].minXPs[
+                                    nextActions[0].minSkills.findIndex(
+                                        (x) => x === skill
+                                    )
+                                ] || 0,
                             xpPerHour: nextActions[0].xpPerHour,
                             actionId: nextActions[0].outputTokenId,
                             name: itemNames[nextActions[0].outputTokenId],
@@ -353,20 +440,48 @@ export const useSkillStore = defineStore({
                     }
 
                     if (
-                        inputChoices.some(x =>
-                            x.inputTokenIds.some(y => itemNames[y]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase())) || 
-                            itemNames[x.outputTokenId]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase()) ||
-                            itemNames[x.handItemTokenIdRangeMax]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase()) ||
-                            itemNames[x.handItemTokenIdRangeMax]?.toLowerCase().includes(itemStore.itemSearch.toLowerCase())
-                        ) 
+                        inputChoices.some(
+                            (x) =>
+                                x.inputTokenIds.some(
+                                    (y) =>
+                                        itemNames[y]
+                                            ?.toLowerCase()
+                                            .includes(
+                                                itemStore.itemSearch.toLowerCase()
+                                            )
+                                ) ||
+                                itemNames[x.outputTokenId]
+                                    ?.toLowerCase()
+                                    .includes(
+                                        itemStore.itemSearch.toLowerCase()
+                                    ) ||
+                                itemNames[x.handItemTokenIdRangeMax]
+                                    ?.toLowerCase()
+                                    .includes(
+                                        itemStore.itemSearch.toLowerCase()
+                                    ) ||
+                                itemNames[x.handItemTokenIdRangeMax]
+                                    ?.toLowerCase()
+                                    .includes(
+                                        itemStore.itemSearch.toLowerCase()
+                                    )
+                        )
                     ) {
                         hasItemSearch = true
                     }
                 }
-                return { currentAction, nextAction, currentXPForSkill, skill, actionType: isActionChoice ? ActionType.actionChoice : ActionType.action, hasItemSearch }
+                return {
+                    currentAction,
+                    nextAction,
+                    currentXPForSkill,
+                    skill,
+                    actionType: isActionChoice
+                        ? ActionType.actionChoice
+                        : ActionType.action,
+                    hasItemSearch,
+                }
             }
         },
     },
-    actions: {
-    },
+    actions: {},
 })
