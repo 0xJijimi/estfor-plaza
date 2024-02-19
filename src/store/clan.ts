@@ -216,8 +216,8 @@ export const calculateBattleChances = (
         } else if (clanBWins > clanAWins) {
             clanBTotalWins++
         } else {
-            // draw, attacker wins for vault, or defender wins for territory
-            battleArena === "Territory" ? clanBTotalWins++ : clanATotalWins++
+            // draw, attacker wins
+            clanATotalWins++
         }
     }
 

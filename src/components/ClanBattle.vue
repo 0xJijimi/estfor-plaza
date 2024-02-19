@@ -34,10 +34,9 @@
                     Highest score wins
                 </li>
                 <li>
-                    If the attackers obtain the most wins they capture the
-                    territory, or if the attacker wins or draws attacking a
-                    vault they steal from the locked vault (if the defender
-                    wins, or draws a territory battle, then nothing happens)
+                    If the attackers obtain the most wins or the overall result is a draw they capture the
+                    territory, or steal from the locked vault (if the defender
+                    wins, then nothing happens)
                 </li>
             </ol>
             <div class="flex justify-start mt-5">
