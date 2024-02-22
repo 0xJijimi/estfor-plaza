@@ -1,6 +1,7 @@
 import {
     BoostType,
     Clan,
+    Donation,
     Lottery,
     Player,
     QueuedAction,
@@ -70,6 +71,10 @@ export interface SearchQueuedActionsResult {
 
 export interface TerritoriesResult {
     territories: Territory[]
+}
+
+export interface DonationsResult {
+    donations: Donation[]
 }
 
 export const getPlayerState = async (
@@ -158,5 +163,10 @@ export const searchQueuedActions = async (
 
 export const getTerritories = async (): Promise<TerritoriesResult> => {
     const response = await fetch(`${baseUrl}/territories`)
+    return response.json()
+}
+
+export const getDonations = async (numToSkip: number): Promise<DonationsResult> => {
+    const response = await fetch(`${baseUrl}/donations?numToSkip=${numToSkip}&orderDirection=desc&orderBy=lastUpdatedTimestamp&useUsers=false`)
     return response.json()
 }

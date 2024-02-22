@@ -22,6 +22,9 @@
                     />
                 </label>
             </div>
+            <div class="text-right text-xs">
+                Average Brush Gained: (Chance to win * Locked Amount) - (Chance to lose * Your Locked Amount)
+            </div>
             <div class="overflow-x-auto">
                 <table class="table md:table-md table-xs">
                     <thead>
@@ -29,6 +32,7 @@
                             <th>Owner</th>
                             <th class="text-right">Locked Amount</th>
                             <th class="text-right">Chance to Win</th>
+                            <th class="text-right">Average Brush Gained</th>
                         </tr>
                     </thead>
 
@@ -37,7 +41,7 @@
                         class="mx-auto my-[100px] w-full text-center"
                     >
                         <tr>
-                            <td colspan="3">
+                            <td colspan="4">
                                 <span
                                     class="loading loading-spinner text-primary loading-md mx-auto"
                                 ></span>
@@ -50,7 +54,7 @@
                             :key="clan.id"
                             :class="{
                                 'text-success':
-                                    clan.name == coreStore.clanState?.name,
+                                    clan.id == coreStore.clanState?.id,
                             }"
                         >
                             <td>{{ clan.name }}</td>
@@ -59,11 +63,18 @@
                             </td>
                             <td class="text-right">
                                 {{
-                                    clan.name == coreStore.clanState?.name
+                                    clan.id == coreStore.clanState?.id
                                         ? "-"
                                         : clan.chanceToWin
                                           ? `${clan.chanceToWin}%`
                                           : "You are not in a clan"
+                                }}
+                            </td>
+                            <td class="text-right">
+                                {{ 
+                                    clan.id == coreStore.clanState?.id
+                                        ? "-"
+                                        : (((clan.chanceToWin / 100) * parseInt((BigInt(clan.total) / BigInt(10 ** 18)).toString()) * 0.1) - ((1 - (clan.chanceToWin / 100)) * parseInt((BigInt(clanStore.sortedVaults.find(x => x.id == coreStore.clanState?.id)?.total || 0) / BigInt(10 ** 18)).toString()) * 0.1)).toFixed(0)
                                 }}
                             </td>
                         </tr>

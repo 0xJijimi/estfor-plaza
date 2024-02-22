@@ -138,26 +138,32 @@ const sortedMembers = computed(() => {
 const onDateUpdate = async () => {
     loading.value = true
     try {
-        let numToSkip = 0
-        let moreToFetch = true
-        const raffleResults: RaffleEntry[] = []
-        while (moreToFetch) {
-            const results = await getRaffleEntries(numToSkip)
-            raffleResults.push(...results.raffleEntries)
-            if (results.raffleEntries.length < 1000) {
-                moreToFetch = false
-            } else {
-                numToSkip += 1000
-            }
-        }
         const timestamp = new Date()
         timestamp.setDate(timestamp.getDate() - date.value)
+        timestamp.setHours(0, 0, 0, 0)
 
-        raffleEntries.value = raffleResults
-            .filter((x) => parseInt(x.timestamp) >= timestamp.valueOf() / 1000)
-            .filter((x) =>
-                props.members.map((x) => x.player.id).includes(x.playerId)
-            )
+        const endTimestamp = new Date()
+        endTimestamp.setHours(0, 0, 0, 0)
+        {
+            let numToSkip = 0
+            let moreToFetch = true
+            const raffleResults: RaffleEntry[] = []
+            while (moreToFetch) {
+                const results = await getRaffleEntries(numToSkip)
+                raffleResults.push(...results.raffleEntries)
+                if (results.raffleEntries.length < 1000) {
+                    moreToFetch = false
+                } else {
+                    numToSkip += 1000
+                }
+            }
+
+            raffleEntries.value = raffleResults
+                .filter((x) => (parseInt(x.timestamp) >= timestamp.valueOf() / 1000) && (parseInt(x.timestamp) < endTimestamp.valueOf() / 1000))
+                .filter((x) =>
+                    props.members.map((x) => x.player.id).includes(x.playerId)
+                )
+        }
     } finally {
         loading.value = false
     }

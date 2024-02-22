@@ -298,6 +298,7 @@ export const useClanStore = defineStore({
             })
             return clans.slice(0, 25).map((c) => {
                 return {
+                    id: c.id,
                     name: c.name,
                     total: c.lockedVaults.reduce((acc, curr) => {
                         if (
