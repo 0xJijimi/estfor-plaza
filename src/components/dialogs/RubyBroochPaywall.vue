@@ -11,7 +11,7 @@
                 So you want to see what's in the Factory, eh? Well, I can't just let anyone in you know. You'll need to buy one of my Ruby brooches to get access. Here, give me your Emerald brooch and I'll give you a Ruby one for a small price.
             </p>
             <p v-if="emeraldBrooch.balance >= 1 && brooch.balance < 1" class="my-5">
-                This one doesn't increase in price like the Emerald brooch, but I'll still need to charge you a small fee to cover the cost of cutting the ruby.
+                This one increases in price just like the Emerald brooch.
             </p>
             <p v-if="emeraldBrooch.balance >= 1 && brooch.balance < 1" class="my-5">
                 The Factory is a place where you can create your own Estfor industrial workflow. Or at least that's the dream. I'm still working on it, but I'll let you in if you have a Ruby brooch.
@@ -30,7 +30,7 @@
                     v-if="!isApproved"
                     type="button"
                     class="btn btn-primary btn-lg grow sm:mr-5"
-                    :disabled="loading || emeraldBrooch.balance < 1"
+                    :disabled="loading"
                     @click.prevent="approve"
                 >
                     Approve Emerald Brooch Transfer
@@ -109,7 +109,8 @@ const openDialog = (_monsterId: number) => {
 
 const mintPrice = computed(() => {
     return (
-        BigInt(brooch.value.baseTokenPrice) /
+        (BigInt(brooch.value.totalSupply) * BigInt(10 ** 18) +
+            BigInt(brooch.value.baseTokenPrice)) /
         BigInt(10 ** 18)
     )
 })

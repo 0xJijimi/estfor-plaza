@@ -156,7 +156,10 @@ export const useBroochStore = defineStore({
                 args: [
                     tokenId,
                 ],
-                value: BigInt(this.brooches[tokenId]?.baseTokenPrice),
+                value:                     
+                BigInt(this.brooches[tokenId]?.totalSupply) *
+                    BigInt(10 ** 18) +
+                BigInt(this.brooches[tokenId]?.baseTokenPrice),
             })
         },
         getApproval() {
