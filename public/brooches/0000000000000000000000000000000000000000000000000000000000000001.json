@@ -1,0 +1,28 @@
+{
+    "name": "Ruby Brooch",
+    "description": "A beautifully crafted brooch made of ruby, teal cloth, and willow wood, wearing it signifies that you are a fellow of the Plaza",
+    "external_uri": "https://estfor.deif.eth.limo/brooches/{id}.json",
+    "image": "ipfs://bafybeien5rvtgon2pqbwnlgpu6zt2xmfjpwjrbnzvmsul6jqfkngcfjlfy",
+    "attributes": [
+        {
+            "trait_type": "Gemstone",
+            "value": "Ruby"
+        },
+        {
+            "trait_type": "Harness",
+            "value": "Willow Wood"
+        },
+        {
+            "trait_type": "Rarity",
+            "value": "Uncommon"
+        },
+        {
+            "trait_type": "Type",
+            "value": "Brooch"
+        },
+        {
+            "trait_type": "Set",
+            "value": "Plaza"
+        }
+    ]
+}

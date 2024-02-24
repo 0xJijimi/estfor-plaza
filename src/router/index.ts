@@ -7,6 +7,7 @@ declare module "vue-router" {
     interface RouteMeta {
         showItemSearch?: boolean
         requiresEmeraldBrooch?: boolean
+        requiresRubyBrooch?: boolean
     }
 }
 
@@ -82,6 +83,13 @@ const routes: Array<RouteRecordRaw> = [
                     },
                 ],
             },
+            {
+                path: "factory",
+                component: () => import("../components/Factory.vue"),
+                meta: {
+                    requiresRubyBrooch: true,
+                },
+            },
         ],
     },
 ]
@@ -97,10 +105,22 @@ router.beforeEach(async (to) => {
 
     if (to.meta.requiresEmeraldBrooch) {
         const broochStore = useBroochStore()
-        if (broochStore.initialised === false) {
-            await broochStore.getBroochData(0)
+        if (broochStore.brooch(0).baseTokenPrice === 0) {
+            await broochStore.getBroochData(0, false)
         }
-        if (broochStore.brooch(0).balance === 0) {
+        if (broochStore.brooch(1).baseTokenPrice === 0) {
+            await broochStore.getBroochData(1, true)
+        }
+        if (broochStore.brooch(0).balance === 0 && broochStore.brooch(1).balance === 0) {
+            return router.push("/")
+        }
+    }
+    if (to.meta.requiresRubyBrooch) {
+        const broochStore = useBroochStore()
+        if (broochStore.brooch(1).baseTokenPrice === 0) {
+            await broochStore.getBroochData(1, true)
+        }
+        if (broochStore.brooch(1).balance === 0) {
             return router.push("/")
         }
     }

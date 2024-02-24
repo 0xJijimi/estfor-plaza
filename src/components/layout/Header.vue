@@ -3,6 +3,7 @@ import { computed, ref, watch } from "vue"
 import { getAccount } from "@wagmi/core"
 import { useItemStore, itemNames } from "../../store/items"
 import Donate from "../dialogs/Donate.vue"
+import RubyBroochPaywall from "../dialogs/RubyBroochPaywall.vue"
 import { useRoute } from "vue-router"
 import { useBroochStore } from "../../store/brooch"
 
@@ -13,10 +14,32 @@ const route = useRoute()
 const broochTimeout = ref<number>(0)
 
 const donateRef = ref<typeof Donate>()
+const rubyUpgradeRef = ref<typeof RubyBroochPaywall>()
 
-const showBrooch = () => {
-    if (broochStore.brooch(0).balance === 0) {
-        donateRef.value?.openDialog()
+const showBrooch = (tokenId: number) => {
+    let hasBrooch = false
+    let checkTokenId = tokenId
+    while (checkTokenId <= 1) { // higher tokenId means higher tier brooch so let them in - update when more brooches are added
+        if (broochStore.brooch(checkTokenId).balance > 0) {
+            hasBrooch = true
+            break
+        }
+        checkTokenId++
+    }
+
+    if (!hasBrooch) {
+        switch (tokenId) {
+            case 0:
+                donateRef.value?.openDialog()
+                return
+            case 1:
+                if (broochStore.brooch(0).balance === 0) {
+                    donateRef.value?.openDialog()
+                    return
+                }
+                rubyUpgradeRef.value?.openDialog()
+                return
+        }
     }
 }
 
@@ -64,41 +87,56 @@ watch(() => broochStore.brooch(0).balance, init)
                         <summary>The Plaza</summary>
                         <ul class="bg-base-100 z-[1] w-56">
                             <li>
-                                <router-link to="/combat"
-                                    >Combat Calculator</router-link
-                                >
+                                <details>
+                                    <summary>
+                                        Hero Management
+                                    </summary>
+                                    <ul>
+                                        <li>
+                                            <router-link to="/combat"
+                                                >Combat Calculator</router-link
+                                            >
+                                        </li>
+                                        <li>
+                                            <router-link to="/skills"
+                                                >Skill Training</router-link
+                                            >
+                                        </li>
+                                        <li>
+                                            <router-link to="/lotteries"
+                                                >Wishing Well Ranking</router-link
+                                            >
+                                        </li>
+                                    </ul>
+                                </details>
                             </li>
                             <li>
-                                <router-link to="/skills"
-                                    >Skill Training</router-link
-                                >
-                            </li>
-                            <li>
-                                <router-link to="/lotteries"
-                                    >Wishing Well Ranking</router-link
-                                >
-                            </li>
-                            <li>
-                                <router-link
-                                    to="/clan-battle"
-                                    @click="showBrooch"
-                                    >Clan Battle
-                                    <img
-                                        src="/src/assets/emerald_brooch_icon.png"
-                                        class="rounded-lg w-[20px] inline cursor-pointer"
-                                        alt="Emerald Brooch"
-                                /></router-link>
-                            </li>
-                            <li>
-                                <router-link
-                                    to="/territory-rankings"
-                                    @click="showBrooch"
-                                    >Battle Rankings
-                                    <img
-                                        src="/src/assets/emerald_brooch_icon.png"
-                                        class="rounded-lg w-[20px] inline cursor-pointer"
-                                        alt="Emerald Brooch"
-                                /></router-link>
+                                <details>
+                                    <summary>
+                                        Battles
+                                        <img
+                                            src="/src/assets/emerald_brooch_icon.png"
+                                            class="rounded-lg w-[20px] inline cursor-pointer"
+                                            alt="Emerald Brooch"
+                                        />
+                                    </summary>
+                                    <ul>
+                                        <li>
+                                            <router-link
+                                                to="/clan-battle"
+                                                @click="showBrooch(0)"
+                                                >Clan Battle
+                                            </router-link>
+                                        </li>
+                                        <li>
+                                            <router-link
+                                                to="/territory-rankings"
+                                                @click="showBrooch(0)"
+                                                >Battle Rankings
+                                            </router-link>
+                                        </li>
+                                    </ul>
+                                </details>
                             </li>
                             <li>
                                 <details>
@@ -114,12 +152,23 @@ watch(() => broochStore.brooch(0).balance, init)
                                         <li>
                                             <router-link
                                                 to="/clan-management/wishing-well"
-                                                @click="showBrooch"
+                                                @click="showBrooch(0)"
                                                 >Wish Contributions</router-link
                                             >
                                         </li>
                                     </ul>
                                 </details>
+                            </li>
+                            <li>
+                                <router-link
+                                    to="/factory"
+                                    @click="showBrooch(1)"
+                                >Factory
+                                    <img
+                                    src="/src/assets/ruby_brooch_icon.png"
+                                    class="rounded-lg w-[20px] inline cursor-pointer"
+                                    alt="Ruby Brooch"
+                                /></router-link>
                             </li>
                         </ul>
                     </details>
@@ -167,7 +216,7 @@ watch(() => broochStore.brooch(0).balance, init)
                         >
                     </li>
                     <li>
-                        <router-link to="/clan-battle" @click="showBrooch"
+                        <router-link to="/clan-battle" @click="showBrooch(0)"
                             >Clan Battle
                             <img
                                 src="/src/assets/emerald_brooch_icon.png"
@@ -178,7 +227,7 @@ watch(() => broochStore.brooch(0).balance, init)
                     <li>
                         <router-link
                             to="/territory-rankings"
-                            @click="showBrooch"
+                            @click="showBrooch(0)"
                             >Battle Rankings
                             <img
                                 src="/src/assets/emerald_brooch_icon.png"
@@ -189,12 +238,24 @@ watch(() => broochStore.brooch(0).balance, init)
                     <li>
                         <router-link
                             to="/clan-management/wishing-well"
-                            @click="showBrooch"
+                            @click="showBrooch(0)"
                             >Wish Contributions
                             <img
                                 src="/src/assets/emerald_brooch_icon.png"
                                 class="rounded-lg w-[20px] inline cursor-pointer"
                                 alt="Emerald Brooch"
+                        /></router-link>
+                    </li>
+
+                    <li>
+                        <router-link
+                            to="/factory"
+                            @click="showBrooch(1)"
+                        >Factory
+                            <img
+                            src="/src/assets/ruby_brooch_icon.png"
+                            class="rounded-lg w-[20px] inline cursor-pointer"
+                            alt="Ruby Brooch"
                         /></router-link>
                     </li>
                 </ul>
@@ -248,6 +309,7 @@ watch(() => broochStore.brooch(0).balance, init)
         </div>
     </nav>
     <Donate ref="donateRef" />
+    <RubyBroochPaywall ref="rubyUpgradeRef" />
 </template>
 
 <style scoped>

@@ -1,10 +1,12 @@
 import { getAccount, readContract, writeContract } from "@wagmi/core"
 import { defineStore } from "pinia"
-import { HOMEMADE_BROOCH_ADDRESS } from "../utils/addresses"
+import { HOMEMADE_BROOCH_ADDRESS, BROOCH_UPGRADER_ADDRESS } from "../utils/addresses"
 import broochAbi from "../abi/brooch.json"
+import broochUpgraderAbi from "../abi/broochUpgrader.json"
 import { solidityPacked } from "ethers"
 
 export interface Brooch {
+    tokenId: number
     balance: number
     totalSupply: number
     baseTokenPrice: number
@@ -12,7 +14,6 @@ export interface Brooch {
 
 export interface BroochState {
     brooches: Brooch[]
-    initialised: boolean
 }
 
 export const useBroochStore = defineStore({
@@ -20,13 +21,13 @@ export const useBroochStore = defineStore({
     state: () =>
         ({
             brooches: [] as Brooch[],
-            initialised: false,
         }) as BroochState,
     getters: {
         brooch(state: BroochState) {
             return (tokenId: number) => {
                 return (
-                    state.brooches[tokenId] || {
+                    state.brooches.find(x => x.tokenId == tokenId) || {
+                        tokenId,
                         balance: 0,
                         totalSupply: 0,
                         baseTokenPrice: 0,
@@ -38,33 +39,60 @@ export const useBroochStore = defineStore({
     actions: {
         disconnect() {
             this.brooches = []
-            this.initialised = false
         },
-        async getBroochData(tokenId: number) {
+        async getBroochData(tokenId: number, isUpgrade: boolean) {
             const account = getAccount()
             if (!account.isConnected) return
 
-            const result = await Promise.all([
-                readContract({
-                    address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
-                    abi: broochAbi,
-                    functionName: "tokenSupply",
-                    args: [0],
-                }),
-                readContract({
-                    address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
-                    abi: broochAbi,
-                    functionName: "baseTokenPrice",
-                    args: [0],
-                }),
-                readContract({
-                    address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
-                    abi: broochAbi,
-                    functionName: "balanceOf",
-                    args: [account.address, 0],
-                }),
-            ])
-            const brooch = this.brooches[tokenId] || {}
+            let result: any[] = []
+            if (!isUpgrade) {
+                result = await Promise.all([
+                    readContract({
+                        address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
+                        abi: broochAbi,
+                        functionName: "tokenSupply",
+                        args: [tokenId],
+                    }),
+                    readContract({
+                        address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
+                        abi: broochAbi,
+                        functionName: "baseTokenPrice",
+                        args: [tokenId],
+                    }),
+                    readContract({
+                        address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
+                        abi: broochAbi,
+                        functionName: "balanceOf",
+                        args: [account.address, tokenId],
+                    }),
+                ])
+            } else {
+                result = await Promise.all([
+                    readContract({
+                        address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
+                        abi: broochAbi,
+                        functionName: "tokenSupply",
+                        args: [tokenId],
+                    }),
+                    readContract({
+                        address: BROOCH_UPGRADER_ADDRESS as `0x${string}`,
+                        abi: broochUpgraderAbi,
+                        functionName: "upgradePrices",
+                        args: [tokenId],
+                    }),
+                    readContract({
+                        address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
+                        abi: broochAbi,
+                        functionName: "balanceOf",
+                        args: [account.address, tokenId],
+                    }),
+                ])
+            }
+            let brooch = this.brooches.find(x => x.tokenId == tokenId)
+            if (!brooch) {
+                brooch = { tokenId, balance: 0, totalSupply: 0, baseTokenPrice: 0 }
+                this.brooches.push(brooch)
+            }
             brooch.totalSupply = parseInt(
                 (result[0] as unknown as bigint).toString(),
                 10
@@ -77,9 +105,6 @@ export const useBroochStore = defineStore({
                 (result[2] as unknown as bigint).toString(),
                 10
             )
-
-            this.brooches[tokenId] = brooch
-            this.initialised = true
         },
         mintNFT(tokenId: number) {
             const account = getAccount()
@@ -97,6 +122,37 @@ export const useBroochStore = defineStore({
                     BigInt(this.brooches[tokenId]?.totalSupply) *
                         BigInt(10 ** 18) +
                     BigInt(this.brooches[tokenId]?.baseTokenPrice),
+            })
+        },
+        setApprovalForAll() {
+            return writeContract({
+                address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
+                abi: broochAbi,
+                functionName: "setApprovalForAll",
+                args: [
+                    BROOCH_UPGRADER_ADDRESS,
+                    true,
+                ],
+            })
+        },
+        upgradeBrooch(tokenId: number) {
+            return writeContract({
+                address: BROOCH_UPGRADER_ADDRESS as `0x${string}`,
+                abi: broochUpgraderAbi,
+                functionName: "upgradeBrooch",
+                args: [
+                    tokenId,
+                ],
+                value: BigInt(this.brooches[tokenId]?.baseTokenPrice),
+            })
+        },
+        getApproval() {
+            const account = getAccount()
+            return readContract({
+                address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
+                abi: broochAbi,
+                functionName: "isApprovedForAll",
+                args: [account.address, BROOCH_UPGRADER_ADDRESS],
             })
         },
     },

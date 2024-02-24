@@ -138,7 +138,8 @@ const init = async () => {
         if (account.isConnected) {
             loading.value = true
             await coreStore.getActivePlayer()
-            await broochStore.getBroochData(0)
+            await broochStore.getBroochData(0, false)
+            await broochStore.getBroochData(1, true)
             isConnected.value = true
         } else if (account.isDisconnected) {
             coreStore.disconnect()
