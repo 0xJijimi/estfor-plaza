@@ -87,7 +87,7 @@ const init = async () => {
             loading.value = true
             await broochStore.getBroochData(0, false)
             await broochStore.getBroochData(1, true)
-            isApproved.value = await broochStore.getApproval()
+            isApproved.value = await broochStore.getApproval() as boolean
         }
     } finally {
         loading.value = false

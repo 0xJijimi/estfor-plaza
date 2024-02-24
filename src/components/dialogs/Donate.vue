@@ -67,7 +67,7 @@ const init = async () => {
         const account = getAccount()
         if (account.isConnected) {
             loading.value = true
-            await broochStore.getBroochData(0)
+            await broochStore.getBroochData(0, false)
         }
     } finally {
         loading.value = false
