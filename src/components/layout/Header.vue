@@ -26,7 +26,7 @@ const showBrooch = (tokenId: number) => {
         }
         checkTokenId++
     }
-    rubyUpgradeRef.value?.openDialog()
+    
     if (!hasBrooch) {
         switch (tokenId) {
             case 0:
