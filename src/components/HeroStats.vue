@@ -11,7 +11,7 @@
                                     type="button"
                                     class="btn btn-primary btn-sm"
                                     @click.prevent="
-                                        broochStore.brooch(0).balance === 0
+                                        !broochStore.hasAccess(0)
                                             ? emeraldBroochPaywallRef?.openDialog()
                                             : changeHeroStatsRef?.openDialog()
                                     "

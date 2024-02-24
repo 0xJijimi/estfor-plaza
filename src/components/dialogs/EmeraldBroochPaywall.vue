@@ -1,18 +1,18 @@
 <template>
     <dialog id="emerald_brooch_paywall_modal" class="modal">
         <div class="modal-box bg-base-100 border-2 border-primary">
-            <h3 v-if="brooch.balance < 1" class="font-bold text-lg text-center">
+            <h3 v-if="!broochStore.hasAccess(0)" class="font-bold text-lg text-center">
                 Sorry, you're not a member!
             </h3>
             <h3 v-else class="font-bold text-lg text-center">
                 Ahh, a member of the Plaza!
             </h3>
-            <p v-if="brooch.balance < 1" class="my-5">
+            <p v-if="!broochStore.hasAccess(0)" class="my-5">
                 This information doesn't come free you know, I have eggs to
                 incubate and fires to upkeep! Now why don't you buy one of my
                 Emerald brooches and you can get basic access to the Plaza?
             </p>
-            <p v-if="brooch.balance < 1" class="my-5">
+            <p v-if="!broochStore.hasAccess(0)" class="my-5">
                 It's better to buy them early because I increase the price after
                 each one sold!
             </p>
@@ -71,6 +71,7 @@ const init = async () => {
         if (account.isConnected) {
             loading.value = true
             await broochStore.getBroochData(0, false)
+            await broochStore.getBroochData(1, true)
         }
     } finally {
         loading.value = false

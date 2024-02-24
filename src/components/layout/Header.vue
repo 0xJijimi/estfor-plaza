@@ -52,7 +52,7 @@ const init = async () => {
         window.clearTimeout(broochTimeout.value)
         const account = getAccount()
         if (account.isConnected) {
-            if (broochStore.brooch(0).balance < 1) {
+            if (!broochStore.hasAccess(0)) {
                 broochTimeout.value = window.setTimeout(() => {
                     donateRef.value?.openDialog()
                 }, 60000 * 5) // 5 minutes
@@ -63,7 +63,7 @@ const init = async () => {
     }
 }
 
-watch(() => broochStore.brooch(0).balance, init)
+watch(() => broochStore.hasAccess(0), init)
 </script>
 
 <template>

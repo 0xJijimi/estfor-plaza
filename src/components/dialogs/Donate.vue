@@ -4,17 +4,17 @@
             <h3 class="font-bold text-lg text-center">
                 Hey, enjoying the plaza?
             </h3>
-            <p v-if="brooch.balance < 1" class="my-5">
+            <p v-if="!broochStore.hasAccess(0)" class="my-5">
                 This information doesn't come free you know, I have eggs to
                 incubate and fires to upkeep! Now why don't you buy one of my
                 Emerald brooches and I'll stop pestering you, what do you say?
             </p>
-            <p v-if="brooch.balance < 1" class="my-5">
+            <p v-if="!broochStore.hasAccess(0)" class="my-5">
                 It's better to buy them early because I increase the price after
                 each one sold!
             </p>
-            <p v-if="brooch.balance >= 1" class="my-5">
-                Oh, you already have {{ brooch.balance }} of my brooches...
+            <p v-if="broochStore.hasAccess(0)" class="my-5">
+                Oh, you already have {{ brooch.balance || rubyBrooch.balance }} of my brooches...
                 would you like another one perchance?
             </p>
             <img
@@ -58,6 +58,10 @@ const broochStore = useBroochStore()
 
 const loading = ref(false)
 
+const rubyBrooch = computed(() => {
+    return broochStore.brooch(1)
+})
+
 const brooch = computed(() => {
     return broochStore.brooch(0)
 })
@@ -68,6 +72,7 @@ const init = async () => {
         if (account.isConnected) {
             loading.value = true
             await broochStore.getBroochData(0, false)
+            await broochStore.getBroochData(1, true)
         }
     } finally {
         loading.value = false

@@ -236,7 +236,7 @@ const selectHero = async (player: Player) => {
         heroSearch.value = player.name
         app.addToast(`${player.name} loaded`, "alert-success", 5000)
     } catch (e: any) {
-        if (e.message === "NO_EMERALD_BROOCH") {
+        if (e.message === "NO_BROOCH") {
             emeraldBroochPaywallRef.value?.openDialog()
         } else {
             console.error(`Failed to load ${player.name}`, e)

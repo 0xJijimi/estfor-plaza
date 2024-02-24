@@ -35,6 +35,19 @@ export const useBroochStore = defineStore({
                 )
             }
         },
+        hasAccess(state: BroochState) {
+            const maxTokenId = Math.max(...state.brooches.map(x => x.tokenId))
+            return (tokenId: number) => {
+                let hasBrooch = false
+                for (let i = tokenId; i <= maxTokenId; i++) {
+                    const brooch = state.brooches.find(x => x.tokenId == i)
+                    if (brooch?.balance || 0 > 0) {
+                        hasBrooch = true
+                    }
+                }
+                return hasBrooch
+            }
+        },
     },
     actions: {
         disconnect() {

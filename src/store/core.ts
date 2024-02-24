@@ -451,9 +451,15 @@ export const useCoreStore = defineStore({
                 functionName: "balanceOf",
                 args: [account.address, 0],
             })
+            const balance1 = await readContract({
+                address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
+                abi: broochAbi,
+                functionName: "balanceOf",
+                args: [account.address, 1],
+            })
 
-            if ((balance as unknown as bigint) < 1) {
-                throw new Error("NO_EMERALD_BROOCH")
+            if ((balance as unknown as bigint) < 1 && (balance1 as unknown as bigint) < 1) {
+                throw new Error("NO_BROOCH")
             }
 
             await this.getAllPlayerInfo(playerId)
