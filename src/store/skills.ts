@@ -301,7 +301,7 @@ export const useSkillStore = defineStore({
                     }
                     const nextActions = inputs.filter(
                         (x) =>
-                            x.info.minXP > currentAction.minXP &&
+                            x.info.minXP >= currentAction.minXP &&
                             x.info.xpPerHour > currentAction.xpPerHour
                     )
                     if (nextActions.length > 1) {
@@ -405,11 +405,12 @@ export const useSkillStore = defineStore({
                         (x) =>
                             x.minXPs.some(
                                 (y, i) =>
-                                    y > currentAction.minXP &&
+                                    y >= currentAction.minXP &&
                                     x.minSkills[i] === skill
                             ) && x.xpPerHour > currentAction.xpPerHour
                     )
-                    if (nextActions.length > 1) {
+
+                    if (nextActions.length > 0) {
                         nextActions.sort((a, b) => {
                             if (
                                 b.minXPs[b.minSkills.indexOf(skill)] >
