@@ -47,7 +47,7 @@
             </tbody>
             <tbody v-else>
                 <tr
-                    v-for="(m) in sortedMembers"
+                    v-for="m in sortedMembers"
                     :key="m.player.id"
                     class="hover:bg-base-100-50"
                     :class="{
@@ -159,7 +159,11 @@ const onDateUpdate = async () => {
             }
 
             raffleEntries.value = raffleResults
-                .filter((x) => (parseInt(x.timestamp) >= timestamp.valueOf() / 1000) && (parseInt(x.timestamp) < endTimestamp.valueOf() / 1000))
+                .filter(
+                    (x) =>
+                        parseInt(x.timestamp) >= timestamp.valueOf() / 1000 &&
+                        parseInt(x.timestamp) < endTimestamp.valueOf() / 1000
+                )
                 .filter((x) =>
                     props.members.map((x) => x.player.id).includes(x.playerId)
                 )

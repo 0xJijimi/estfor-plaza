@@ -111,7 +111,10 @@ router.beforeEach(async (to) => {
         if (broochStore.brooch(1).baseTokenPrice === 0) {
             await broochStore.getBroochData(1, true)
         }
-        if (broochStore.brooch(0).balance === 0 && broochStore.brooch(1).balance === 0) {
+        if (
+            broochStore.brooch(0).balance === 0 &&
+            broochStore.brooch(1).balance === 0
+        ) {
             return router.push("/")
         }
     }

@@ -1,7 +1,10 @@
 <template>
     <dialog id="emerald_brooch_paywall_modal" class="modal">
         <div class="modal-box bg-base-100 border-2 border-primary">
-            <h3 v-if="!broochStore.hasAccess(0)" class="font-bold text-lg text-center">
+            <h3
+                v-if="!broochStore.hasAccess(0)"
+                class="font-bold text-lg text-center"
+            >
                 Sorry, you're not a member!
             </h3>
             <h3 v-else class="font-bold text-lg text-center">

@@ -23,7 +23,8 @@
                 </label>
             </div>
             <div class="text-right text-xs">
-                Average Brush Gained: (Chance to win * Locked Amount) - (Chance to lose * Your Locked Amount)
+                Average Brush Gained: (Chance to win * Locked Amount) - (Chance
+                to lose * Your Locked Amount)
             </div>
             <div class="overflow-x-auto">
                 <table class="table md:table-md table-xs">
@@ -71,10 +72,34 @@
                                 }}
                             </td>
                             <td class="text-right">
-                                {{ 
+                                {{
                                     clan.id == coreStore.clanState?.id
                                         ? "-"
-                                        : (((clan.chanceToWin / 100) * parseInt((BigInt(clan.total) / BigInt(10 ** 18)).toString()) * 0.1) - ((1 - (clan.chanceToWin / 100)) * parseInt((BigInt(clanStore.sortedVaults.find(x => x.id == coreStore.clanState?.id)?.total || 0) / BigInt(10 ** 18)).toString()) * 0.05)).toFixed(0)
+                                        : (
+                                              (clan.chanceToWin / 100) *
+                                                  parseInt(
+                                                      (
+                                                          BigInt(clan.total) /
+                                                          BigInt(10 ** 18)
+                                                      ).toString()
+                                                  ) *
+                                                  0.1 -
+                                              (1 - clan.chanceToWin / 100) *
+                                                  parseInt(
+                                                      (
+                                                          BigInt(
+                                                              clanStore.sortedVaults.find(
+                                                                  (x) =>
+                                                                      x.id ==
+                                                                      coreStore
+                                                                          .clanState
+                                                                          ?.id
+                                                              )?.total || 0
+                                                          ) / BigInt(10 ** 18)
+                                                      ).toString()
+                                                  ) *
+                                                  0.05
+                                          ).toFixed(0)
                                 }}
                             </td>
                         </tr>

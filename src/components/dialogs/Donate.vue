@@ -14,7 +14,8 @@
                 each one sold!
             </p>
             <p v-if="broochStore.hasAccess(0)" class="my-5">
-                Oh, you already have {{ brooch.balance || rubyBrooch.balance }} of my brooches...
+                Oh, you already have
+                {{ brooch.balance || rubyBrooch.balance }} of my brooches...
                 would you like another one perchance?
             </p>
             <img

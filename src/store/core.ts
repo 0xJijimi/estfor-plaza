@@ -30,6 +30,8 @@ export const MEDIA_URL = "https://media.estfor.com"
 
 export enum Address {
     estforPlayers,
+    factoryRegistry,
+    estforPlayerNFT,
 }
 
 export interface AddressMap {
@@ -177,6 +179,16 @@ export const useCoreStore = defineStore({
                             name: Address.estforPlayers,
                             address:
                                 "0x058eC56ABa13F7FEE3ae9c9b91B3bB03bc336143",
+                        },
+                        {
+                            name: Address.factoryRegistry,
+                            address:
+                                "0xF9A66F8C569D23f1fA1A63950c3CA822Cf26355e",
+                        },
+                        {
+                            name: Address.estforPlayerNFT,
+                            address:
+                                "0xB809Ed839c691D465e2EC45E1BCb5E5adED50Fb9",
                         },
                     ],
                 },
@@ -458,7 +470,10 @@ export const useCoreStore = defineStore({
                 args: [account.address, 1],
             })
 
-            if ((balance as unknown as bigint) < 1 && (balance1 as unknown as bigint) < 1) {
+            if (
+                (balance as unknown as bigint) < 1 &&
+                (balance1 as unknown as bigint) < 1
+            ) {
                 throw new Error("NO_BROOCH")
             }
 

@@ -77,6 +77,14 @@ export interface DonationsResult {
     donations: Donation[]
 }
 
+export interface Avatar {
+    id: string
+}
+
+export interface AvatarSearchResult {
+    avatars: Avatar[]
+}
+
 export const getPlayerState = async (
     playerId: string
 ): Promise<ClanMemberResult> => {
@@ -105,6 +113,13 @@ export const getPlayers = async (
     searchTerm: string
 ): Promise<PlayerSearchResult> => {
     const response = await fetch(`${baseUrl}/players?name=${searchTerm}`)
+    return response.json()
+}
+
+export const getExactPlayers = async (
+    searchTerm: string
+): Promise<PlayerSearchResult> => {
+    const response = await fetch(`${baseUrl}/players?exactName=${searchTerm}`)
     return response.json()
 }
 
@@ -166,7 +181,16 @@ export const getTerritories = async (): Promise<TerritoriesResult> => {
     return response.json()
 }
 
-export const getDonations = async (numToSkip: number): Promise<DonationsResult> => {
-    const response = await fetch(`${baseUrl}/donations?numToSkip=${numToSkip}&orderDirection=desc&orderBy=lastUpdatedTimestamp&useUsers=false`)
+export const getDonations = async (
+    numToSkip: number
+): Promise<DonationsResult> => {
+    const response = await fetch(
+        `${baseUrl}/donations?numToSkip=${numToSkip}&orderDirection=desc&orderBy=lastUpdatedTimestamp&useUsers=false`
+    )
+    return response.json()
+}
+
+export const getAvatars = async (): Promise<AvatarSearchResult> => {
+    const response = await fetch(`${baseUrl}/avatars`)
     return response.json()
 }

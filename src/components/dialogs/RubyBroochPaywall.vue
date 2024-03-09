@@ -1,24 +1,45 @@
 <template>
     <dialog id="ruby_brooch_paywall_modal" class="modal">
         <div class="modal-box bg-base-100 border-2 border-primary">
-            <h3 v-if="emeraldBrooch.balance < 1 && brooch.balance < 1" class="font-bold text-lg text-center">
+            <h3
+                v-if="emeraldBrooch.balance < 1 && brooch.balance < 1"
+                class="font-bold text-lg text-center"
+            >
                 Sorry, you're not a member!
             </h3>
             <h3 v-else class="font-bold text-lg text-center">
                 Ahh, a member of the Plaza!
             </h3>
-            <p v-if="emeraldBrooch.balance >= 1 && brooch.balance < 1" class="my-5">
-                So you want to see what's in the Factory, eh? Well, I can't just let anyone in you know. You'll need to buy one of my Ruby brooches to get access. Here, give me your Emerald brooch and I'll give you a Ruby one for a small price.
+            <p
+                v-if="emeraldBrooch.balance >= 1 && brooch.balance < 1"
+                class="my-5"
+            >
+                So you want to see what's in the Factory, eh? Well, I can't just
+                let anyone in you know. You'll need to buy one of my Ruby
+                brooches to get access. Here, give me your Emerald brooch and
+                I'll give you a Ruby one for a small price.
             </p>
-            <p v-if="emeraldBrooch.balance >= 1 && brooch.balance < 1" class="my-5">
+            <p
+                v-if="emeraldBrooch.balance >= 1 && brooch.balance < 1"
+                class="my-5"
+            >
                 This one increases in price just like the Emerald brooch.
             </p>
-            <p v-if="emeraldBrooch.balance >= 1 && brooch.balance < 1" class="my-5">
-                The Factory is a place where you can create your own Estfor industrial workflow. Or at least that's the dream. I'm still working on it, but I'll let you in if you have a Ruby brooch.
+            <p
+                v-if="emeraldBrooch.balance >= 1 && brooch.balance < 1"
+                class="my-5"
+            >
+                The Factory is a place where you can create your own Estfor
+                industrial workflow. Or at least that's the dream. I'm still
+                working on it, but I'll let you in if you have a Ruby brooch.
             </p>
             <p v-else-if="brooch.balance >= 1" class="my-5">
                 You already have access to use this feature. But feel free to
-                buy another one of my brooches if you like... <span v-if="emeraldBrooch.balance < 1">Oh, you don't have any more Emerald Brooches, then you can't have any more Ruby Brooches!</span>
+                buy another one of my brooches if you like...
+                <span v-if="emeraldBrooch.balance < 1"
+                    >Oh, you don't have any more Emerald Brooches, then you
+                    can't have any more Ruby Brooches!</span
+                >
             </p>
             <img
                 src="/src/assets/ruby_brooch_web.png"
@@ -87,7 +108,7 @@ const init = async () => {
             loading.value = true
             await broochStore.getBroochData(0, false)
             await broochStore.getBroochData(1, true)
-            isApproved.value = await broochStore.getApproval() as boolean
+            isApproved.value = (await broochStore.getApproval()) as boolean
         }
     } finally {
         loading.value = false

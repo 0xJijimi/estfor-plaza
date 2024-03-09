@@ -19,14 +19,15 @@ const rubyUpgradeRef = ref<typeof RubyBroochPaywall>()
 const showBrooch = (tokenId: number) => {
     let hasBrooch = false
     let checkTokenId = tokenId
-    while (checkTokenId <= 1) { // higher tokenId means higher tier brooch so let them in - update when more brooches are added
+    while (checkTokenId <= 1) {
+        // higher tokenId means higher tier brooch so let them in - update when more brooches are added
         if (broochStore.brooch(checkTokenId).balance > 0) {
             hasBrooch = true
             break
         }
         checkTokenId++
     }
-    
+
     if (!hasBrooch) {
         switch (tokenId) {
             case 0:
@@ -88,9 +89,7 @@ watch(() => broochStore.hasAccess(0), init)
                         <ul class="bg-base-100 z-[1] w-56">
                             <li>
                                 <details>
-                                    <summary>
-                                        Hero Management
-                                    </summary>
+                                    <summary>Hero Management</summary>
                                     <ul>
                                         <li>
                                             <router-link to="/combat"
@@ -104,7 +103,8 @@ watch(() => broochStore.hasAccess(0), init)
                                         </li>
                                         <li>
                                             <router-link to="/lotteries"
-                                                >Wishing Well Ranking</router-link
+                                                >Wishing Well
+                                                Ranking</router-link
                                             >
                                         </li>
                                     </ul>
@@ -163,11 +163,11 @@ watch(() => broochStore.hasAccess(0), init)
                                 <router-link
                                     to="/factory"
                                     @click="showBrooch(1)"
-                                >Factory
+                                    >Factory
                                     <img
-                                    src="/src/assets/ruby_brooch_icon.png"
-                                    class="rounded-lg w-[20px] inline cursor-pointer"
-                                    alt="Ruby Brooch"
+                                        src="/src/assets/ruby_brooch_icon.png"
+                                        class="rounded-lg w-[20px] inline cursor-pointer"
+                                        alt="Ruby Brooch"
                                 /></router-link>
                             </li>
                         </ul>
@@ -248,14 +248,12 @@ watch(() => broochStore.hasAccess(0), init)
                     </li>
 
                     <li>
-                        <router-link
-                            to="/factory"
-                            @click="showBrooch(1)"
-                        >Factory
+                        <router-link to="/factory" @click="showBrooch(1)"
+                            >Factory
                             <img
-                            src="/src/assets/ruby_brooch_icon.png"
-                            class="rounded-lg w-[20px] inline cursor-pointer"
-                            alt="Ruby Brooch"
+                                src="/src/assets/ruby_brooch_icon.png"
+                                class="rounded-lg w-[20px] inline cursor-pointer"
+                                alt="Ruby Brooch"
                         /></router-link>
                     </li>
                 </ul>

@@ -1,6 +1,9 @@
 import { getAccount, readContract, writeContract } from "@wagmi/core"
 import { defineStore } from "pinia"
-import { HOMEMADE_BROOCH_ADDRESS, BROOCH_UPGRADER_ADDRESS } from "../utils/addresses"
+import {
+    HOMEMADE_BROOCH_ADDRESS,
+    BROOCH_UPGRADER_ADDRESS,
+} from "../utils/addresses"
 import broochAbi from "../abi/brooch.json"
 import broochUpgraderAbi from "../abi/broochUpgrader.json"
 import { solidityPacked } from "ethers"
@@ -26,7 +29,7 @@ export const useBroochStore = defineStore({
         brooch(state: BroochState) {
             return (tokenId: number) => {
                 return (
-                    state.brooches.find(x => x.tokenId == tokenId) || {
+                    state.brooches.find((x) => x.tokenId == tokenId) || {
                         tokenId,
                         balance: 0,
                         totalSupply: 0,
@@ -36,11 +39,11 @@ export const useBroochStore = defineStore({
             }
         },
         hasAccess(state: BroochState) {
-            const maxTokenId = Math.max(...state.brooches.map(x => x.tokenId))
+            const maxTokenId = Math.max(...state.brooches.map((x) => x.tokenId))
             return (tokenId: number) => {
                 let hasBrooch = false
                 for (let i = tokenId; i <= maxTokenId; i++) {
-                    const brooch = state.brooches.find(x => x.tokenId == i)
+                    const brooch = state.brooches.find((x) => x.tokenId == i)
                     if (brooch?.balance || 0 > 0) {
                         hasBrooch = true
                     }
@@ -101,9 +104,14 @@ export const useBroochStore = defineStore({
                     }),
                 ])
             }
-            let brooch = this.brooches.find(x => x.tokenId == tokenId)
+            let brooch = this.brooches.find((x) => x.tokenId == tokenId)
             if (!brooch) {
-                brooch = { tokenId, balance: 0, totalSupply: 0, baseTokenPrice: 0 }
+                brooch = {
+                    tokenId,
+                    balance: 0,
+                    totalSupply: 0,
+                    baseTokenPrice: 0,
+                }
                 this.brooches.push(brooch)
             }
             brooch.totalSupply = parseInt(
@@ -142,10 +150,7 @@ export const useBroochStore = defineStore({
                 address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
                 abi: broochAbi,
                 functionName: "setApprovalForAll",
-                args: [
-                    BROOCH_UPGRADER_ADDRESS,
-                    true,
-                ],
+                args: [BROOCH_UPGRADER_ADDRESS, true],
             })
         },
         upgradeBrooch(tokenId: number) {
@@ -153,13 +158,11 @@ export const useBroochStore = defineStore({
                 address: BROOCH_UPGRADER_ADDRESS as `0x${string}`,
                 abi: broochUpgraderAbi,
                 functionName: "upgradeBrooch",
-                args: [
-                    tokenId,
-                ],
-                value:                     
-                BigInt(this.brooches[tokenId]?.totalSupply) *
-                    BigInt(10 ** 18) +
-                BigInt(this.brooches[tokenId]?.baseTokenPrice),
+                args: [tokenId],
+                value:
+                    BigInt(this.brooches[tokenId]?.totalSupply) *
+                        BigInt(10 ** 18) +
+                    BigInt(this.brooches[tokenId]?.baseTokenPrice),
             })
         },
         getApproval() {
