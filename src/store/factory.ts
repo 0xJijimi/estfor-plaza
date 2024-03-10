@@ -1,6 +1,7 @@
 import {
     getAccount,
     multicall,
+    readContract,
     waitForTransaction,
     writeContract,
 } from "@wagmi/core"
@@ -228,38 +229,37 @@ export const useFactoryStore = defineStore({
                 chainId: fantom.id,
             }
 
-            let moreProxys = true
-            let currentIndex = this.proxys.length
-            while (moreProxys) {
-                const data = await multicall({
-                    contracts: Array.from(
-                        { length: 10 },
-                        (_, i) =>
-                            ({
-                                ...factoryContract,
-                                functionName: "proxyAddressOfOwnerByIndex",
-                                args: [account.address, i + currentIndex],
-                            }) as any
-                    ),
-                })
-                currentIndex += 10
+            const totalAddressCount: bigint = await readContract({
+                ...factoryContract,
+                functionName: "totalAddressCount",
+                args: [],
+            }) as bigint
 
-                moreProxys = !data.some((d) => d.result === ZeroAddress)
-                this.proxys.push(
-                    ...data
-                        .filter((d) => d.result !== ZeroAddress)
-                        .map((d, i) => ({
-                            address: d.result as string,
-                            index: i + currentIndex,
-                            playerId: "",
-                            playerState: {} as Player,
-                            queuedActions: [] as QueuedAction[],
-                            owner: account.address as string,
-                            isPaused: true,
-                            savedTransactions: [] as SavedTransaction[],
-                        }))
-                )
-            }
+            const data = await multicall({
+                contracts: Array.from(
+                    { length: Number(totalAddressCount) },
+                    (_, i) =>
+                        ({
+                            ...factoryContract,
+                            functionName: "proxyAddressOfOwnerByIndex",
+                            args: [account.address, i],
+                        }) as any
+                ),
+            })
+            this.proxys.push(
+                ...data
+                    .map((d, i) => ({
+                        address: d.result as string,
+                        index: i,
+                        playerId: "",
+                        playerState: {} as Player,
+                        queuedActions: [] as QueuedAction[],
+                        owner: account.address as string,
+                        isPaused: true,
+                        savedTransactions: [] as SavedTransaction[],
+                    }))
+                    .filter((d: any) => d.address !== ZeroAddress)
+            )
 
             this.initialised = true
             this.initialisedAt = new Date()
