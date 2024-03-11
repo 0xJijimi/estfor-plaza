@@ -72,11 +72,14 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue"
+import { ref, watch } from "vue"
 import { useFactoryStore } from "../store/factory"
 import { useAppStore } from "../store/app"
+import { useQuery } from "@vue/apollo-composable"
+import gql from "graphql-tag"
 import EmptySilos from "./factory/EmptySilos.vue"
 import UnassignedSilos from "./factory/UnassignedSilos.vue"
+import { getAccount } from "@wagmi/core"
 
 const factoryStore = useFactoryStore()
 const app = useAppStore()
@@ -84,9 +87,30 @@ const loading = ref(false)
 const creating = ref(false)
 const silosToCreate = ref(5)
 
+const account = getAccount()
+
+const { result, onError, refetch } = useQuery(gql`
+    query getProxys {
+        factoryRegistryCreateds(where: { owner: "${account.address}" }) {
+            sender
+            owner
+            proxy
+            proxyId
+        }
+    }
+`)
+
+watch(result, async (v) => {
+    if (v?.factoryRegistryCreateds?.length > 0) {
+        await factoryStore.setProxys(v.factoryRegistryCreateds)
+        await factoryStore.getAllProxyStates()
+    }
+})
+
 const createSilos = async () => {
     creating.value = true
     try {
+        const originalProxyCount = factoryStore.proxys.length
         await factoryStore.createProxy(silosToCreate.value)
         app.addToast(
             `${silosToCreate.value} silo${
@@ -95,6 +119,11 @@ const createSilos = async () => {
             "alert-success",
             5000
         )
+
+        while (factoryStore.proxys.length === originalProxyCount) {
+            await refetch()
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+        }
     } catch {
         // user rejected tx
         // console.error(e)
@@ -103,7 +132,7 @@ const createSilos = async () => {
     }
 }
 
-const init = async () => {
+onError(async () => {
     loading.value = true
     try {
         await factoryStore.getProxys()
@@ -113,7 +142,5 @@ const init = async () => {
     } finally {
         loading.value = false
     }
-}
-
-onMounted(init)
+})
 </script>

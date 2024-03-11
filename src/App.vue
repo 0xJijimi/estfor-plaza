@@ -1,9 +1,15 @@
 <script setup lang="ts">
-import { onMounted } from "vue"
+import { onMounted, provide } from "vue"
 import { useAppStore } from "./store/app"
 import Header from "./components/layout/Header.vue"
 import { createWeb3Modal, defaultWagmiConfig } from "@web3modal/wagmi/vue"
 import { fantom } from "viem/chains"
+import {
+    ApolloClient,
+    createHttpLink,
+    InMemoryCache,
+} from "@apollo/client/core"
+import { DefaultApolloClient } from "@vue/apollo-composable"
 
 const appStore = useAppStore()
 
@@ -38,6 +44,23 @@ createWeb3Modal({
         "--w3m-accent": "#214850",
     },
 })
+
+// HTTP connection to the API
+const httpLink = createHttpLink({
+    // You should use an absolute URL here
+    uri: import.meta.env.VITE_SUBGRAPH_URL,
+})
+
+// Cache implementation
+const cache = new InMemoryCache()
+
+// Create the apollo client
+const apolloClient = new ApolloClient({
+    link: httpLink,
+    cache,
+})
+
+provide(DefaultApolloClient, apolloClient)
 </script>
 
 <template>

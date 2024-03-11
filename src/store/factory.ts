@@ -195,15 +195,32 @@ export const useFactoryStore = defineStore({
                 solidityPacked(["bytes"], [data])
             )
 
-            const tx = await writeContract({
+            const factoryContract = {
                 address: factoryAddress as `0x${string}`,
                 abi: factoryAbi,
+                chainId: fantom.id,
+            }
+
+            const tx = await writeContract({
+                ...factoryContract,
                 functionName: "multicall",
                 args: [selectorArray],
             })
             await waitForTransaction({ hash: tx.hash })
+        },
+        async setProxys(proxys: any[]) {
+            const account = getAccount()
 
-            this.getProxys(true)
+            this.proxys = proxys.map((d) => ({
+                address: d.proxy,
+                index: d.proxyId,
+                playerId: "",
+                playerState: {} as Player,
+                queuedActions: [] as QueuedAction[],
+                owner: account.address as string,
+                isPaused: true,
+                savedTransactions: [] as SavedTransaction[],
+            }))
         },
         async getProxys(force = true) {
             if (
@@ -229,11 +246,11 @@ export const useFactoryStore = defineStore({
                 chainId: fantom.id,
             }
 
-            const totalAddressCount: bigint = await readContract({
+            const totalAddressCount: bigint = (await readContract({
                 ...factoryContract,
                 functionName: "totalAddressCount",
                 args: [],
-            }) as bigint
+            })) as bigint
 
             const data = await multicall({
                 contracts: Array.from(
