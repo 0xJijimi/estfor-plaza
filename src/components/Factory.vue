@@ -56,7 +56,7 @@
                 </div>
                 <button
                     type="button"
-                    class="btn btn-primary my-2 w-full"
+                    class="btn btn-primary mt-5 w-full"
                     @click="createSilos"
                     :disabled="loading || creating"
                 >
@@ -69,6 +69,7 @@
     </div>
     <EmptySilos v-if="factoryStore.emptyProxys.length > 0" />
     <UnassignedSilos v-if="factoryStore.unassignedProxys.length > 0" />
+    <AssignedSilos v-if="factoryStore.assignedProxys.length > 0" />
 </template>
 
 <script setup lang="ts">
@@ -79,6 +80,7 @@ import { useQuery } from "@vue/apollo-composable"
 import gql from "graphql-tag"
 import EmptySilos from "./factory/EmptySilos.vue"
 import UnassignedSilos from "./factory/UnassignedSilos.vue"
+import AssignedSilos from "./factory/AssignedSilos.vue"
 import { getAccount } from "@wagmi/core"
 
 const factoryStore = useFactoryStore()
@@ -89,7 +91,8 @@ const silosToCreate = ref(5)
 
 const account = getAccount()
 
-const { result, onError, refetch, fetchMore } = useQuery(gql`
+const { result, onError, refetch, fetchMore } = useQuery(
+    gql`
     query getProxys($offset: Int) {
         factoryRegistryCreateds(skip: $offset, where: { owner: "${account.address}" }) {
             sender
@@ -98,9 +101,11 @@ const { result, onError, refetch, fetchMore } = useQuery(gql`
             proxyId
         }
     }
-`, () => ({
-    offset: 0,
-}))
+`,
+    () => ({
+        offset: 0,
+    })
+)
 
 watch(result, async (v) => {
     if (v?.factoryRegistryCreateds?.length > 0) {

@@ -5,7 +5,12 @@ import {
     waitForTransaction,
     writeContract,
 } from "@wagmi/core"
-import { Player, QueuedAction } from "@paintswap/estfor-definitions/types"
+import {
+    ActionQueueStatus,
+    CombatStyle,
+    Player,
+    QueuedAction,
+} from "@paintswap/estfor-definitions/types"
 import { defineStore } from "pinia"
 import { ZeroAddress, solidityPacked, Interface } from "ethers"
 import { fantom } from "viem/chains"
@@ -16,7 +21,7 @@ import estforPlayerAbi from "../abi/estforPlayer.json"
 import estforPlayerNFTAbi from "../abi/estforPlayerNFT.json"
 import factoryAbi from "../abi/factoryRegistry.json"
 import epProxyAbi from "../abi/epProxy.json"
-import { getPlayersByIds } from "../utils/api"
+import { getPlayersByIds, searchQueuedActions } from "../utils/api"
 
 export interface SavedTransaction {
     to: string
@@ -40,6 +45,33 @@ export interface FactoryState {
     initialisedAt: Date | null
 }
 
+const constructQueuedActions = (
+    actionId: number,
+    rightHand: number | undefined
+): any[] => {
+    return [
+        [
+            [
+                0, // head
+                0, // neck
+                0, // body
+                0, // arms
+                0, // legs
+                0, // feet
+                0, // ring
+                0, // reserved1
+            ],
+            actionId,
+            0, // food
+            0, // melee / ranged / magic
+            rightHand || 0, // weapon or tool
+            0, // shield
+            60 * 60 * 24, // 24 hours
+            CombatStyle.NONE, // NONE / ATTACK / DEFENCE
+        ],
+    ]
+}
+
 export const useFactoryStore = defineStore({
     id: "factory",
     state: () =>
@@ -55,6 +87,11 @@ export const useFactoryStore = defineStore({
         unassignedProxys(state: FactoryState) {
             return state.proxys.filter(
                 (p) => p.playerId !== "" && p.savedTransactions.length === 0
+            )
+        },
+        assignedProxys(state: FactoryState) {
+            return state.proxys.filter(
+                (p) => p.playerId !== "" && p.savedTransactions.length > 0
             )
         },
     },
@@ -142,6 +179,9 @@ export const useFactoryStore = defineStore({
                 .map((p) => p.playerId)
             if (playerIdsToGet.length > 0) {
                 const playerStateResults = await getPlayersByIds(playerIdsToGet)
+                const queuedActionPromises = await Promise.all(
+                    playerIdsToGet.map((id) => searchQueuedActions(id))
+                )
 
                 const proxyData = await multicall({
                     contracts: proxysWithPlayerId.map(
@@ -173,6 +213,14 @@ export const useFactoryStore = defineStore({
                         playerStateResults.players.find(
                             (ps) => ps.id === p.playerId
                         ) || ({} as Player),
+                    queuedActions: queuedActionPromises
+                        .filter((x) =>
+                            x.queuedActions.find(
+                                (q) => q.playerId === p.playerId
+                            )
+                        )
+                        .map((x) => x.queuedActions)
+                        .flat(),
                     savedTransactions: proxyData[i]
                         .result as SavedTransaction[],
                     isPaused: proxyPauseData[i].result as boolean,
@@ -221,6 +269,12 @@ export const useFactoryStore = defineStore({
                 isPaused: true,
                 savedTransactions: [] as SavedTransaction[],
             }))
+        },
+        setQueuedActions(proxy: string, queuedActions: QueuedAction[]) {
+            const proxyToUpdate = this.proxys.find((p) => p.address === proxy)
+            if (proxyToUpdate) {
+                proxyToUpdate.queuedActions = queuedActions
+            }
         },
         async getProxys(force = true) {
             if (
@@ -280,6 +334,142 @@ export const useFactoryStore = defineStore({
 
             this.initialised = true
             this.initialisedAt = new Date()
+        },
+        async assignActionToProxy(
+            proxys: ProxySilo[],
+            actionId: number,
+            rightHand: number[],
+            activate: boolean
+        ) {
+            const coreStore = useCoreStore()
+            const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
+            const playersAddress = coreStore.getAddress(Address.estforPlayers)
+            const account = getAccount()
+            if (!factoryAddress || !playersAddress || !account.isConnected) {
+                return
+            }
+
+            const factoryInterface = new Interface(factoryAbi)
+            const playersInterface = new Interface(estforPlayerAbi)
+
+            const selectorArray = proxys.map((h, i) =>
+                solidityPacked(
+                    ["bytes"],
+                    [
+                        factoryInterface.encodeFunctionData("setTransaction", [
+                            h.address,
+                            0,
+                            playersAddress, // estfor players contract address
+                            playersInterface.encodeFunctionData(
+                                "startActions",
+                                [
+                                    BigInt(h.playerState.id), // playerId
+                                    constructQueuedActions(
+                                        actionId,
+                                        rightHand[i]
+                                    ), // solidity QueuedAction[] (different from api type)
+                                    ActionQueueStatus.KEEP_LAST_IN_PROGRESS, // action queue status - NONE / APPEND / KEEP_LAST_IN_PROGRESS
+                                ]
+                            ),
+                        ]),
+                    ]
+                )
+            )
+
+            const pauseArray = proxys.map((h) =>
+                solidityPacked(
+                    ["bytes"],
+                    [
+                        factoryInterface.encodeFunctionData("setPaused", [
+                            h.address,
+                            !activate,
+                        ]),
+                    ]
+                )
+            )
+
+            const tx = await writeContract({
+                address: factoryAddress as `0x${string}`,
+                abi: factoryAbi,
+                functionName: "multicall",
+                args: [[...pauseArray, ...selectorArray]],
+            })
+            await waitForTransaction({ hash: tx.hash })
+
+            // update savedTransactions and isPaused in state
+            let i = 0
+            for (const p of proxys) {
+                const proxy = this.proxys.find((x) => x.address === p.address)
+                if (proxy) {
+                    proxy.savedTransactions = [
+                        {
+                            to: playersAddress,
+                            data: playersInterface.encodeFunctionData(
+                                "startActions",
+                                [
+                                    BigInt(p.playerState.id),
+                                    constructQueuedActions(
+                                        actionId,
+                                        rightHand[i]
+                                    ),
+                                    ActionQueueStatus.KEEP_LAST_IN_PROGRESS,
+                                ]
+                            ),
+                        },
+                    ]
+                    proxy.isPaused = !activate
+                }
+                i++
+            }
+        },
+        async executeSavedTransactions(proxys: ProxySilo[]) {
+            const coreStore = useCoreStore()
+            const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
+            const account = getAccount()
+            if (!factoryAddress || !account.isConnected) {
+                return
+            }
+
+            const factoryInterface = new Interface(factoryAbi)
+
+            const selectorArray = proxys.map((h) =>
+                solidityPacked(
+                    ["bytes"],
+                    [
+                        factoryInterface.encodeFunctionData(
+                            "executeSavedTransactions",
+                            [h.address]
+                        ),
+                    ]
+                )
+            )
+
+            const tx = await writeContract({
+                address: factoryAddress as `0x${string}`,
+                abi: factoryAbi,
+                functionName: "multicall",
+                args: [selectorArray],
+            })
+            await waitForTransaction({ hash: tx.hash })
+
+            // update queuedActions in state
+            const queuedActionPromises = await Promise.all(
+                proxys.map((p) => searchQueuedActions(p.playerId))
+            )
+            for (const p of proxys) {
+                const proxy = this.proxys.find((x) => x.address === p.address)
+                if (proxy) {
+                    proxy.queuedActions =
+                        queuedActionPromises
+                            .filter((x) =>
+                                x.queuedActions.find(
+                                    (q) => q.playerId === p.playerId
+                                )
+                            )
+                            .map((x) => x.queuedActions)
+                            .flat() || []
+                }
+            }
         },
     },
 })

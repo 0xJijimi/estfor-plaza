@@ -65,7 +65,7 @@
                 <div class="flex">
                     <button
                         type="button"
-                        class="btn btn-primary my-2 me-2"
+                        class="btn btn-primary mt-5 me-2"
                         @click="addHero"
                         :disabled="
                             mintingHeroes ||
@@ -76,7 +76,7 @@
                     </button>
                     <button
                         type="button"
-                        class="btn btn-primary my-2 grow"
+                        class="btn btn-primary mt-5 grow"
                         @click="mintHeroes"
                         :disabled="mintingHeroes"
                     >

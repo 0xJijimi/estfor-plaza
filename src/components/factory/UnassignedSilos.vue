@@ -10,7 +10,7 @@
                         <tr>
                             <th class="w-[80px] text-center"></th>
                             <th>Name</th>
-                            <th class="w-[80px] text-center">Is Paused</th>
+                            <th class="w-[80px] text-center">Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -35,7 +35,10 @@
                                 >
                                     Paused
                                 </div>
-                                <div v-else class="badge badge-success">
+                                <div
+                                    v-else
+                                    class="badge badge-primary text-white"
+                                >
                                     Active
                                 </div>
                             </td>
@@ -45,30 +48,32 @@
             </div>
             <button
                 type="button"
-                class="btn btn-primary my-2"
+                class="btn btn-primary mt-5"
                 @click="assignHeroes"
                 :disabled="assigningHeroes || !selectedSilos.length"
             >
                 Assign {{ selectedSilos.length }} Hero{{
-                    selectedSilos.length > 1 ? "es" : ""
+                    selectedSilos.length !== 1 ? "es" : ""
                 }}
             </button>
         </div>
     </div>
+    <AssignHero ref="assignHeroRef" id="assign_hero_modal" />
 </template>
 
 <script setup lang="ts">
 import { useFactoryStore } from "../../store/factory"
-import { useAppStore } from "../../store/app"
 import { computed, ref, watch } from "vue"
+import AssignHero from "../dialogs/AssignHero.vue"
 
 const factoryStore = useFactoryStore()
-const app = useAppStore()
 const assigningHeroes = ref(false)
+
+const assignHeroRef = ref<typeof AssignHero>()
 
 const unassignedSilos = computed(() => factoryStore.unassignedProxys)
 const unassignedSilosRef = ref(
-    unassignedSilos.value.map((s) => ({ ...s, selected: false }))
+    unassignedSilos.value.map((s, i) => ({ ...s, selected: i === 0 }))
 )
 
 const selectedSilos = computed(() =>
@@ -76,10 +81,8 @@ const selectedSilos = computed(() =>
 )
 
 const assignHeroes = () => {
-    app.addToast(
-        `NOT IMPLEMENTED YET - Soon you can assign the selected heroes to a task`,
-        "alert-success",
-        5000
+    assignHeroRef.value?.openDialog(
+        unassignedSilosRef.value.filter((x) => x.selected)
     )
 }
 

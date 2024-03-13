@@ -188,6 +188,44 @@ export const useSkillStore = defineStore({
             ) as ActionInput[],
         }) as SkillState,
     getters: {
+        getActionInputsForSkill: (state: SkillState) => {
+            return (skill: Skill): ActionInput[] => {
+                switch (skill) {
+                    case Skill.WOODCUTTING:
+                        return state.woodcutting
+                    case Skill.MINING:
+                        return state.mining
+                    case Skill.FISHING:
+                        return state.fishing
+                    case Skill.THIEVING:
+                        return state.thieving
+                    default:
+                        return []
+                }
+            }
+        },
+        getActionChoiceInputsForSkill: (state: SkillState) => {
+            return (skill: Skill): ActionChoiceInput[] => {
+                switch (skill) {
+                    case Skill.COOKING:
+                        return state.cooking
+                    case Skill.CRAFTING:
+                        return state.crafting
+                    case Skill.SMITHING:
+                        return state.smithing
+                    case Skill.FIREMAKING:
+                        return state.firemaking
+                    case Skill.ALCHEMY:
+                        return state.alchemy
+                    case Skill.FORGING:
+                        return state.forging
+                    case Skill.FLETCHING:
+                        return state.fletching
+                    default:
+                        return []
+                }
+            }
+        },
         getCurrentAndNextActionForSkill: (state: SkillState) => {
             return (skill: Skill): RelevantAction => {
                 let inputChoices: ActionChoiceInput[] = []
