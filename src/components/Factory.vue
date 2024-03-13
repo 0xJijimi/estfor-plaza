@@ -89,20 +89,44 @@ const silosToCreate = ref(5)
 
 const account = getAccount()
 
-const { result, onError, refetch } = useQuery(gql`
-    query getProxys {
-        factoryRegistryCreateds(where: { owner: "${account.address}" }) {
+const { result, onError, refetch, fetchMore } = useQuery(gql`
+    query getProxys($offset: Int) {
+        factoryRegistryCreateds(skip: $offset, where: { owner: "${account.address}" }) {
             sender
             owner
             proxy
             proxyId
         }
     }
-`)
+`, () => ({
+    offset: 0,
+}))
 
 watch(result, async (v) => {
     if (v?.factoryRegistryCreateds?.length > 0) {
         await factoryStore.setProxys(v.factoryRegistryCreateds)
+
+        if (v.factoryRegistryCreateds.length % 100 === 0) {
+            await fetchMore({
+                variables: {
+                    offset: factoryStore.proxys.length - 1,
+                },
+                updateQuery: (previousResult, { fetchMoreResult }) => {
+                    if (!fetchMoreResult) {
+                        return previousResult
+                    }
+                    return {
+                        factoryRegistryCreateds: [
+                            ...previousResult.factoryRegistryCreateds,
+                            ...fetchMoreResult.factoryRegistryCreateds,
+                        ],
+                    }
+                },
+            })
+        } else {
+            await factoryStore.getAllProxyStates()
+        }
+    } else {
         await factoryStore.getAllProxyStates()
     }
 })
