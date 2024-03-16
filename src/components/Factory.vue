@@ -48,7 +48,6 @@
                             type="number"
                             step="1"
                             min="1"
-                            max="10"
                             class="input input-sm input-bordered bg-base-100-50"
                             v-model="silosToCreate"
                         />
@@ -60,8 +59,13 @@
                     @click="createSilos"
                     :disabled="loading || creating"
                 >
-                    Create {{ silosToCreate }} Silo{{
+                    Create {{ Math.floor(silosToCreate) }} Silo{{
                         silosToCreate > 1 ? "s" : ""
+                    }}
+                    {{
+                        neededTransactions > 1
+                            ? `(${neededTransactions} transactions)`
+                            : ""
                     }}
                 </button>
             </div>
@@ -69,11 +73,12 @@
     </div>
     <EmptySilos v-if="factoryStore.emptyProxys.length > 0" />
     <UnassignedSilos v-if="factoryStore.unassignedProxys.length > 0" />
+    <ItemBank v-if="factoryStore.proxys.length > 0" />
     <AssignedSilos v-if="factoryStore.assignedProxys.length > 0" />
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue"
+import { computed, ref, watch } from "vue"
 import { useFactoryStore } from "../store/factory"
 import { useAppStore } from "../store/app"
 import { useQuery } from "@vue/apollo-composable"
@@ -82,12 +87,14 @@ import EmptySilos from "./factory/EmptySilos.vue"
 import UnassignedSilos from "./factory/UnassignedSilos.vue"
 import AssignedSilos from "./factory/AssignedSilos.vue"
 import { getAccount } from "@wagmi/core"
+import ItemBank from "./factory/ItemBank.vue"
 
 const factoryStore = useFactoryStore()
 const app = useAppStore()
 const loading = ref(false)
 const creating = ref(false)
 const silosToCreate = ref(5)
+const chunks = ref(15)
 
 const account = getAccount()
 
@@ -136,11 +143,16 @@ watch(result, async (v) => {
     }
 })
 
+// gas cost for create proxy is 500k gas, split into chunks of 15
+const neededTransactions = computed(() => {
+    return Math.ceil(silosToCreate.value / chunks.value)
+})
+
 const createSilos = async () => {
     creating.value = true
     try {
         const originalProxyCount = factoryStore.proxys.length
-        await factoryStore.createProxy(silosToCreate.value)
+        await factoryStore.createProxy(silosToCreate.value, chunks.value)
         app.addToast(
             `${silosToCreate.value} silo${
                 silosToCreate.value > 1 ? "s" : ""

@@ -369,6 +369,12 @@ export const itemNames = {
     [EstforConstants.RAW_CHODFISH]: "Raw Chodfish",
     [EstforConstants.RAW_DOUBTFISH]: "Raw Doubtfish",
     [EstforConstants.RAW_ROSEFIN]: "Raw Rosefin",
+
+    [EstforConstants.MAGIC_FIRE_STARTER]: "Magic Fire Starter",
+    [EstforConstants.XP_BOOST]: "XP Boost",
+    [EstforConstants.SKILL_BOOST]: "Skill Boost",
+    [EstforConstants.COMBAT_BOOST]: "Combat Boost",
+    [EstforConstants.GATHERING_BOOST]: "Gathering Boost",
 }
 
 export interface EquippedItems {

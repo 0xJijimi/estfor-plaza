@@ -32,6 +32,7 @@ export enum Address {
     estforPlayers,
     factoryRegistry,
     estforPlayerNFT,
+    itemNFT,
 }
 
 export interface AddressMap {
@@ -189,6 +190,11 @@ export const useCoreStore = defineStore({
                             name: Address.estforPlayerNFT,
                             address:
                                 "0xB809Ed839c691D465e2EC45E1BCb5E5adED50Fb9",
+                        },
+                        {
+                            name: Address.itemNFT,
+                            address:
+                                "0x4b9C90ebb1fA98d9724dB46C4689994b46706f5a",
                         },
                     ],
                 },

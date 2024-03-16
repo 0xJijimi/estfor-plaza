@@ -54,8 +54,29 @@ const value = computed({
 const minHeroXPForSkill = computed(() => {
     return Math.min(
         ...props.heroes.map((h) => {
+            const relevantActions = h.queuedActions.filter(
+                (x) => x.skill == props.skillId
+            )
+            let extraXP = 0
+            const timenow = Date.now() / 1000
+            for (const action of relevantActions) {
+                const a = skillStore
+                    .getActionInputsForSkill(props.skillId)
+                    .find((s) => s.actionId == action.actionId)
+                if (!a) {
+                    continue
+                }
+                if (parseInt(action.startTime) < timenow) {
+                    const timeNotInAction =
+                        timenow - parseInt(action.startTime) - action.timespan
+                    extraXP +=
+                        a.info.xpPerHour *
+                        ((action.timespan - timeNotInAction) / 60 / 60)
+                }
+            }
+
             // @ts-ignore
-            return h.playerState[skillToXPMap[props.skillId]] as number
+            return Number(h.playerState[skillToXPMap[props.skillId]]) + extraXP
         })
     )
 })

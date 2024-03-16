@@ -8,7 +8,14 @@
                 <table class="table md:table-md table-xs">
                     <thead>
                         <tr>
-                            <th class="w-[80px] text-center"></th>
+                            <th class="w-[80px]">
+                                <input
+                                    type="checkbox"
+                                    class="checkbox checkbox-primary"
+                                    v-model="selectAll"
+                                    @change="selectAllSilos"
+                                />
+                            </th>
                             <th>Name</th>
                             <th>Saved Action</th>
                             <th>Time Left</th>
@@ -18,7 +25,7 @@
                     </thead>
                     <tbody>
                         <tr
-                            v-for="silo in assignedSilosRef"
+                            v-for="silo in pagedAssignedSilos"
                             :key="silo.address"
                         >
                             <td>
@@ -77,6 +84,31 @@
                     </tbody>
                 </table>
             </div>
+            <div v-if="assignedSilosRef.length > 20" class="join mx-auto">
+                <button
+                    :disabled="pageNumber === 0"
+                    class="join-item btn btn-primary"
+                    @click="pageNumber = pageNumber - 1"
+                >
+                    «
+                </button>
+                <button
+                    v-for="p in pagesToSelect"
+                    :key="p"
+                    :disabled="p === pageNumber + 1"
+                    class="join-item btn btn-primary"
+                    @click="pageNumber = p - 1"
+                >
+                    {{ p }}
+                </button>
+                <button
+                    :disabled="pageNumber + 1 === totalPages"
+                    class="join-item btn btn-primary"
+                    @click="pageNumber = pageNumber + 1"
+                >
+                    »
+                </button>
+            </div>
             <div class="flex">
                 <button
                     type="button"
@@ -97,6 +129,11 @@
                     Execute Actions for {{ selectedSilos.length }} Hero{{
                         selectedSilos.length !== 1 ? "es" : ""
                     }}
+                    {{
+                        neededTransactions > 1
+                            ? `(${neededTransactions} transactions)`
+                            : ""
+                    }}
                 </button>
             </div>
         </div>
@@ -110,15 +147,18 @@ import { SavedTransaction, useFactoryStore } from "../../store/factory"
 import { computed, onMounted, onUnmounted, ref, watch } from "vue"
 import AssignHero from "../dialogs/AssignHero.vue"
 import { QueuedAction } from "@paintswap/estfor-definitions/types"
-import { Interface } from "ethers"
 import estforPlayerAbi from "../../abi/estforPlayer.json"
 import { actionNames } from "../../store/skills"
-import { searchQueuedActions } from "../../utils/api"
+import { decode } from "../../utils/abi"
 
 const factoryStore = useFactoryStore()
 const app = useAppStore()
 const executing = ref(false)
 const interval = ref<NodeJS.Timeout>()
+const chunks = ref(10)
+const pageSize = ref(20)
+const pageNumber = ref(0)
+const selectAll = ref(false)
 
 const assignHeroRef = ref<typeof AssignHero>()
 
@@ -127,9 +167,53 @@ const assignedSilosRef = ref(
     assignedSilos.value.map((s, i) => ({ ...s, selected: i === 0 }))
 )
 
+const pagedAssignedSilos = computed(() => {
+    const start = pageNumber.value * pageSize.value
+    return assignedSilosRef.value.slice(start, start + pageSize.value)
+})
+
+const totalPages = computed(() => {
+    return Math.ceil(assignedSilosRef.value.length / pageSize.value)
+})
+
+const pagesToSelect = computed(() => {
+    const pages = []
+    if (totalPages.value > 5) {
+        if (pageNumber.value + 1 < 3) {
+            for (let i = 1; i <= 5; i++) {
+                pages.push(i)
+            }
+        } else if (pageNumber.value + 1 > totalPages.value - 3) {
+            for (let i = totalPages.value - 4; i < totalPages.value + 1; i++) {
+                pages.push(i)
+            }
+        } else {
+            for (let i = pageNumber.value - 1; i < pageNumber.value + 4; i++) {
+                pages.push(i)
+            }
+        }
+    } else {
+        for (let i = 1; i < totalPages.value; i++) {
+            pages.push(i)
+        }
+    }
+    return pages
+})
+
+const selectAllSilos = () => {
+    for (const silo of assignedSilosRef.value) {
+        silo.selected = selectAll.value
+    }
+}
+
 const selectedSilos = computed(() =>
     assignedSilosRef.value.filter((s) => s.selected)
 )
+
+// gas cost for execute action is 800k gas, split into chunks of 10
+const neededTransactions = computed(() => {
+    return Math.ceil(selectedSilos.value.length / chunks.value)
+})
 
 const assignHeroes = () => {
     assignHeroRef.value?.openDialog(
@@ -140,7 +224,10 @@ const assignHeroes = () => {
 const executeSavedTransactions = async () => {
     executing.value = true
     try {
-        await factoryStore.executeSavedTransactions(selectedSilos.value)
+        await factoryStore.executeSavedTransactions(
+            selectedSilos.value,
+            chunks.value
+        )
         app.addToast(
             `${selectedSilos.value.length} hero${
                 selectedSilos.value.length !== 1 ? "es" : ""
@@ -176,25 +263,28 @@ const decodeTransaction = (savedTransactions: SavedTransaction[]) => {
         return "No action"
     }
     // first transaction is the action queue
-    const data = savedTransactions[0].data
-    const playersInterface = new Interface(estforPlayerAbi)
-    const decoded = playersInterface.decodeFunctionData("startActions", data)
+    const decoded = decode(
+        savedTransactions[0].data,
+        "startActions",
+        estforPlayerAbi
+    )
     // [playerId, actions[[attire, actionId, ...], [], []], action queue type]
     const actionId = decoded?.[1]?.[0]?.[1] || BigInt(0)
     return actionNames[Number(actionId)] || "Unknown"
 }
 
 onMounted(() => {
-    clearInterval(interval.value)
-    interval.value = setInterval(async () => {
-        for (const silo of assignedSilos.value) {
-            const queuedActions = await searchQueuedActions(silo.playerId)
-            factoryStore.setQueuedActions(
-                silo.playerId,
-                queuedActions.queuedActions
-            )
-        }
-    }, 1000 * 60) // every minute
+    // doesn't actually update the store, just fetches the data so useless for now (also it should only do the current page probably)
+    // clearInterval(interval.value)
+    // interval.value = setInterval(async () => {
+    //     for (const silo of assignedSilos.value) {
+    //         const queuedActions = await searchQueuedActions(silo.playerId)
+    //         factoryStore.setQueuedActions(
+    //             silo.playerId,
+    //             queuedActions.queuedActions
+    //         )
+    //     }
+    // }, 1000 * 60) // every minute
 })
 
 onUnmounted(() => {

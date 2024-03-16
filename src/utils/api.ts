@@ -124,10 +124,13 @@ export const getExactPlayers = async (
 }
 
 export const getPlayersByIds = async (
-    ids: string[]
+    ids: string[],
+    numToSkip: number = 0
 ): Promise<PlayerSearchResult> => {
     const response = await fetch(
-        `${baseUrl}/players?${ids.map((x) => `tokenIds[]=${x}`).join("&")}`
+        `${baseUrl}/players?numToSkip=${numToSkip}&${ids
+            .map((x) => `tokenIds[]=${x}`)
+            .join("&")}`
     )
     return response.json()
 }
@@ -171,7 +174,7 @@ export const searchQueuedActions = async (
     playerId: string
 ): Promise<SearchQueuedActionsResult> => {
     const response = await fetch(
-        `${baseUrl}/queued-actions?playerId=${playerId}&isActive=true`
+        `${baseUrl}/queued-actions?playerId=${playerId}&isActive=true&orderDirection=asc`
     )
     return response.json()
 }

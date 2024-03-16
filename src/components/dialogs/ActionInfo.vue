@@ -72,23 +72,10 @@
                                     <span>{{ itemNames[r.itemTokenId] }}</span
                                     ><span
                                         >{{ r.amount }} ({{
-                                            (
-                                                (r.chance *
-                                                    Math.min(
-                                                        90,
-                                                        a.info.successPercent +
-                                                            Math.max(
-                                                                0,
-                                                                getLevel(
-                                                                    playerXp
-                                                                ) -
-                                                                    getLevel(
-                                                                        a.info
-                                                                            .minXP
-                                                                    )
-                                                            )
-                                                    )) /
-                                                65535
+                                            calculateChance(
+                                                r,
+                                                a,
+                                                playerXp
                                             ).toFixed(2)
                                         }}%)</span
                                     >
@@ -117,6 +104,7 @@ import {
 import { itemNames, useItemStore } from "../../store/items"
 import { allActions } from "../../data/actions"
 import { Skill } from "@paintswap/estfor-definitions/types"
+import { calculateChance } from "../../utils/player"
 
 const coreStore = useCoreStore()
 const skillId = ref(0)
