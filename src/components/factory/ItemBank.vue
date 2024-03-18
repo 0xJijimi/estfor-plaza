@@ -38,10 +38,17 @@
             <div class="flex">
                 <button
                     type="button"
-                    class="btn btn-primary mt-5 grow"
+                    class="btn btn-primary mt-5"
                     @click="withdrawItems"
                 >
                     Withdraw Items
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-primary mt-5 grow ms-2"
+                    @click="depositItems"
+                >
+                    Process Deposits
                 </button>
             </div>
         </div>
@@ -64,6 +71,9 @@ import { itemNames } from "../../store/items"
 import { getUserItemNFTs } from "../../utils/api"
 import { UserItemNFT } from "@paintswap/estfor-definitions/types"
 import WithdrawFromBank from "../dialogs/WithdrawFromBank.vue"
+import { decode } from "../../utils/abi"
+import estforPlayerAbi from "../../abi/estforPlayer.json"
+import { allActions } from "../../data/actions"
 
 const factoryStore = useFactoryStore()
 const period = ref(24)
@@ -119,6 +129,49 @@ const aggregatedItems: ComputedRef<AggregatedItem[]> = computed(() => {
 
 const withdrawItems = async () => {
     withdrawFromBankRef.value?.openDialog(aggregatedItems.value)
+}
+
+const depositItems = async () => {
+    try {
+        const itemResultPromises = factoryStore.assignedProxys.filter(p => p.address !== bank.value?.address).map(p => getUserItemNFTs(p.address, []))
+        const results = await Promise.all(itemResultPromises)
+        
+        // match proxy on item result user address and work out the outputs from the decoded saved transaction
+        const deposits: { items: UserItemNFT[], proxy: string }[] = []
+        for (const result of results.filter(r => r.userItemNFTs.length > 0)) {
+            const proxy = factoryStore.assignedProxys.find(p => p.address === result.userItemNFTs[0].user)
+            console.log(proxy)
+            if (!proxy) {
+                continue
+            }
+
+            // TODO: implement ActionChoice
+            const decoded = decode(proxy.savedTransactions[0].data, "startActions", estforPlayerAbi)
+            const actionId = decoded?.[1]?.[0]?.[1] || BigInt(0)
+            const action = allActions.find(a => a.actionId === Number(actionId))
+            const relevantTokenIds: number[] = []
+            if (action) {
+                relevantTokenIds.push(...action.guaranteedRewards.map(r => r.itemTokenId))
+                relevantTokenIds.push(...action.randomRewards.map(r => r.itemTokenId))
+            }
+
+            for (const item of result.userItemNFTs.filter(i => relevantTokenIds.includes(i.tokenId))) {
+                let d = deposits.find(d => d.proxy === proxy.address)
+                if (!d) {
+                    d = {
+                        proxy: proxy?.address,
+                        items: [],
+                    }
+                    deposits.push(d)
+                }
+                d.items.push(item)
+            }
+        }
+        await factoryStore.transferItemsToBank(deposits)
+        init()
+    } catch {
+        // console.error(e)
+    }
 }
 
 const init = async () => {

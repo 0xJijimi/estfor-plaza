@@ -11,6 +11,7 @@ import {
     GuaranteedReward,
     Player,
     QueuedAction,
+    UserItemNFT,
 } from "@paintswap/estfor-definitions/types"
 import { defineStore } from "pinia"
 import { ZeroAddress, solidityPacked, Interface } from "ethers"
@@ -610,6 +611,50 @@ export const useFactoryStore = defineStore({
                     ]
                 ),
             ]
+
+            const tx = await writeContract({
+                address: factoryAddress as `0x${string}`,
+                abi: factoryAbi,
+                functionName: "multicall",
+                args: [selectorArray],
+            })
+            await waitForTransaction({ hash: tx.hash })
+        },
+        async transferItemsToBank(items: { items: UserItemNFT[], proxy: string }[]) {
+            const coreStore = useCoreStore()
+            const itemAddress = coreStore.getAddress(Address.itemNFT)
+            const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
+            const account = getAccount()
+            if (!factoryAddress || !itemAddress || !account.isConnected) {
+                return
+            }
+
+            const toAddress = this.bank?.address
+            if (!toAddress) {
+                return
+            }
+
+            const factoryInterface = new Interface(factoryAbi)
+            const itemInterface = new Interface(itemNFTAbi)
+
+            const selectorArray = items.map((i) =>
+                solidityPacked(
+                    ["bytes"],
+                    [
+                        factoryInterface.encodeFunctionData("execute", [
+                            i.proxy,
+                            itemAddress,
+                            itemInterface.encodeFunctionData("safeBatchTransferFrom", [
+                                i.proxy,
+                                toAddress,
+                                i.items.map((i) => i.tokenId),
+                                i.items.map((i) => i.amount),
+                                solidityPacked(["bytes"], ["0x"]),
+                            ]),
+                        ]),
+                    ]
+                )
+            )
 
             const tx = await writeContract({
                 address: factoryAddress as `0x${string}`,
