@@ -148,7 +148,7 @@ import { computed, onMounted, onUnmounted, ref, watch } from "vue"
 import AssignHero from "../dialogs/AssignHero.vue"
 import { QueuedAction } from "@paintswap/estfor-definitions/types"
 import estforPlayerAbi from "../../abi/estforPlayer.json"
-import { actionNames } from "../../store/skills"
+import { actionChoiceNames, actionNames } from "../../store/skills"
 import { decode } from "../../utils/abi"
 
 const factoryStore = useFactoryStore()
@@ -268,9 +268,14 @@ const decodeTransaction = (savedTransactions: SavedTransaction[]) => {
         "startActions",
         estforPlayerAbi
     )
-    // [playerId, actions[[attire, actionId, ...], [], []], action queue type]
+    // [playerId, actions[[attire, actionId, regenId, choiceId], [], []], action queue type]
     const actionId = decoded?.[1]?.[0]?.[1] || BigInt(0)
-    return actionNames[Number(actionId)] || "Unknown"
+    const choiceId = decoded?.[1]?.[0]?.[3] || BigInt(0)
+    return (
+        actionNames[Number(actionId)] ||
+        actionChoiceNames[Number(choiceId)] ||
+        "Unknown"
+    )
 }
 
 onMounted(() => {

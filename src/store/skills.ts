@@ -18,6 +18,15 @@ import {
     allActionChoicesSmithing,
 } from "../data/actionChoices"
 import { itemNames, useItemStore } from "./items"
+import {
+    allActionChoiceIdsAlchemy,
+    allActionChoiceIdsCooking,
+    allActionChoiceIdsCrafting,
+    allActionChoiceIdsFiremaking,
+    allActionChoiceIdsFletching,
+    allActionChoiceIdsForging,
+    allActionChoiceIdsSmithing,
+} from "../data/actionChoiceIds"
 
 export interface SkillState {
     woodcutting: ActionInput[]
@@ -142,6 +151,334 @@ export const actionNames = {
     [EstforConstants.ACTION_THIEVING_MASTER_THIEF]: "Master Thief",
 }
 
+export const actionChoiceNames = {
+    // taken from the choices in ../data/actionChoiceId.ts
+    [EstforConstants.ACTIONCHOICE_FIREMAKING_LOG]: "Log",
+    [EstforConstants.ACTIONCHOICE_FIREMAKING_OAK]: "Oak",
+    [EstforConstants.ACTIONCHOICE_FIREMAKING_WILLOW]: "Willow",
+    [EstforConstants.ACTIONCHOICE_FIREMAKING_MAPLE]: "Maple",
+    [EstforConstants.ACTIONCHOICE_FIREMAKING_REDWOOD]: "Redwood",
+    [EstforConstants.ACTIONCHOICE_FIREMAKING_MAGICAL]: "Magical",
+    [EstforConstants.ACTIONCHOICE_FIREMAKING_ASH]: "Ash",
+    [EstforConstants.ACTIONCHOICE_FIREMAKING_ENCHANTED]: "Enchanted",
+    [EstforConstants.ACTIONCHOICE_FIREMAKING_LIVING]: "Living",
+
+    [EstforConstants.ACTIONCHOICE_SMITHING_BRONZE_BAR]: "Bronze Bar",
+    [EstforConstants.ACTIONCHOICE_SMITHING_IRON_BAR]: "Iron Bar",
+    [EstforConstants.ACTIONCHOICE_SMITHING_MITHRIL_BAR]: "Mithril Bar",
+    [EstforConstants.ACTIONCHOICE_SMITHING_ADAMANTINE_BAR]: "Adamantine Bar",
+    [EstforConstants.ACTIONCHOICE_SMITHING_RUNITE_BAR]: "Runite Bar",
+    [EstforConstants.ACTIONCHOICE_SMITHING_TITANIUM_BAR]: "Titanium Bar",
+    [EstforConstants.ACTIONCHOICE_SMITHING_ORICHALCUM_BAR]: "Orichalcum Bar",
+    [EstforConstants.ACTIONCHOICE_SMITHING_BRONZE_HELMET]: "Bronze Helmet",
+    [EstforConstants.ACTIONCHOICE_SMITHING_IRON_HELMET]: "Iron Helmet",
+    [EstforConstants.ACTIONCHOICE_SMITHING_MITHRIL_HELMET]: "Mithril Helmet",
+    [EstforConstants.ACTIONCHOICE_SMITHING_ADAMANTINE_HELMET]:
+        "Adamantine Helmet",
+    [EstforConstants.ACTIONCHOICE_SMITHING_RUNITE_HELMET]: "Runite Helmet",
+    [EstforConstants.ACTIONCHOICE_SMITHING_TITANIUM_HELMET]: "Titanium Helmet",
+    [EstforConstants.ACTIONCHOICE_SMITHING_ORICHALCUM_HELMET]:
+        "Orichalcum Helmet",
+    [EstforConstants.ACTIONCHOICE_SMITHING_BRONZE_ARMOR]: "Bronze Armor",
+    [EstforConstants.ACTIONCHOICE_SMITHING_IRON_ARMOR]: "Iron Armor",
+    [EstforConstants.ACTIONCHOICE_SMITHING_MITHRIL_ARMOR]: "Mithril Armor",
+    [EstforConstants.ACTIONCHOICE_SMITHING_ADAMANTINE_ARMOR]:
+        "Adamantine Armor",
+    [EstforConstants.ACTIONCHOICE_SMITHING_RUNITE_ARMOR]: "Runite Armor",
+    [EstforConstants.ACTIONCHOICE_SMITHING_TITANIUM_ARMOR]: "Titanium Armor",
+    [EstforConstants.ACTIONCHOICE_SMITHING_ORICHALCUM_ARMOR]:
+        "Orichalcum Armor",
+    [EstforConstants.ACTIONCHOICE_SMITHING_BRONZE_TASSETS]: "Bronze Tassets",
+    [EstforConstants.ACTIONCHOICE_SMITHING_IRON_TASSETS]: "Iron Tassets",
+    [EstforConstants.ACTIONCHOICE_SMITHING_MITHRIL_TASSETS]: "Mithril Tassets",
+    [EstforConstants.ACTIONCHOICE_SMITHING_ADAMANTINE_TASSETS]:
+        "Adamantine Tassets",
+    [EstforConstants.ACTIONCHOICE_SMITHING_RUNITE_TASSETS]: "Runite Tassets",
+    [EstforConstants.ACTIONCHOICE_SMITHING_TITANIUM_TASSETS]:
+        "Titanium Tassets",
+    [EstforConstants.ACTIONCHOICE_SMITHING_ORICHALCUM_TASSETS]:
+        "Orichalcum Tassets",
+    [EstforConstants.ACTIONCHOICE_SMITHING_BRONZE_GAUNTLETS]:
+        "Bronze Gauntlets",
+    [EstforConstants.ACTIONCHOICE_SMITHING_IRON_GAUNTLETS]: "Iron Gauntlets",
+    [EstforConstants.ACTIONCHOICE_SMITHING_MITHRIL_GAUNTLETS]:
+        "Mithril Gauntlets",
+    [EstforConstants.ACTIONCHOICE_SMITHING_ADAMANTINE_GAUNTLETS]:
+        "Adamantine Gauntlets",
+    [EstforConstants.ACTIONCHOICE_SMITHING_RUNITE_GAUNTLETS]:
+        "Runite Gauntlets",
+    [EstforConstants.ACTIONCHOICE_SMITHING_TITANIUM_GAUNTLETS]:
+        "Titanium Gauntlets",
+    [EstforConstants.ACTIONCHOICE_SMITHING_ORICHALCUM_GAUNTLETS]:
+        "Orichalcum Gauntlets",
+    [EstforConstants.ACTIONCHOICE_SMITHING_BRONZE_BOOTS]: "Bronze Boots",
+    [EstforConstants.ACTIONCHOICE_SMITHING_IRON_BOOTS]: "Iron Boots",
+    [EstforConstants.ACTIONCHOICE_SMITHING_MITHRIL_BOOTS]: "Mithril Boots",
+    [EstforConstants.ACTIONCHOICE_SMITHING_ADAMANTINE_BOOTS]:
+        "Adamantine Boots",
+    [EstforConstants.ACTIONCHOICE_SMITHING_RUNITE_BOOTS]: "Runite Boots",
+    [EstforConstants.ACTIONCHOICE_SMITHING_TITANIUM_BOOTS]: "Titanium Boots",
+    [EstforConstants.ACTIONCHOICE_SMITHING_ORICHALCUM_BOOTS]:
+        "Orichalcum Boots",
+    [EstforConstants.ACTIONCHOICE_SMITHING_BRONZE_SHIELD]: "Bronze Shield",
+    [EstforConstants.ACTIONCHOICE_SMITHING_IRON_SHIELD]: "Iron Shield",
+    [EstforConstants.ACTIONCHOICE_SMITHING_MITHRIL_SHIELD]: "Mithril Shield",
+    [EstforConstants.ACTIONCHOICE_SMITHING_ADAMANTINE_SHIELD]:
+        "Adamantine Shield",
+    [EstforConstants.ACTIONCHOICE_SMITHING_RUNITE_SHIELD]: "Runite Shield",
+    [EstforConstants.ACTIONCHOICE_SMITHING_TITANIUM_SHIELD]: "Titanium Shield",
+    [EstforConstants.ACTIONCHOICE_SMITHING_ORICHALCUM_SHIELD]:
+        "Orichalcum Shield",
+    [EstforConstants.ACTIONCHOICE_SMITHING_BRONZE_SWORD]: "Bronze Sword",
+    [EstforConstants.ACTIONCHOICE_SMITHING_IRON_SWORD]: "Iron Sword",
+    [EstforConstants.ACTIONCHOICE_SMITHING_MITHRIL_SWORD]: "Mithril Sword",
+    [EstforConstants.ACTIONCHOICE_SMITHING_ADAMANTINE_SWORD]:
+        "Adamantine Sword",
+    [EstforConstants.ACTIONCHOICE_SMITHING_RUNITE_SWORD]: "Runite Sword",
+    [EstforConstants.ACTIONCHOICE_SMITHING_TITANIUM_SWORD]: "Titanium Sword",
+    [EstforConstants.ACTIONCHOICE_SMITHING_ORICHALCUM_SWORD]:
+        "Orichalcum Sword",
+    [EstforConstants.ACTIONCHOICE_SMITHING_BRONZE_ARROW_HEAD]:
+        "Bronze Arrow Head",
+    [EstforConstants.ACTIONCHOICE_SMITHING_IRON_ARROW_HEAD]: "Iron Arrow Head",
+    [EstforConstants.ACTIONCHOICE_SMITHING_MITHRIL_ARROW_HEAD]:
+        "Mithril Arrow Head",
+    [EstforConstants.ACTIONCHOICE_SMITHING_ADAMANTINE_ARROW_HEAD]:
+        "Adamantine Arrow Head",
+    [EstforConstants.ACTIONCHOICE_SMITHING_RUNITE_ARROW_HEAD]:
+        "Runite Arrow Head",
+    [EstforConstants.ACTIONCHOICE_SMITHING_TITANIUM_ARROW_HEAD]:
+        "Titanium Arrow Head",
+    [EstforConstants.ACTIONCHOICE_SMITHING_ORICHALCUM_ARROW_HEAD]:
+        "Orichalcum Arrow Head",
+
+    [EstforConstants.ACTIONCHOICE_COOKING_MINNUS]: "Cooked Minnus",
+    [EstforConstants.ACTIONCHOICE_COOKING_BLEKK]: "Cooked Blekk",
+    [EstforConstants.ACTIONCHOICE_COOKING_SKRIMP]: "Cooked Skrimp",
+    [EstforConstants.ACTIONCHOICE_COOKING_FEOLA]: "Cooked Feola",
+    [EstforConstants.ACTIONCHOICE_COOKING_ANCHO]: "Cooked Ancho",
+    [EstforConstants.ACTIONCHOICE_COOKING_TROUT]: "Cooked Trout",
+    [EstforConstants.ACTIONCHOICE_COOKING_ROJJA]: "Cooked Rojja",
+    [EstforConstants.ACTIONCHOICE_COOKING_BOWFISH]: "Cooked Bowfish",
+    [EstforConstants.ACTIONCHOICE_COOKING_GOLDFISH]: "Cooked Goldfish",
+    [EstforConstants.ACTIONCHOICE_COOKING_MYSTY_BLUE]: "Cooked Mysty Blue",
+    [EstforConstants.ACTIONCHOICE_COOKING_FLITFISH]: "Cooked Flitfish",
+    [EstforConstants.ACTIONCHOICE_COOKING_RAZORFISH]: "Cooked Razorfish",
+    [EstforConstants.ACTIONCHOICE_COOKING_QUAFFER]: "Cooked Quaffer",
+    [EstforConstants.ACTIONCHOICE_COOKING_ROXA]: "Cooked Roxa",
+    [EstforConstants.ACTIONCHOICE_COOKING_AZACUDDA]: "Cooked Azacudda",
+    [EstforConstants.ACTIONCHOICE_COOKING_STONECLAW]: "Cooked Stoneclaw",
+    [EstforConstants.ACTIONCHOICE_COOKING_CRUSKAN]: "Cooked Cruskan",
+    [EstforConstants.ACTIONCHOICE_COOKING_CHODFISH]: "Cooked Chodfish",
+    [EstforConstants.ACTIONCHOICE_COOKING_DOUBTFISH]: "Cooked Doubtfish",
+    [EstforConstants.ACTIONCHOICE_COOKING_ROSEFIN]: "Cooked Rosefin",
+
+    [EstforConstants.ACTIONCHOICE_CRAFTING_SAPPHIRE_AMULET]: "Sapphire Amulet",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_EMERALD_AMULET]: "Emerald Amulet",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_RUBY_AMULET]: "Ruby Amulet",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_AMETHYST_AMULET]: "Amethyst Amulet",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_DIAMOND_AMULET]: "Diamond Amulet",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_DRAGONSTONE_AMULET]:
+        "Dragonstone Amulet",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_BRONZE_PICKAXE]: "Bronze Pickaxe",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_IRON_PICKAXE]: "Iron Pickaxe",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_MITHRIL_PICKAXE]: "Mithril Pickaxe",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_ADAMANTINE_PICKAXE]:
+        "Adamantine Pickaxe",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_RUNITE_PICKAXE]: "Runite Pickaxe",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_TITANIUM_PICKAXE]:
+        "Titanium Pickaxe",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_ORICHALCUM_PICKAXE]:
+        "Orichalcum Pickaxe",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_BRONZE_AXE]: "Bronze Axe",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_IRON_AXE]: "Iron Axe",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_MITHRIL_AXE]: "Mithril Axe",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_ADAMANTINE_AXE]: "Adamantine Axe",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_RUNITE_AXE]: "Runite Axe",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_TITANIUM_AXE]: "Titanium Axe",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_ORICHALCUM_AXE]: "Orichalcum Axe",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_NATUOW_LEATHER]: "Natuow Leather",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_BONEMEAL]: "Bonemeal",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_BONEMEAL_MEDIUM]: "Bonemeal Medium",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_BONEMEAL_LARGE]: "Bonemeal Large",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_BONEMEAL_DRAGON]: "Bonemeal Dragon",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_ROPE]: "Rope",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_ACORN_PATCH]: "Acorn Patch",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_BAT_WING_PATCH]: "Bat Wing Patch",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_NATUOW_HOOD]: "Natuow Hood",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_NATUOW_BODY]: "Natuow Body",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_NATUOW_TASSETS]: "Natuow Tassets",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_NATUOW_BOOTS]: "Natuow Boots",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_NATUOW_BRACERS]: "Natuow Bracers",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_BAT_WING_HAT]: "Bat Wing Hat",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_BAT_WING_BODY]: "Bat Wing Body",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_BAT_WING_TROUSERS]:
+        "Bat Wing Trousers",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_BAT_WING_BOOTS]: "Bat Wing Boots",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_BAT_WING_BRACERS]:
+        "Bat Wing Bracers",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_NATURE_MASK]: "Nature Mask",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_NATURE_BODY]: "Nature Body",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_NATURE_TROUSERS]: "Nature Trousers",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_NATURE_BOOTS]: "Nature Boots",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_NATURE_BRACERS]: "Nature Bracers",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_TOTEM_STAFF]: "Totem Staff",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_SAPPHIRE_STAFF]: "Sapphire Staff",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_EMERALD_STAFF]: "Emerald Staff",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_RUBY_STAFF]: "Ruby Staff",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_AMETHYST_STAFF]: "Amethyst Staff",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_AMETHYST_STAFF]: "Amethyst Staff",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_DIAMOND_STAFF]: "Diamond Staff",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_APPRENTICE_HAT]: "Apprentice Hat",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_APPRENTICE_BODY]: "Apprentice Body",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_APPRENTICE_TROUSERS]:
+        "Apprentice Trousers",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_APPRENTICE_GAUNTLETS]:
+        "Apprentice Gauntlets",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_APPRENTICE_BOOTS]:
+        "Apprentice Boots",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_MAGE_HOOD]: "Mage Hood",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_MAGE_BODY]: "Mage Body",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_MAGE_TROUSERS]: "Mage Trousers",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_MAGE_BRACERS]: "Mage Bracers",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_MAGE_BOOTS]: "Mage Boots",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_SORCERER_HAT]: "Sorcerer Hat",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_SORCERER_BODY]: "Sorcerer Body",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_SORCERER_TROUSERS]:
+        "Sorcerer Trousers",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_SORCERER_GAUNTLETS]:
+        "Sorcerer Gauntlets",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_SORCERER_BOOTS]: "Sorcerer Boots",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_SEERS_HOOD]: "Seers Hood",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_SEERS_BODY]: "Seers Body",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_SEERS_TROUSERS]: "Seers Trousers",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_SEERS_BRACERS]: "Seers Bracers",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_SEERS_BOOTS]: "Seers Boots",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_SHAMAN_HOOD]: "Shaman Hood",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_SHAMAN_BODY]: "Shaman Body",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_SHAMAN_TROUSERS]: "Shaman Trousers",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_SHAMAN_GAUNTLETS]:
+        "Shaman Gauntlets",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_SHAMAN_BOOTS]: "Shaman Boots",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_AZAMITE_COWL]: "Azamite Cowl",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_AZAMITE_BODY]: "Azamite Body",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_AZAMITE_CHAPS]: "Azamite Chaps",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_AZAMITE_BRACERS]: "Azamite Bracers",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_AZAMITE_BOOTS]: "Azamite Boots",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_HAUBERK_COWL]: "Hauberk Cowl",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_HAUBERK_BODY]: "Hauberk Body",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_HAUBERK_CHAPS]: "Hauberk Chaps",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_HAUBERK_BRACERS]: "Hauberk Bracers",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_HAUBERK_BOOTS]: "Hauberk Boots",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_GARAGOS_COWL]: "Garagos Cowl",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_GARAGOS_BODY]: "Garagos Body",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_GARAGOS_CHAPS]: "Garagos Chaps",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_GARAGOS_BRACERS]: "Garagos Bracers",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_GARAGOS_BOOTS]: "Garagos Boots",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_ETERNAL_COWL]: "Eternal Cowl",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_ETERNAL_BODY]: "Eternal Body",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_ETERNAL_CHAPS]: "Eternal Chaps",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_ETERNAL_BRACERS]: "Eternal Bracers",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_ETERNAL_BOOTS]: "Eternal Boots",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_REAVER_COWL]: "Reaver Cowl",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_REAVER_BODY]: "Reaver Body",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_REAVER_CHAPS]: "Reaver Chaps",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_REAVER_BRACERS]: "Reaver Bracers",
+    [EstforConstants.ACTIONCHOICE_CRAFTING_REAVER_BOOTS]: "Reaver Boots",
+
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_PAPER_FROM_LOG]: "Paper from Log",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_PAPER_FROM_OAK]: "Paper from Oak",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_PAPER_FROM_WILLOW]:
+        "Paper from Willow",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_PAPER_FROM_MAPLE]: "Paper from Maple",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_PAPER_FROM_REDWOOD]:
+        "Paper from Redwood",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_PAPER_FROM_MAGICAL]:
+        "Paper from Magical",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_PAPER_FROM_ASH]: "Paper from Ash",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_PAPER_FROM_ENCHANTED]:
+        "Paper from Enchanted",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_PAPER_FROM_LIVING]:
+        "Paper from Living",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_SHADOW_SCROLL]: "Shadow Scroll",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_NATURE_SCROLL]: "Nature Scroll",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_AQUA_SCROLL]: "Aqua Scroll",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_HELL_SCROLL]: "Hell Scroll",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_AIR_SCROLL]: "Air Scroll",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_BARRAGE_SCROLL]: "Barrage Scroll",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_FREEZE_SCROLL]: "Freeze Scroll",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_ANCIENT_SCROLL]: "Ancient Scroll",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_COPPER_ORE]: "Copper Ore",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_TIN_ORE]: "Tin Ore",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_IRON_ORE]: "Iron Ore",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_SAPPHIRE]: "Sapphire",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_COAL_ORE]: "Coal Ore",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_EMERALD]: "Emerald",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_MITHRIL_ORE]: "Mithril Ore",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_RUBY]: "Ruby",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_ADAMANTINE_ORE]: "Adamantine Ore",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_AMETHYST]: "Amethyst",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_DIAMOND]: "Diamond",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_RUNITE_ORE]: "Runite Ore",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_DRAGONSTONE]: "Dragonstone",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_TITANIUM_ORE]: "Titanium Ore",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_ORICHALCUM_ORE]: "Orichalcum Ore",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_FEATHER]: "Feather",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_LOG]: "Log",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_OAK_LOG]: "Oak Log",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_WILLOW_LOG]: "Willow Log",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_MAPLE_LOG]: "Maple Log",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_REDWOOD_LOG]: "Redwood Log",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_MAGICAL_LOG]: "Magical Log",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_ASH_LOG]: "Ash Log",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_ENCHANTED_LOG]: "Enchanted Log",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_LIVING_LOG]: "Living Log",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_PAPER]: "Paper",
+
+    [EstforConstants.ACTIONCHOICE_FLETCHING_ARROW_SHAFT_FROM_LOG]:
+        "Arrow Shaft from Log",
+    [EstforConstants.ACTIONCHOICE_FLETCHING_ARROW_SHAFT_FROM_OAK]:
+        "Arrow Shaft from Oak",
+    [EstforConstants.ACTIONCHOICE_FLETCHING_ARROW_SHAFT_FROM_WILLOW]:
+        "Arrow Shaft from Willow",
+    [EstforConstants.ACTIONCHOICE_FLETCHING_ARROW_SHAFT_FROM_MAPLE]:
+        "Arrow Shaft from Maple",
+    [EstforConstants.ACTIONCHOICE_FLETCHING_ARROW_SHAFT_FROM_REDWOOD]:
+        "Arrow Shaft from Redwood",
+    [EstforConstants.ACTIONCHOICE_FLETCHING_ARROW_SHAFT_FROM_MAGICAL]:
+        "Arrow Shaft from Magical",
+    [EstforConstants.ACTIONCHOICE_FLETCHING_ARROW_SHAFT_FROM_ASH]:
+        "Arrow Shaft from Ash",
+    [EstforConstants.ACTIONCHOICE_FLETCHING_ARROW_SHAFT_FROM_ENCHANTED]:
+        "Arrow Shaft from Enchanted",
+    [EstforConstants.ACTIONCHOICE_FLETCHING_ARROW_SHAFT_FROM_LIVING]:
+        "Arrow Shaft from Living",
+    [EstforConstants.ACTIONCHOICE_FLETCHING_BRONZE_ARROW]: "Bronze Arrow",
+    [EstforConstants.ACTIONCHOICE_FLETCHING_IRON_ARROW]: "Iron Arrow",
+    [EstforConstants.ACTIONCHOICE_FLETCHING_MITHRIL_ARROW]: "Mithril Arrow",
+    [EstforConstants.ACTIONCHOICE_FLETCHING_ADAMANTINE_ARROW]:
+        "Adamantine Arrow",
+    [EstforConstants.ACTIONCHOICE_FLETCHING_RUNITE_ARROW]: "Runite Arrow",
+    [EstforConstants.ACTIONCHOICE_FLETCHING_TITANIUM_ARROW]: "Titanium Arrow",
+    [EstforConstants.ACTIONCHOICE_FLETCHING_ORICHALCUM_ARROW]:
+        "Orichalcum Arrow",
+    [EstforConstants.ACTIONCHOICE_FLETCHING_BASIC_BOW]: "Basic Bow",
+    [EstforConstants.ACTIONCHOICE_FLETCHING_BONE_BOW]: "Bone Bow",
+    [EstforConstants.ACTIONCHOICE_FLETCHING_EXPERT_BOW]: "Expert Bow",
+    [EstforConstants.ACTIONCHOICE_FLETCHING_SPECTRAL_BOW]: "Spectral Bow",
+    [EstforConstants.ACTIONCHOICE_FLETCHING_ICY_BOW]: "Icy Bow",
+    [EstforConstants.ACTIONCHOICE_FLETCHING_GLITTERING_BOW]: "Glittering Bow",
+
+    [EstforConstants.ACTIONCHOICE_FORGING_MERGE_TINY_ELIXIUM]:
+        "Merge Tiny Elixium",
+    [EstforConstants.ACTIONCHOICE_FORGING_MERGE_SMALL_ELIXIUM]:
+        "Merge Small Elixium",
+    [EstforConstants.ACTIONCHOICE_FORGING_MERGE_MEDIUM_ELIXIUM]:
+        "Merge Medium Elixium",
+    [EstforConstants.ACTIONCHOICE_FORGING_MERGE_LARGE_ELIXIUM]:
+        "Merge Large Elixium",
+}
+
 export interface RelevantActionInput {
     minXP: number
     xpPerHour: number
@@ -161,6 +498,44 @@ export interface RelevantAction {
     skill: Skill
     actionType: ActionType
     hasItemSearch: boolean
+}
+
+export const getActionChoiceById = (
+    actionId: number,
+    choiceId: number
+): ActionChoiceInput | undefined => {
+    switch (actionId) {
+        case EstforConstants.ACTION_COOKING_ITEM:
+            return allActionChoicesCooking[
+                allActionChoiceIdsCooking.indexOf(choiceId)
+            ]
+        case EstforConstants.ACTION_CRAFTING_ITEM:
+            return allActionChoicesCrafting[
+                allActionChoiceIdsCrafting.indexOf(choiceId)
+            ]
+        case EstforConstants.ACTION_SMITHING_ITEM:
+            return allActionChoicesSmithing[
+                allActionChoiceIdsSmithing.indexOf(choiceId)
+            ]
+        case EstforConstants.ACTION_FIREMAKING_ITEM:
+            return allActionChoicesFiremaking[
+                allActionChoiceIdsFiremaking.indexOf(choiceId)
+            ]
+        case EstforConstants.ACTION_ALCHEMY_ITEM:
+            return allActionChoicesAlchemy[
+                allActionChoiceIdsAlchemy.indexOf(choiceId)
+            ]
+        case EstforConstants.ACTION_FORGING_ITEM:
+            return allActionChoicesForging[
+                allActionChoiceIdsForging.indexOf(choiceId)
+            ]
+        case EstforConstants.ACTION_FLETCHING_ITEM:
+            return allActionChoicesFletching[
+                allActionChoiceIdsFletching.indexOf(choiceId)
+            ]
+        default:
+            return undefined
+    }
 }
 
 export const useSkillStore = defineStore({
@@ -204,7 +579,29 @@ export const useSkillStore = defineStore({
                 }
             }
         },
-        getActionChoiceInputsForSkill: (state: SkillState) => {
+        getActionChoiceInputsForSkill: () => {
+            return (skill: Skill): number[] => {
+                switch (skill) {
+                    case Skill.COOKING:
+                        return allActionChoiceIdsCooking
+                    case Skill.CRAFTING:
+                        return allActionChoiceIdsCrafting
+                    case Skill.SMITHING:
+                        return allActionChoiceIdsSmithing
+                    case Skill.FIREMAKING:
+                        return allActionChoiceIdsFiremaking
+                    case Skill.ALCHEMY:
+                        return allActionChoiceIdsAlchemy
+                    case Skill.FORGING:
+                        return allActionChoiceIdsForging
+                    case Skill.FLETCHING:
+                        return allActionChoiceIdsFletching
+                    default:
+                        return []
+                }
+            }
+        },
+        getActionChoicesForSkill: (state: SkillState) => {
             return (skill: Skill): ActionChoiceInput[] => {
                 switch (skill) {
                     case Skill.COOKING:

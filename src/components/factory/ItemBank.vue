@@ -19,6 +19,7 @@
                             <th>Item</th>
                             <th class="text-right">Amount</th>
                             <th class="text-right">Incoming / day</th>
+                            <th class="text-right">Outgoing / day</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -30,6 +31,9 @@
                             <td class="text-success text-right">
                                 +{{ (item.rate * period).toFixed(0) }}
                             </td>
+                            <td class="text-error text-right">
+                                -{{ (item.outgoingRate * period).toFixed(0) }}
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -38,17 +42,10 @@
             <div class="flex">
                 <button
                     type="button"
-                    class="btn btn-primary mt-5"
+                    class="btn btn-primary mt-5 grow"
                     @click="withdrawItems"
                 >
                     Withdraw Items
-                </button>
-                <button
-                    type="button"
-                    class="btn btn-primary mt-5 grow ms-2"
-                    @click="depositItems"
-                >
-                    Process Deposits
                 </button>
             </div>
         </div>
@@ -64,6 +61,7 @@
 import {
     AggregatedItem,
     getIncomingItems,
+    getOutgoingItems,
     useFactoryStore,
 } from "../../store/factory"
 import { ComputedRef, computed, onMounted, ref } from "vue"
@@ -71,9 +69,6 @@ import { itemNames } from "../../store/items"
 import { getUserItemNFTs } from "../../utils/api"
 import { UserItemNFT } from "@paintswap/estfor-definitions/types"
 import WithdrawFromBank from "../dialogs/WithdrawFromBank.vue"
-import { decode } from "../../utils/abi"
-import estforPlayerAbi from "../../abi/estforPlayer.json"
-import { allActions } from "../../data/actions"
 
 const factoryStore = useFactoryStore()
 const period = ref(24)
@@ -87,10 +82,14 @@ const bank = computed(() => {
 
 const aggregatedItems: ComputedRef<AggregatedItem[]> = computed(() => {
     const incomingItems: any[] = getIncomingItems(factoryStore.assignedProxys)
+    const outgoingItems: any[] = getOutgoingItems(factoryStore.assignedProxys)
 
     // merge bankItems and incomingItems
     const mergedItems: AggregatedItem[] = bankItems.value.map((item) => {
         const incomingItem = incomingItems.find(
+            (i) => i.itemTokenId === item.tokenId
+        )
+        const outgoingItem = outgoingItems.find(
             (i) => i.itemTokenId === item.tokenId
         )
         if (incomingItem) {
@@ -98,12 +97,22 @@ const aggregatedItems: ComputedRef<AggregatedItem[]> = computed(() => {
                 tokenId: item.tokenId,
                 amount: item.amount,
                 rate: incomingItem.rate,
+                outgoingRate: 0,
+            }
+        }
+        if (outgoingItem) {
+            return {
+                tokenId: item.tokenId,
+                amount: item.amount,
+                rate: 0,
+                outgoingRate: outgoingItem.rate,
             }
         }
         return {
             tokenId: item.tokenId,
             amount: item.amount,
             rate: 0,
+            outgoingRate: 0,
         }
     })
 
@@ -114,6 +123,19 @@ const aggregatedItems: ComputedRef<AggregatedItem[]> = computed(() => {
                 tokenId: item.itemTokenId,
                 amount: "0",
                 rate: item.rate,
+                outgoingRate: 0,
+            })
+        }
+    }
+
+    // add missing outgoingItems
+    for (const item of outgoingItems) {
+        if (!mergedItems.find((i) => i.tokenId === item.itemTokenId)) {
+            mergedItems.push({
+                tokenId: item.itemTokenId,
+                amount: "0",
+                rate: 0,
+                outgoingRate: item.rate,
             })
         }
     }
@@ -129,49 +151,6 @@ const aggregatedItems: ComputedRef<AggregatedItem[]> = computed(() => {
 
 const withdrawItems = async () => {
     withdrawFromBankRef.value?.openDialog(aggregatedItems.value)
-}
-
-const depositItems = async () => {
-    try {
-        const itemResultPromises = factoryStore.assignedProxys.filter(p => p.address !== bank.value?.address).map(p => getUserItemNFTs(p.address, []))
-        const results = await Promise.all(itemResultPromises)
-        
-        // match proxy on item result user address and work out the outputs from the decoded saved transaction
-        const deposits: { items: UserItemNFT[], proxy: string }[] = []
-        for (const result of results.filter(r => r.userItemNFTs.length > 0)) {
-            const proxy = factoryStore.assignedProxys.find(p => p.address === result.userItemNFTs[0].user)
-            console.log(proxy)
-            if (!proxy) {
-                continue
-            }
-
-            // TODO: implement ActionChoice
-            const decoded = decode(proxy.savedTransactions[0].data, "startActions", estforPlayerAbi)
-            const actionId = decoded?.[1]?.[0]?.[1] || BigInt(0)
-            const action = allActions.find(a => a.actionId === Number(actionId))
-            const relevantTokenIds: number[] = []
-            if (action) {
-                relevantTokenIds.push(...action.guaranteedRewards.map(r => r.itemTokenId))
-                relevantTokenIds.push(...action.randomRewards.map(r => r.itemTokenId))
-            }
-
-            for (const item of result.userItemNFTs.filter(i => relevantTokenIds.includes(i.tokenId))) {
-                let d = deposits.find(d => d.proxy === proxy.address)
-                if (!d) {
-                    d = {
-                        proxy: proxy?.address,
-                        items: [],
-                    }
-                    deposits.push(d)
-                }
-                d.items.push(item)
-            }
-        }
-        await factoryStore.transferItemsToBank(deposits)
-        init()
-    } catch {
-        // console.error(e)
-    }
 }
 
 const init = async () => {

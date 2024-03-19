@@ -23,6 +23,17 @@
                 :heroes="heroesToAssign"
                 @update:model-value="checkRequiredItems"
             />
+            <ActionChoiceInputSelect
+                v-if="
+                    skillId > 0 &&
+                    skillStore.getActionChoiceInputsForSkill(skillId).length > 0
+                "
+                class="mt-5"
+                v-model="actionChoiceOutputId"
+                :skill-id="skillId"
+                :heroes="heroesToAssign"
+                @update:model-value="checkActionChoiceRequiredItems"
+            />
 
             <label class="label cursor-pointer mt-5">
                 <span class="label-text text-xs mr-2 items-center flex">
@@ -64,7 +75,11 @@
                 type="button"
                 class="btn btn-primary mt-5 w-full"
                 @click="assignHeroes"
-                :disabled="loading || missingItems.length > 0 || actionId === 0"
+                :disabled="
+                    loading ||
+                    missingItems.length > 0 ||
+                    (actionId === 0 && actionChoiceOutputId === 0)
+                "
             >
                 Assign {{ heroesToAssign.length }} Hero{{
                     heroesToAssign.length === 1 ? "" : "es"
@@ -93,6 +108,7 @@ import { Skill } from "@paintswap/estfor-definitions/types"
 import { ProxySilo, useFactoryStore } from "../../store/factory"
 import SkillSelect from "../inputs/SkillSelect.vue"
 import ActionInputSelect from "../inputs/ActionInputSelect.vue"
+import ActionChoiceInputSelect from "../inputs/ActionChoiceInputSelect.vue"
 import { getUserItemNFTs } from "../../utils/api"
 import { useAppStore } from "../../store/app"
 
@@ -105,6 +121,7 @@ const props = defineProps({
 
 const skillId = ref(Skill.NONE)
 const actionId = ref(0)
+const actionChoiceOutputId = ref(0)
 const skillStore = useSkillStore()
 const factoryStore = useFactoryStore()
 const app = useAppStore()
@@ -170,16 +187,79 @@ const checkRequiredItems = async () => {
     }
 }
 
+const checkActionChoiceRequiredItems = async () => {
+    missingItems.value = []
+    rightHandItems.value = []
+    loading.value = true
+    try {
+        if (actionChoiceOutputId.value > 0) {
+            const action = allActions.find((x) => x.info.skill == skillId.value) // only 1 for action choice
+            const max = action?.info.handItemTokenIdRangeMax
+            const min = action?.info.handItemTokenIdRangeMin
+
+            // get an array of numbers between min and max (inclusive)
+            const requiredItems = Array.from(
+                { length: max - min + 1 },
+                (_, i) => i + min
+            )
+
+            if (requiredItems.some((x) => x > 0)) {
+                for (const h of heroesToAssign.value) {
+                    const userItemsResult = await getUserItemNFTs(h.address, [])
+                    if (
+                        !userItemsResult.userItemNFTs.some((x) =>
+                            requiredItems.includes(x.tokenId)
+                        )
+                    ) {
+                        missingItems.value.push(
+                            `${h.playerState.name} is missing ${itemNames[min]}`
+                        )
+                    }
+                    // find first item in the requiredItems array that the user has
+                    rightHandItems.value.push(
+                        userItemsResult.userItemNFTs.find((x) =>
+                            requiredItems.includes(x.tokenId)
+                        )?.tokenId || 0
+                    )
+                }
+            }
+        }
+    } catch {
+    } finally {
+        loading.value = false
+    }
+}
+
 const assignHeroes = async () => {
     loading.value = true
     try {
-        await factoryStore.assignActionToProxy(
-            heroesToAssign.value,
-            actionId.value,
-            rightHandItems.value,
-            active.value,
-            chunks.value
-        )
+        if (
+            skillId.value > 0 &&
+            skillStore.getActionInputsForSkill(skillId.value).length > 0
+        ) {
+            await factoryStore.assignActionToProxy(
+                heroesToAssign.value,
+                actionId.value,
+                0,
+                rightHandItems.value,
+                active.value,
+                chunks.value
+            )
+        } else if (
+            skillId.value > 0 &&
+            skillStore.getActionChoiceInputsForSkill(skillId.value).length > 0
+        ) {
+            await factoryStore.assignActionToProxy(
+                heroesToAssign.value,
+                allActions.find((x) => x.info.skill == skillId.value)
+                    ?.actionId || 0,
+                actionChoiceOutputId.value,
+                rightHandItems.value,
+                active.value,
+                chunks.value
+            )
+        }
+
         app.addToast(
             `${heroesToAssign.value.length} hero${
                 heroesToAssign.value.length !== 1 ? "es" : ""

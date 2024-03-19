@@ -76,24 +76,11 @@
                                 <span v-if="a.successPercent < 100">{{
                                     (
                                         ((a.outputAmount * a.rate) / 1000) *
-                                        (Math.min(
-                                            90,
-                                            a.successPercent +
-                                                Math.max(
-                                                    0,
-                                                    getLevel(playerXp) -
-                                                        getLevel(
-                                                            a.minXPs[
-                                                                a.minSkills.findIndex(
-                                                                    (s) =>
-                                                                        s ===
-                                                                        skillId
-                                                                )
-                                                            ] || 0
-                                                        )
-                                                )
-                                        ) /
-                                            100)
+                                        calculateActionChoiceSuccessPercent(
+                                            a,
+                                            playerXp,
+                                            skillId
+                                        )
                                     ).toFixed(1)
                                 }}</span>
                                 <span v-else>{{
@@ -122,6 +109,7 @@ import {
 } from "../../store/core"
 import { itemNames, useItemStore } from "../../store/items"
 import { ActionChoiceInput, Skill } from "@paintswap/estfor-definitions/types"
+import { calculateActionChoiceSuccessPercent } from "../../store/factory"
 
 const coreStore = useCoreStore()
 const skillId = ref(0)

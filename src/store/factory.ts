@@ -6,31 +6,31 @@ import {
     writeContract,
 } from "@wagmi/core"
 import {
+    ActionChoiceInput,
     ActionQueueStatus,
     CombatStyle,
     GuaranteedReward,
     Player,
     QueuedAction,
+    Skill,
     UserItemNFT,
 } from "@paintswap/estfor-definitions/types"
 import { defineStore } from "pinia"
 import { ZeroAddress, solidityPacked, Interface } from "ethers"
 import { fantom } from "viem/chains"
 
-import { Address, skillToXPMap, useCoreStore } from "./core"
+import { Address, getLevel, skillToXPMap, useCoreStore } from "./core"
 
 import estforPlayerAbi from "../abi/estforPlayer.json"
 import itemNFTAbi from "../abi/itemNFT.json"
 import estforPlayerNFTAbi from "../abi/estforPlayerNFT.json"
 import factoryAbi from "../abi/factoryRegistry.json"
 import epProxyAbi from "../abi/epProxy.json"
-import {
-    getPlayersByIds,
-    searchQueuedActions,
-} from "../utils/api"
+import { getPlayersByIds, getUserItemNFTs, searchQueuedActions } from "../utils/api"
 import { decode } from "../utils/abi"
 import { allActions } from "../data/actions"
 import { calculateChance } from "../utils/player"
+import { getActionChoiceById } from "./skills"
 
 export interface SavedTransaction {
     to: string
@@ -56,8 +56,29 @@ export interface FactoryState {
 
 export interface AggregatedItem {
     rate: number
+    outgoingRate: number
     amount: string
     tokenId: number
+}
+
+export const calculateActionChoiceSuccessPercent = (
+    a: ActionChoiceInput,
+    playerXP: string,
+    skillId: Skill
+): number => {
+    return Math.min(
+        90,
+        a.successPercent +
+            Math.max(
+                0,
+                getLevel(playerXP) -
+                    getLevel(
+                        a.minXPs[
+                            a.minSkills.findIndex((s) => s === skillId)
+                        ] || 0
+                    )
+            )
+    ) / 100    
 }
 
 export const getIncomingItems = (proxys: ProxySilo[]) => {
@@ -69,7 +90,12 @@ export const getIncomingItems = (proxys: ProxySilo[]) => {
             estforPlayerAbi
         )
         const actionId = decoded?.[1]?.[0]?.[1] || BigInt(0)
+        const actionChoiceId = decoded?.[1]?.[0]?.[3] || BigInt(0)
         const action = allActions.find((a) => a.actionId === Number(actionId))
+        const actionChoice = getActionChoiceById(
+            Number(actionId),
+            Number(actionChoiceId)
+        )
         if (action) {
             for (const i of action.guaranteedRewards) {
                 const existing = items.find(
@@ -86,13 +112,12 @@ export const getIncomingItems = (proxys: ProxySilo[]) => {
                     (x) => x.itemTokenId === i.itemTokenId
                 )
                 if (existing) {
-                    
                     existing.rate +=
                         (calculateChance(
                             i,
                             action,
                             // @ts-ignore
-                            s.playerState[skillToXPMap[action.info.skill]] 
+                            s.playerState[skillToXPMap[action.info.skill]]
                         ) /
                             100) *
                         i.amount
@@ -112,12 +137,81 @@ export const getIncomingItems = (proxys: ProxySilo[]) => {
                 }
             }
         }
+        if (actionChoice) {
+            const existing = items.find(
+                (x) => x.itemTokenId === actionChoice.outputTokenId
+            )
+            if (existing) {
+                existing.rate +=
+                    actionChoice.outputAmount *
+                    (actionChoice.rate / 1000) *
+                    calculateActionChoiceSuccessPercent(
+                        actionChoice,
+                        // @ts-ignore
+                        s.playerState[skillToXPMap[actionChoice.skill]],
+                        actionChoice.skill
+                    )
+            } else {
+                items.push({
+                    itemTokenId: actionChoice.outputTokenId,
+                    rate:
+                        actionChoice.outputAmount *
+                        (actionChoice.rate / 1000) *
+                        calculateActionChoiceSuccessPercent(
+                            actionChoice,
+                            // @ts-ignore
+                            s.playerState[skillToXPMap[actionChoice.skill]],
+                            actionChoice.skill
+                        ),
+                })
+            }
+        }
+    }
+    return items
+}
+
+export const getOutgoingItems = (proxys: ProxySilo[]) => {
+    const items: GuaranteedReward[] = []
+    for (const s of proxys) {
+        const decoded = decode(
+            s.savedTransactions[0].data,
+            "startActions",
+            estforPlayerAbi
+        )
+        const actionId = decoded?.[1]?.[0]?.[1] || BigInt(0)
+        const actionChoiceId = decoded?.[1]?.[0]?.[3] || BigInt(0)
+        const actionChoice = getActionChoiceById(
+            Number(actionId),
+            Number(actionChoiceId)
+        )
+        if (actionChoice) {
+            let i = 0
+            for (const input of actionChoice.inputTokenIds) {
+                const existing = items.find(
+                    (x) => x.itemTokenId === input
+                )
+                if (existing) {
+                    existing.rate +=
+                        actionChoice.inputAmounts[i] *
+                        (actionChoice.rate / 1000)
+                } else {
+                    items.push({
+                        itemTokenId: input,
+                        rate:
+                            actionChoice.inputAmounts[i] *
+                            (actionChoice.rate / 1000),
+                    })
+                }
+                i++
+            }
+        }
     }
     return items
 }
 
 const constructQueuedActions = (
     actionId: number,
+    choiceId: number,
     rightHand: number | undefined
 ): any[] => {
     return [
@@ -134,7 +228,7 @@ const constructQueuedActions = (
             ],
             actionId,
             0, // food
-            0, // melee / ranged / magic
+            choiceId, // choice id
             rightHand || 0, // weapon or tool
             0, // shield
             60 * 60 * 24, // 24 hours
@@ -429,6 +523,7 @@ export const useFactoryStore = defineStore({
         async assignActionToProxy(
             proxys: ProxySilo[],
             actionId: number,
+            choiceId: number,
             rightHand: number[],
             activate: boolean,
             chunks: number
@@ -458,6 +553,7 @@ export const useFactoryStore = defineStore({
                                     BigInt(h.playerState.id), // playerId
                                     constructQueuedActions(
                                         actionId,
+                                        choiceId,
                                         rightHand[i]
                                     ), // solidity QueuedAction[] (different from api type)
                                     ActionQueueStatus.KEEP_LAST_IN_PROGRESS, // action queue status - NONE / APPEND / KEEP_LAST_IN_PROGRESS
@@ -509,6 +605,7 @@ export const useFactoryStore = defineStore({
                                     BigInt(p.playerState.id),
                                     constructQueuedActions(
                                         actionId,
+                                        choiceId,
                                         rightHand[i]
                                     ),
                                     ActionQueueStatus.KEEP_LAST_IN_PROGRESS,
@@ -620,7 +717,7 @@ export const useFactoryStore = defineStore({
             })
             await waitForTransaction({ hash: tx.hash })
         },
-        async transferItemsToBank(items: { items: UserItemNFT[], proxy: string }[]) {
+        async transferItemsToBank() {
             const coreStore = useCoreStore()
             const itemAddress = coreStore.getAddress(Address.itemNFT)
             const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
@@ -634,23 +731,84 @@ export const useFactoryStore = defineStore({
                 return
             }
 
+            const itemResultPromises = this.assignedProxys
+                .filter((p) => p.address !== this.bank?.address)
+                .map((p) => getUserItemNFTs(p.address, []))
+            const results = await Promise.all(itemResultPromises)
+
+            // match proxy on item result user address and work out the outputs from the decoded saved transaction
+            const deposits: { items: UserItemNFT[]; proxy: string }[] = []
+            for (const result of results.filter((r) => r.userItemNFTs.length > 0)) {
+                const proxy = this.assignedProxys.find(
+                    (p) => p.address === result.userItemNFTs[0].user
+                )
+                if (!proxy) {
+                    continue
+                }
+
+                const decoded = decode(
+                    proxy.savedTransactions[0].data,
+                    "startActions",
+                    estforPlayerAbi
+                )
+                const actionId = decoded?.[1]?.[0]?.[1] || BigInt(0)
+                const actionChoiceId = decoded?.[1]?.[0]?.[3] || BigInt(0)
+                const action = allActions.find(
+                    (a) => a.actionId === Number(actionId)
+                )
+                const actionChoice = getActionChoiceById(
+                    Number(actionId),
+                    Number(actionChoiceId)
+                )
+                const relevantTokenIds: number[] = []
+                if (action) {
+                    relevantTokenIds.push(
+                        ...action.guaranteedRewards.map((r) => r.itemTokenId)
+                    )
+                    relevantTokenIds.push(
+                        ...action.randomRewards.map((r) => r.itemTokenId)
+                    )
+                }
+                if (actionChoice) {
+                    relevantTokenIds.push(actionChoice.outputTokenId)
+                    relevantTokenIds.push(...actionChoice.inputTokenIds)
+                }
+
+                for (const item of result.userItemNFTs.filter((i) =>
+                    relevantTokenIds.includes(i.tokenId)
+                )) {
+                    let d = deposits.find((d) => d.proxy === proxy.address)
+                    if (!d) {
+                        d = {
+                            proxy: proxy?.address,
+                            items: [],
+                        }
+                        deposits.push(d)
+                    }
+                    d.items.push(item)
+                }
+            }
+
             const factoryInterface = new Interface(factoryAbi)
             const itemInterface = new Interface(itemNFTAbi)
 
-            const selectorArray = items.map((i) =>
+            const selectorArray = deposits.map((i) =>
                 solidityPacked(
                     ["bytes"],
                     [
                         factoryInterface.encodeFunctionData("execute", [
                             i.proxy,
                             itemAddress,
-                            itemInterface.encodeFunctionData("safeBatchTransferFrom", [
-                                i.proxy,
-                                toAddress,
-                                i.items.map((i) => i.tokenId),
-                                i.items.map((i) => i.amount),
-                                solidityPacked(["bytes"], ["0x"]),
-                            ]),
+                            itemInterface.encodeFunctionData(
+                                "safeBatchTransferFrom",
+                                [
+                                    i.proxy,
+                                    toAddress,
+                                    i.items.map((i) => i.tokenId),
+                                    i.items.map((i) => i.amount),
+                                    solidityPacked(["bytes"], ["0x"]),
+                                ]
+                            ),
                         ]),
                     ]
                 )

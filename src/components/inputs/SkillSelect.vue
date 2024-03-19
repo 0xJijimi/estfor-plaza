@@ -21,16 +21,16 @@ const emit = defineEmits(["update:modelValue"])
 const options = [
     Skill.WOODCUTTING,
     Skill.MINING,
-    //Skill.SMITHING,
+    Skill.SMITHING,
     Skill.FISHING,
-    //Skill.COOKING,
-    //Skill.CRAFTING,
-    //Skill.FIREMAKING,
-    //Skill.ALCHEMY,
-    //Skill.FORGING,
-    //Skill.FLETCHING,
+    Skill.COOKING,
+    Skill.CRAFTING,
+    Skill.FIREMAKING,
+    Skill.ALCHEMY,
+    Skill.FORGING,
+    Skill.FLETCHING,
     Skill.THIEVING,
-    //Skill.COMBAT,
+    // Skill.COMBAT,
 ]
 
 const props = defineProps({
