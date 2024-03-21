@@ -375,6 +375,27 @@ export const itemNames = {
     [EstforConstants.SKILL_BOOST]: "Skill Boost",
     [EstforConstants.COMBAT_BOOST]: "Combat Boost",
     [EstforConstants.GATHERING_BOOST]: "Gathering Boost",
+
+    [EstforConstants.INFUSED_DRAGONSTONE_AMULET]: "Infused Dragonstone Amulet",
+    [EstforConstants.INFUSED_DRAGONSTONE_STAFF]: "Infused Dragonstone Staff",
+    [EstforConstants.INFUSED_GODLY_BOW]: "Infused Godly Bow",
+    [EstforConstants.INFUSED_MASTER_BODY]: "Infused Master Body",
+    [EstforConstants.INFUSED_MASTER_BRACERS]: "Infused Master Bracers",
+    [EstforConstants.INFUSED_MASTER_HAT]: "Infused Master Hat",
+    [EstforConstants.INFUSED_MASTER_BOOTS]: "Infused Master Boots",
+    [EstforConstants.INFUSED_MASTER_TROUSERS]: "Infused Master Trousers",
+    [EstforConstants.INFUSED_ORICHALCUM_ARMOR]: "Infused Oricalcum Armor",
+    [EstforConstants.INFUSED_ORICHALCUM_BOOTS]: "Infused Oricalcum Boots",
+    [EstforConstants.INFUSED_ORICHALCUM_HELMET]: "Infused Oricalcum Helmet",
+    [EstforConstants.INFUSED_ORICHALCUM_TASSETS]: "Infused Oricalcum Tassets",
+    [EstforConstants.INFUSED_ORICHALCUM_GAUNTLETS]: "Infused Oricalcum Gauntlets",
+    [EstforConstants.INFUSED_ORICHALCUM_SHIELD]: "Infused Oricalcum Shield",
+    [EstforConstants.INFUSED_ORICHALCUM_SWORD]: "Infused Oricalcum Sword",
+    [EstforConstants.INFUSED_SCORCHING_BODY]: "Infused Scorching Body",
+    [EstforConstants.INFUSED_SCORCHING_BRACERS]: "Infused Scorching Bracers",
+    [EstforConstants.INFUSED_SCORCHING_COWL]: "Infused Scorching Cowl",
+    [EstforConstants.INFUSED_SCORCHING_BOOTS]: "Infused Scorching Boots",
+    [EstforConstants.INFUSED_SCORCHING_CHAPS]: "Infused Scorching Chaps",
 }
 
 export interface EquippedItems {
