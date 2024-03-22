@@ -388,7 +388,8 @@ export const itemNames = {
     [EstforConstants.INFUSED_ORICHALCUM_BOOTS]: "Infused Oricalcum Boots",
     [EstforConstants.INFUSED_ORICHALCUM_HELMET]: "Infused Oricalcum Helmet",
     [EstforConstants.INFUSED_ORICHALCUM_TASSETS]: "Infused Oricalcum Tassets",
-    [EstforConstants.INFUSED_ORICHALCUM_GAUNTLETS]: "Infused Oricalcum Gauntlets",
+    [EstforConstants.INFUSED_ORICHALCUM_GAUNTLETS]:
+        "Infused Oricalcum Gauntlets",
     [EstforConstants.INFUSED_ORICHALCUM_SHIELD]: "Infused Oricalcum Shield",
     [EstforConstants.INFUSED_ORICHALCUM_SWORD]: "Infused Oricalcum Sword",
     [EstforConstants.INFUSED_SCORCHING_BODY]: "Infused Scorching Body",

@@ -26,7 +26,11 @@ import itemNFTAbi from "../abi/itemNFT.json"
 import estforPlayerNFTAbi from "../abi/estforPlayerNFT.json"
 import factoryAbi from "../abi/factoryRegistry.json"
 import epProxyAbi from "../abi/epProxy.json"
-import { getPlayersByIds, getUserItemNFTs, searchQueuedActions } from "../utils/api"
+import {
+    getPlayersByIds,
+    getUserItemNFTs,
+    searchQueuedActions,
+} from "../utils/api"
 import { decode } from "../utils/abi"
 import { allActions } from "../data/actions"
 import { calculateChance } from "../utils/player"
@@ -61,24 +65,31 @@ export interface AggregatedItem {
     tokenId: number
 }
 
+export interface NeededItem {
+    address: string
+    items: { tokenId: number; amount: number }[]
+}
+
 export const calculateActionChoiceSuccessPercent = (
     a: ActionChoiceInput,
     playerXP: string,
     skillId: Skill
 ): number => {
-    return Math.min(
-        90,
-        a.successPercent +
-            Math.max(
-                0,
-                getLevel(playerXP) -
-                    getLevel(
-                        a.minXPs[
-                            a.minSkills.findIndex((s) => s === skillId)
-                        ] || 0
-                    )
-            )
-    ) / 100    
+    return (
+        Math.min(
+            90,
+            a.successPercent +
+                Math.max(
+                    0,
+                    getLevel(playerXP) -
+                        getLevel(
+                            a.minXPs[
+                                a.minSkills.findIndex((s) => s === skillId)
+                            ] || 0
+                        )
+                )
+        ) / 100
+    )
 }
 
 export const getIncomingItems = (proxys: ProxySilo[]) => {
@@ -187,9 +198,7 @@ export const getOutgoingItems = (proxys: ProxySilo[]) => {
         if (actionChoice) {
             let i = 0
             for (const input of actionChoice.inputTokenIds) {
-                const existing = items.find(
-                    (x) => x.itemTokenId === input
-                )
+                const existing = items.find((x) => x.itemTokenId === input)
                 if (existing) {
                     existing.rate +=
                         actionChoice.inputAmounts[i] *
@@ -618,11 +627,64 @@ export const useFactoryStore = defineStore({
                 i++
             }
         },
+        async transferItemsFromBankToProxys(
+            itemsNeeded: NeededItem[],
+            chunks: number = 50
+        ) {
+            const coreStore = useCoreStore()
+            const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
+            const itemAddress = coreStore.getAddress(Address.itemNFT)
+            const account = getAccount()
+            if (!factoryAddress || !itemAddress || !account.isConnected) {
+                return
+            }
+            if (itemsNeeded.length > 0) {
+                const factoryInterface = new Interface(factoryAbi)
+                const itemInterface = new Interface(itemNFTAbi)
+                const fromAddress = this.bank?.address
+
+                const selectorArray = itemsNeeded.map((i) =>
+                    solidityPacked(
+                        ["bytes"],
+                        [
+                            factoryInterface.encodeFunctionData("execute", [
+                                fromAddress,
+                                itemAddress,
+                                itemInterface.encodeFunctionData(
+                                    "safeBatchTransferFrom",
+                                    [
+                                        fromAddress,
+                                        i.address,
+                                        i.items.map((i) => i.tokenId),
+                                        i.items.map((i) => i.amount),
+                                        solidityPacked(["bytes"], ["0x"]),
+                                    ]
+                                ),
+                            ]),
+                        ]
+                    )
+                )
+
+                const splits = Math.ceil(itemsNeeded.length / chunks)
+                for (let i = 0; i < splits; i++) {
+                    const tx = await writeContract({
+                        address: factoryAddress as `0x${string}`,
+                        abi: factoryAbi,
+                        functionName: "multicall",
+                        args: [
+                            selectorArray.slice(i * chunks, (i + 1) * chunks),
+                        ],
+                    })
+                    await waitForTransaction({ hash: tx.hash })
+                }
+            }
+        },
         async executeSavedTransactions(proxys: ProxySilo[], chunks: number) {
             const coreStore = useCoreStore()
             const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
+            const itemAddress = coreStore.getAddress(Address.itemNFT)
             const account = getAccount()
-            if (!factoryAddress || !account.isConnected) {
+            if (!factoryAddress || !itemAddress || !account.isConnected) {
                 return
             }
 
@@ -650,24 +712,32 @@ export const useFactoryStore = defineStore({
                 })
                 await waitForTransaction({ hash: tx.hash })
             }
-
-            // update queuedActions in state
+        },
+        async updateQueuedActions() {
             const queuedActionPromises = await Promise.all(
-                proxys.map((p) => searchQueuedActions(p.playerId))
+                this.proxys
+                    .filter(
+                        (p) =>
+                            p.playerId !== "" && p.savedTransactions.length > 0
+                    )
+                    .map((p) => searchQueuedActions(p.playerId))
             )
-            for (const p of proxys) {
-                const proxy = this.proxys.find((x) => x.address === p.address)
-                if (proxy) {
-                    proxy.queuedActions =
-                        queuedActionPromises
-                            .filter((x) =>
-                                x.queuedActions.find(
-                                    (q) => q.playerId === p.playerId
-                                )
-                            )
-                            .map((x) => x.queuedActions)
-                            .flat() || []
+            for (const proxy of this.proxys) {
+                if (
+                    proxy.playerId === "" ||
+                    proxy.savedTransactions.length === 0
+                ) {
+                    continue
                 }
+                proxy.queuedActions =
+                    queuedActionPromises
+                        .filter((x) =>
+                            x.queuedActions.find(
+                                (q) => q.playerId === proxy.playerId
+                            )
+                        )
+                        .map((x) => x.queuedActions)
+                        .flat() || []
             }
         },
         async withdrawItems(items: any[]) {
@@ -738,7 +808,9 @@ export const useFactoryStore = defineStore({
 
             // match proxy on item result user address and work out the outputs from the decoded saved transaction
             const deposits: { items: UserItemNFT[]; proxy: string }[] = []
-            for (const result of results.filter((r) => r.userItemNFTs.length > 0)) {
+            for (const result of results.filter(
+                (r) => r.userItemNFTs.length > 0
+            )) {
                 const proxy = this.assignedProxys.find(
                     (p) => p.address === result.userItemNFTs[0].user
                 )
@@ -771,7 +843,29 @@ export const useFactoryStore = defineStore({
                 }
                 if (actionChoice) {
                     relevantTokenIds.push(actionChoice.outputTokenId)
-                    relevantTokenIds.push(...actionChoice.inputTokenIds)
+                    // relevantTokenIds.push(...actionChoice.inputTokenIds)
+                }
+
+                for (const q of proxy.queuedActions) {
+                    if (q.choice) {
+                        relevantTokenIds.push(q.choice.outputTokenId)
+                    } else {
+                        const action = allActions.find(
+                            (a) => a.actionId === q.actionId
+                        )
+                        if (action) {
+                            relevantTokenIds.push(
+                                ...action.guaranteedRewards.map(
+                                    (r) => r.itemTokenId
+                                )
+                            )
+                            relevantTokenIds.push(
+                                ...action.randomRewards.map(
+                                    (r) => r.itemTokenId
+                                )
+                            )
+                        }
+                    }
                 }
 
                 for (const item of result.userItemNFTs.filter((i) =>

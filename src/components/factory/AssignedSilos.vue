@@ -123,26 +123,21 @@
                 <button
                     type="button"
                     class="btn btn-primary mt-5 grow"
-                    @click="executeSavedTransactions"
-                    :disabled="executing || !selectedSilos.length"
+                    @click="openExecuteTransactions"
+                    :disabled="!selectedSilos.length"
                 >
                     Execute Actions for {{ selectedSilos.length }} Hero{{
                         selectedSilos.length !== 1 ? "es" : ""
-                    }}
-                    {{
-                        neededTransactions > 1
-                            ? `(${neededTransactions} transactions)`
-                            : ""
                     }}
                 </button>
             </div>
         </div>
     </div>
     <AssignHero ref="assignHeroRef" id="reassign_hero_modal" />
+    <ExecuteSiloActions ref="executeActionsRef" id="execute_actions_modal" />
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from "../../store/app"
 import { SavedTransaction, useFactoryStore } from "../../store/factory"
 import { computed, onMounted, onUnmounted, ref, watch } from "vue"
 import AssignHero from "../dialogs/AssignHero.vue"
@@ -150,17 +145,17 @@ import { QueuedAction } from "@paintswap/estfor-definitions/types"
 import estforPlayerAbi from "../../abi/estforPlayer.json"
 import { actionChoiceNames, actionNames } from "../../store/skills"
 import { decode } from "../../utils/abi"
+import ExecuteSiloActions from "../dialogs/ExecuteSiloActions.vue"
 
 const factoryStore = useFactoryStore()
-const app = useAppStore()
 const executing = ref(false)
 const interval = ref<NodeJS.Timeout>()
-const chunks = ref(10)
 const pageSize = ref(20)
 const pageNumber = ref(0)
 const selectAll = ref(false)
 
 const assignHeroRef = ref<typeof AssignHero>()
+const executeActionsRef = ref<typeof ExecuteSiloActions>()
 
 const assignedSilos = computed(() => factoryStore.assignedProxys)
 const assignedSilosRef = ref(
@@ -210,37 +205,14 @@ const selectedSilos = computed(() =>
     assignedSilosRef.value.filter((s) => s.selected)
 )
 
-// gas cost for execute action is 800k gas, split into chunks of 10
-const neededTransactions = computed(() => {
-    return Math.ceil(selectedSilos.value.length / chunks.value)
-})
+const openExecuteTransactions = () => {
+    executeActionsRef.value?.openDialog(selectedSilos.value)
+}
 
 const assignHeroes = () => {
     assignHeroRef.value?.openDialog(
         assignedSilosRef.value.filter((x) => x.selected)
     )
-}
-
-const executeSavedTransactions = async () => {
-    executing.value = true
-    try {
-        await factoryStore.executeSavedTransactions(
-            selectedSilos.value,
-            chunks.value
-        )
-        app.addToast(
-            `${selectedSilos.value.length} hero${
-                selectedSilos.value.length !== 1 ? "es" : ""
-            } actions executed`,
-            "alert-success",
-            5000
-        )
-    } catch {
-        // console.error(e)
-        // user declined tx
-    } finally {
-        executing.value = false
-    }
 }
 
 const calculateTimeLeft = (queuedActions: QueuedAction[]) => {
