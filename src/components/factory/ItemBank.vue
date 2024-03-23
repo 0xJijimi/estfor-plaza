@@ -1,6 +1,6 @@
 <template>
     <div
-        class="card bg-base-100-50 shadow-xl rounded-lg mt-10 mx-auto md:w-[760px]"
+        class="card bg-base-100-50 shadow-xl rounded-lg mt-2 md:mt-10 mx-auto md:w-[760px]"
     >
         <div class="card-body">
             <h2 class="text-2xl font-bold text-center">Item Bank</h2>

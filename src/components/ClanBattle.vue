@@ -1,6 +1,6 @@
 <template>
     <div
-        class="card bg-base-100-50 shadow-xl rounded-lg mt-10 mx-auto md:w-[760px]"
+        class="card bg-base-100-50 shadow-xl rounded-lg mt-2 md:mt-10 mx-auto md:w-[760px]"
     >
         <div class="card-body">
             <h3 class="font-bold text-lg text-center">Clan Battle Simulator</h3>
@@ -124,7 +124,7 @@
     </div>
 
     <div class="flex max-xl:flex-col flex-row justify-evenly xl:gap-10">
-        <div class="card bg-base-100-50 shadow-xl rounded-lg mt-10 grow">
+        <div class="card bg-base-100-50 shadow-xl rounded-lg mt-2 md:mt-10 grow">
             <div class="card-body">
                 <div class="flex justify-between">
                     <button
@@ -222,7 +222,7 @@
                 </div>
             </div>
         </div>
-        <div class="card bg-base-100-50 shadow-xl rounded-lg mt-10 grow">
+        <div class="card bg-base-100-50 shadow-xl rounded-lg mt-2 md:mt-10 grow">
             <div class="card-body">
                 <ClanSearch
                     class="w-full"

@@ -10,6 +10,10 @@
                 class="w-full mx-auto mt-5"
             />
 
+            <div class="text-center mt-5">
+                {{ monster?.info.numSpawned / 1000 }} spawned per hour for {{ (monster?.info.xpPerHour / (monster?.info.numSpawned / 1000)).toFixed(0) }} xp each
+            </div>
+
             <div class="overflow-x-auto mt-5">
                 <table class="table md:table-md table-xs">
                     <thead>

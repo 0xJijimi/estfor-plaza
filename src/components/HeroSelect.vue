@@ -65,7 +65,7 @@
                             <td>
                                 <button
                                     type="button"
-                                    class="btn btn-primary mr-2"
+                                    class="btn btn-primary mr-2 btn-xs md:btn-md"
                                     :disabled="coreStore.playerId == h.id"
                                     @click.prevent="selectHero(h)"
                                 >
@@ -73,7 +73,7 @@
                                 </button>
                                 <button
                                     type="button"
-                                    class="btn btn-error btn-outline"
+                                    class="btn btn-error btn-outline btn-xs md:btn-md"
                                     :disabled="coreStore.playerId == h.id"
                                     @click.prevent="
                                         coreStore.removeHeroFromRoster(h)
@@ -95,7 +95,7 @@
     </div>
     <div class="card bg-base-100-50 shadow-xl rounded-lg mt-10">
         <div class="card-body">
-            <div class="flex flex-row justify-evenly items-center">
+            <div class="flex flex-col md:flex-row justify-evenly items-center">
                 <div class="join items-center">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -119,7 +119,7 @@
                     />
                 </div>
 
-                <div class="items-center flex gap-2">
+                <div class="items-center flex flex-col md:flex-row gap-2">
                     <ClanSearch
                         container-class="justify-center"
                         input-class="input-md"

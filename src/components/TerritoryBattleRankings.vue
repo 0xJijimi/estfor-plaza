@@ -1,11 +1,11 @@
 <template>
     <div
-        class="card bg-base-100-50 shadow-xl rounded-lg mt-10 mx-auto md:w-[760px]"
+        class="card bg-base-100-50 shadow-xl rounded-lg mt-2 md:mt-10 mx-auto md:w-[760px]"
     >
         <div class="card-body">
             <div role="tablist" class="tabs tabs-bordered tabs-lg mb-4">
-                <div role="tab" class="tab tab-active">Territory Rankings</div>
-                <router-link to="/vault-rankings" role="tab" class="tab"
+                <div role="tab" class="tab tab-active text-sm md:text-md">Territory Rankings</div>
+                <router-link to="/vault-rankings" role="tab" class="tab text-sm md:text-md"
                     >Vault Rankings</router-link
                 >
             </div>

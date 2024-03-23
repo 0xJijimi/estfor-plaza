@@ -1,5 +1,5 @@
 <template>
-    <div role="alert" class="alert alert-warning mt-10 mx-auto md:w-[760px]">
+    <div role="alert" class="alert alert-warning mt-2 md:mt-10 mx-auto md:w-[760px]">
         <svg
             xmlns="http://www.w3.org/2000/svg"
             class="stroke-current shrink-0 h-6 w-6"
@@ -20,7 +20,7 @@
         </span>
     </div>
     <div
-        class="card bg-base-100-50 shadow-xl rounded-lg mt-10 mx-auto md:w-[760px]"
+        class="card bg-base-100-50 shadow-xl rounded-lg mt-2 md:mt-10 mx-auto md:w-[760px]"
     >
         <div class="card-body">
             <p>

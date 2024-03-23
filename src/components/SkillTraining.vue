@@ -11,7 +11,7 @@
         </div>
     </template>
     <div
-        class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-5 my-10"
+        class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-2 md:gap-5 my-2 md:my-10"
     >
         <template v-for="action in actionsWithItemSearch" :key="action.skill">
             <div class="card bg-base-100-50 shadow-xl rounded-lg">

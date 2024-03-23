@@ -174,90 +174,91 @@ watch(() => broochStore.hasAccess(0), init)
                     </details>
                 </li>
             </ul>
-            <div class="dropdown">
-                <div
-                    tabindex="0"
-                    role="button"
-                    class="btn m-1 border-0 md:hidden"
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke-width="1.5"
-                        stroke="currentColor"
-                        class="w-6 h-6"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-                        />
-                    </svg>
-                </div>
-                <ul
-                    tabindex="0"
-                    class="z-[1] menu dropdown-content p-2 shadow bg-base-100 rounded-box w-52"
-                >
-                    <li>
-                        <router-link to="/hero-select">Hero Select</router-link>
-                    </li>
-                    <li>
-                        <router-link to="/combat"
-                            >Combat Calculator</router-link
+            <ul class="menu menu-horizontal md:hidden">
+                <li>
+                    <details>
+                        <summary>
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke-width="1.5"
+                                stroke="currentColor"
+                                class="w-6 h-6"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                                />
+                            </svg>
+                        </summary>
+                        <ul
+                            tabindex="0"
+                            class="z-[1] menu dropdown-content p-2 shadow bg-base-100 rounded-box w-52"
                         >
-                    </li>
-                    <li>
-                        <router-link to="/skills">Skill Training</router-link>
-                    </li>
-                    <li>
-                        <router-link to="/lotteries"
-                            >Wishing Well Ranking</router-link
-                        >
-                    </li>
-                    <li>
-                        <router-link to="/clan-battle" @click="showBrooch(0)"
-                            >Clan Battle
-                            <img
-                                src="/src/assets/emerald_brooch_icon.png"
-                                class="rounded-lg w-[20px] inline cursor-pointer"
-                                alt="Emerald Brooch"
-                        /></router-link>
-                    </li>
-                    <li>
-                        <router-link
-                            to="/territory-rankings"
-                            @click="showBrooch(0)"
-                            >Battle Rankings
-                            <img
-                                src="/src/assets/emerald_brooch_icon.png"
-                                class="rounded-lg w-[20px] inline cursor-pointer"
-                                alt="Emerald Brooch"
-                        /></router-link>
-                    </li>
-                    <li>
-                        <router-link
-                            to="/clan-management/wishing-well"
-                            @click="showBrooch(0)"
-                            >Wish Contributions
-                            <img
-                                src="/src/assets/emerald_brooch_icon.png"
-                                class="rounded-lg w-[20px] inline cursor-pointer"
-                                alt="Emerald Brooch"
-                        /></router-link>
-                    </li>
+                            <li>
+                                <router-link to="/hero-select">Hero Select</router-link>
+                            </li>
+                            <li>
+                                <router-link to="/combat"
+                                    >Combat Calculator</router-link
+                                >
+                            </li>
+                            <li>
+                                <router-link to="/skills">Skill Training</router-link>
+                            </li>
+                            <li>
+                                <router-link to="/lotteries"
+                                    >Wishing Well Ranking</router-link
+                                >
+                            </li>
+                            <li>
+                                <router-link to="/clan-battle" @click="showBrooch(0)"
+                                    >Clan Battle
+                                    <img
+                                        src="/src/assets/emerald_brooch_icon.png"
+                                        class="rounded-lg w-[20px] inline cursor-pointer"
+                                        alt="Emerald Brooch"
+                                /></router-link>
+                            </li>
+                            <li>
+                                <router-link
+                                    to="/territory-rankings"
+                                    @click="showBrooch(0)"
+                                    >Battle Rankings
+                                    <img
+                                        src="/src/assets/emerald_brooch_icon.png"
+                                        class="rounded-lg w-[20px] inline cursor-pointer"
+                                        alt="Emerald Brooch"
+                                /></router-link>
+                            </li>
+                            <li>
+                                <router-link
+                                    to="/clan-management/wishing-well"
+                                    @click="showBrooch(0)"
+                                    >Wish Contributions
+                                    <img
+                                        src="/src/assets/emerald_brooch_icon.png"
+                                        class="rounded-lg w-[20px] inline cursor-pointer"
+                                        alt="Emerald Brooch"
+                                /></router-link>
+                            </li>
 
-                    <li>
-                        <router-link to="/factory" @click="showBrooch(1)"
-                            >Factory
-                            <img
-                                src="/src/assets/ruby_brooch_icon.png"
-                                class="rounded-lg w-[20px] inline cursor-pointer"
-                                alt="Ruby Brooch"
-                        /></router-link>
-                    </li>
-                </ul>
-            </div>
+                            <li>
+                                <router-link to="/factory" @click="showBrooch(1)"
+                                    >Factory
+                                    <img
+                                        src="/src/assets/ruby_brooch_icon.png"
+                                        class="rounded-lg w-[20px] inline cursor-pointer"
+                                        alt="Ruby Brooch"
+                                /></router-link>
+                            </li>
+                        </ul>
+                
+                    </details>
+                </li>
+            </ul>
         </div>
         <div class="navbar-end">
             <!-- <button class="btn btn-ghost btn-circle" v-if="isDark" @click="onThemeToggle('light')">

@@ -1,11 +1,11 @@
 <template>
-    <div class="flex my-10 gap-10">
+    <div class="flex my-2 gap-2 md:my-10 md:gap-10">
         <Avatar
-            class="flex-initial w-1/3 min-w-[200px]"
+            class="flex-initial w-1/3 md:w-1/4 min-w-[200px]"
             :id="coreStore.playerState?.avatarId"
             :name="coreStore.playerState?.name"
         />
-        <div class="flex-grow card bg-base-100-50 shadow-xl rounded-lg">
+        <div class="grow 2xl:flex-initial card bg-base-100-50 shadow-xl rounded-lg 2xl:w-[280px]">
             <div class="card-body flex flex-wrap">
                 <ItemSelect
                     :items="headItems"
@@ -81,22 +81,22 @@
                     v-model="equippedItems.food"
                 />
                 <div
-                    class="md:flex-row flex-col flex justify-stretch w-full gap-2"
+                    class="md:flex-row xl:flex-col flex-col flex justify-stretch w-full gap-2"
                 >
                     <button
-                        class="btn btn-primary grow btn-xs md:btn-md"
+                        class="btn btn-primary grow btn-xs sm:btn-sm md:btn-md"
                         @click.prevent="equipFullMelee"
                     >
                         Full Melee
                     </button>
                     <button
-                        class="btn btn-primary grow btn-xs md:btn-md"
+                        class="btn btn-primary grow btn-xs sm:btn-sm md:btn-md"
                         @click.prevent="equipFullRanged"
                     >
                         Full Ranged
                     </button>
                     <button
-                        class="btn btn-primary grow btn-xs md:btn-md"
+                        class="btn btn-primary grow btn-xs sm:btn-sm md:btn-md"
                         @click.prevent="equipFullMagic"
                     >
                         Full Magic
@@ -104,10 +104,15 @@
                 </div>
             </div>
         </div>
+        <div class="max-xl:hidden my-2 md:my-10 w-1/2 flex flex-col justify-center items-center">
+            <HeroStats />
+        </div>
     </div>
-    <HeroStats class="my-10" />
-    <BoostPanel :hide-non-combat="true" class="my-10" />
-    <ItemSearch class="my-10 lg:hidden" />
+    <div class="xl:hidden my-2 md:my-10">
+        <HeroStats />
+    </div>
+    <BoostPanel :hide-non-combat="true" class="my-2 md:my-10" />
+    <ItemSearch class="my-2 md:my-10 lg:hidden" />
     <MonsterRankings />
 </template>
 

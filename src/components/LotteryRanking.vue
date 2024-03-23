@@ -1,6 +1,6 @@
 <template>
     <div class="flex max-xl:flex-col flex-row justify-evenly xl:gap-10">
-        <div class="card bg-base-100-50 shadow-xl rounded-lg mt-10 grow">
+        <div class="card bg-base-100-50 shadow-xl rounded-lg mt-2 md:mt-10 grow">
             <div class="card-body">
                 <div
                     v-if="loading"
@@ -51,7 +51,7 @@
                 </div>
             </div>
         </div>
-        <div class="card bg-base-100-50 shadow-xl rounded-lg mt-10 grow">
+        <div class="card bg-base-100-50 shadow-xl rounded-lg mt-2 md:mt-10 grow">
             <div class="card-body">
                 <div
                     v-if="loading"

@@ -1,5 +1,5 @@
 <template>
-    <div class="card bg-base-100-50 shadow-xl rounded-lg mt-10">
+    <div class="card bg-base-100-50 shadow-xl rounded-lg my-2 md:mt-10">
         <div class="card-body">
             <div
                 v-if="!props.hideNonCombat"
