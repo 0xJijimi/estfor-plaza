@@ -4,6 +4,28 @@
     >
         <div class="card-body">
             <h2 class="text-2xl font-bold text-center">Assigned Heroes</h2>
+            <div class="join items-center justify-end">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    class="w-6 h-6 mr-2 text-primary"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+                    />
+                </svg>
+                <input
+                    type="text"
+                    placeholder="Search"
+                    class="input input-bordered bg-base-100-50 input-sm"
+                    v-model="searchValue"
+                />
+            </div>
             <div class="overflow-x-auto">
                 <table class="table md:table-md table-xs">
                     <thead>
@@ -153,11 +175,12 @@ const interval = ref<NodeJS.Timeout>()
 const pageSize = ref(20)
 const pageNumber = ref(0)
 const selectAll = ref(false)
+const searchValue = ref('')
 
 const assignHeroRef = ref<typeof AssignHero>()
 const executeActionsRef = ref<typeof ExecuteSiloActions>()
 
-const assignedSilos = computed(() => factoryStore.assignedProxys)
+const assignedSilos = computed(() => factoryStore.assignedProxys.filter((s) => s.playerState.name?.toLowerCase()?.indexOf(searchValue.value?.toLowerCase()) > -1 || decodeTransaction(s.savedTransactions)?.toLowerCase()?.indexOf(searchValue.value?.toLowerCase()) > -1))
 const assignedSilosRef = ref(
     assignedSilos.value.map((s, i) => ({ ...s, selected: i === 0 }))
 )
