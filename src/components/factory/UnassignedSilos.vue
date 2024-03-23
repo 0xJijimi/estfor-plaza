@@ -8,7 +8,14 @@
                 <table class="table md:table-md table-xs">
                     <thead>
                         <tr>
-                            <th class="w-[80px] text-center"></th>
+                            <th class="w-[80px]">
+                                <input
+                                    type="checkbox"
+                                    class="checkbox checkbox-primary"
+                                    v-model="selectAll"
+                                    @change="selectAllSilos"
+                                />
+                            </th>
                             <th>Name</th>
                             <th class="w-[80px] text-center">Status</th>
                         </tr>
@@ -68,6 +75,7 @@ import AssignHero from "../dialogs/AssignHero.vue"
 
 const factoryStore = useFactoryStore()
 const assigningHeroes = ref(false)
+const selectAll = ref(false)
 
 const assignHeroRef = ref<typeof AssignHero>()
 
@@ -84,6 +92,12 @@ const assignHeroes = () => {
     assignHeroRef.value?.openDialog(
         unassignedSilosRef.value.filter((x) => x.selected)
     )
+}
+
+const selectAllSilos = () => {
+    for (const silo of unassignedSilosRef.value) {
+        silo.selected = selectAll.value
+    }
 }
 
 watch(
