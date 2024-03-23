@@ -84,19 +84,19 @@
                     class="md:flex-row xl:flex-col flex-col flex justify-stretch w-full gap-2"
                 >
                     <button
-                        class="btn btn-primary grow btn-xs sm:btn-sm md:btn-md"
+                        class="btn btn-primary grow btn-xs sm:btn-sm md:btn-md xl:btn-sm"
                         @click.prevent="equipFullMelee"
                     >
                         Full Melee
                     </button>
                     <button
-                        class="btn btn-primary grow btn-xs sm:btn-sm md:btn-md"
+                        class="btn btn-primary grow btn-xs sm:btn-sm md:btn-md xl:btn-sm"
                         @click.prevent="equipFullRanged"
                     >
                         Full Ranged
                     </button>
                     <button
-                        class="btn btn-primary grow btn-xs sm:btn-sm md:btn-md"
+                        class="btn btn-primary grow btn-xs sm:btn-sm md:btn-md xl:btn-sm"
                         @click.prevent="equipFullMagic"
                     >
                         Full Magic

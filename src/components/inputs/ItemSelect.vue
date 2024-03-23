@@ -1,6 +1,6 @@
 <template>
     <select
-        class="select select-bordered w-full md:select-md select-xs"
+        class="select select-bordered w-full md:select-sm select-xs"
         v-model="value"
         :disabled="props.disabled"
     >
