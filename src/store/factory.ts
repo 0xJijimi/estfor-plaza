@@ -27,6 +27,7 @@ import estforPlayerNFTAbi from "../abi/estforPlayerNFT.json"
 import factoryAbi from "../abi/factoryRegistry.json"
 import epProxyAbi from "../abi/epProxy.json"
 import {
+    PlayerSearchResult,
     getPlayersByOwner,
     getUserItemNFTs,
     searchQueuedActions,
@@ -35,6 +36,7 @@ import { decode } from "../utils/abi"
 import { allActions } from "../data/actions"
 import { calculateChance } from "../utils/player"
 import { getActionChoiceById } from "./skills"
+import { sleep } from "../utils/time"
 
 export interface SavedTransaction {
     to: string
@@ -345,9 +347,20 @@ export const useFactoryStore = defineStore({
                 chainId: fantom.id,
             }
 
-            const playerPromises = await Promise.all(
-                this.proxys.map((p) => getPlayersByOwner(p.address))
-            )
+            // do this in 20 player chunks
+            const chunks = 20
+            const playerChunks = Math.ceil(this.proxys.length / chunks)
+            const playerPromises: PlayerSearchResult[] = []
+
+            for (let i = 0; i < playerChunks; i++) {
+                const promises = await Promise.all(
+                    this.proxys
+                        .slice(i * chunks, (i + 1) * chunks)
+                        .map((p) => getPlayersByOwner(p.address))
+                )
+                playerPromises.push(...promises)
+                await sleep(200)
+            }
 
             const proxysWithPlayerId = this.proxys.map((p) => {
                 const result = playerPromises.find(
@@ -453,17 +466,34 @@ export const useFactoryStore = defineStore({
         async setProxys(proxys: any[]) {
             const account = getAccount()
 
-            this.proxys = proxys.map((d) => ({
-                address: d.proxy,
-                index: d.proxyId,
-                allPlayers: [],
-                playerId: "",
-                playerState: {} as Player,
-                queuedActions: [] as QueuedAction[],
-                owner: account.address as string,
-                isPaused: true,
-                savedTransactions: [] as SavedTransaction[],
-            }))
+            this.proxys = proxys.map((d) => {
+                // Fix for pre-event proxys with the same id
+                let proxyId = d.proxyId
+                let sameProxyIds = proxys.filter((p) => p.proxyId === d.proxyId)
+                if (sameProxyIds.length > 1) {
+                    sameProxyIds.sort((a, b) => {
+                        if (a.proxy > b.proxy) {
+                            return 1
+                        }
+                        if (a.proxy < b.proxy) {
+                            return -1
+                        }
+                        return 0
+                    })
+                    proxyId = (Number(proxyId) + sameProxyIds.findIndex((p) => p.proxy === d.proxy) - sameProxyIds.length + 1).toString()
+                }
+                return {
+                    address: d.proxy,
+                    index: proxyId,
+                    allPlayers: [],
+                    playerId: "",
+                    playerState: {} as Player,
+                    queuedActions: [] as QueuedAction[],
+                    owner: account.address as string,
+                    isPaused: true,
+                    savedTransactions: [] as SavedTransaction[],
+                }
+            })
         },
         setQueuedActions(proxy: string, queuedActions: QueuedAction[]) {
             const proxyToUpdate = this.proxys.find((p) => p.address === proxy)

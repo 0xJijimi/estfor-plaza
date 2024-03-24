@@ -7,3 +7,5 @@ export const formatDate = (ms: string) => {
     const date = new Date(parseInt(ms) * 1000)
     return date.toLocaleDateString()
 }
+
+export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))

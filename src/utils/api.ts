@@ -9,6 +9,7 @@ import {
     Territory,
     UserItemNFT,
 } from "@paintswap/estfor-definitions/types"
+import { sleep } from "./time"
 
 const baseUrl = "https://api.estfor.com"
 
@@ -85,122 +86,118 @@ export interface AvatarSearchResult {
     avatars: Avatar[]
 }
 
+const fetchRetry = async (url: string) => {
+    let retries = 0
+    while (retries < 50) {
+        try {
+            const response = await fetch(url)
+            return response.json()
+        } catch (e) {
+            await sleep(1000)
+        }
+    }
+    return null
+}
+
 export const getPlayerState = async (
     playerId: string
 ): Promise<ClanMemberResult> => {
-    const response = await fetch(`${baseUrl}/clan-members/${playerId}`)
-    return response.json()
+    return fetchRetry(`${baseUrl}/clan-members/${playerId}`)
 }
 
 export const getGlobalData = async (): Promise<CoreDataResult> => {
-    const response = await fetch(`${baseUrl}/core-data`)
-    return response.json()
+    return fetchRetry(`${baseUrl}/core-data`)
 }
 
 export const getUserItemNFTs = async (
     user: string,
     tokenIds: number[]
 ): Promise<UserItemNFTResult> => {
-    const response = await fetch(
-        `${baseUrl}/user-item-nfts/${user}?${tokenIds
+    return fetchRetry(`${baseUrl}/user-item-nfts/${user}?${tokenIds
             .map((x) => `tokenIds[]=${x}`)
             .join("&")}`
     )
-    return response.json()
 }
 
 export const getPlayers = async (
     searchTerm: string
 ): Promise<PlayerSearchResult> => {
-    const response = await fetch(`${baseUrl}/players?name=${searchTerm}`)
-    return response.json()
+    return fetchRetry(`${baseUrl}/players?name=${searchTerm}`)
 }
 
 export const getPlayersByOwner = async (
     address: string
 ): Promise<PlayerSearchResult> => {
-    const response = await fetch(`${baseUrl}/players?owner=${address}`)
-    return response.json()
+    return fetchRetry(`${baseUrl}/players?owner=${address}`)
 }
 
 export const getExactPlayers = async (
     searchTerm: string
 ): Promise<PlayerSearchResult> => {
-    const response = await fetch(`${baseUrl}/players?exactName=${searchTerm}`)
-    return response.json()
+    return fetchRetry(`${baseUrl}/players?exactName=${searchTerm}`)
 }
 
 export const getPlayersByIds = async (
     ids: string[],
     numToSkip: number = 0
 ): Promise<PlayerSearchResult> => {
-    const response = await fetch(
+    return fetchRetry(
         `${baseUrl}/players?numToSkip=${numToSkip}&${ids
             .map((x) => `tokenIds[]=${x}`)
             .join("&")}`
     )
-    return response.json()
 }
 
 export const getSoloPlayerState = async (
     playerId: string
 ): Promise<PlayerResult> => {
-    const response = await fetch(`${baseUrl}/players/${playerId}`)
-    return response.json()
+    return fetchRetry(`${baseUrl}/players/${playerId}`)
 }
 
 export const getLotteries = async (
     numToSkip: number
 ): Promise<LotteriesResult> => {
-    const response = await fetch(`${baseUrl}/lotteries?numToSkip=${numToSkip}`)
-    return response.json()
+    return fetchRetry(`${baseUrl}/lotteries?numToSkip=${numToSkip}`)
 }
 
 export const getRaffleEntries = async (
     numToSkip: number
 ): Promise<RaffleEntryResult> => {
-    const response = await fetch(
+    return fetchRetry(
         `${baseUrl}/raffle-entries?numToSkip=${numToSkip}`
     )
-    return response.json()
 }
 
 export const getClanMembers = async (
     clanId: string
 ): Promise<ClanMembersResult> => {
-    const response = await fetch(`${baseUrl}/clan-members?clanId=${clanId}`)
-    return response.json()
+    return fetchRetry(`${baseUrl}/clan-members?clanId=${clanId}`)
 }
 
 export const getClans = async (numToSkip: number): Promise<ClansResult> => {
-    const response = await fetch(`${baseUrl}/clans?numToSkip=${numToSkip}`)
-    return response.json()
+    return fetchRetry(`${baseUrl}/clans?numToSkip=${numToSkip}`)
 }
 
 export const searchQueuedActions = async (
     playerId: string
 ): Promise<SearchQueuedActionsResult> => {
-    const response = await fetch(
+    return fetchRetry(
         `${baseUrl}/queued-actions?playerId=${playerId}&isActive=true&orderDirection=asc`
     )
-    return response.json()
 }
 
 export const getTerritories = async (): Promise<TerritoriesResult> => {
-    const response = await fetch(`${baseUrl}/territories`)
-    return response.json()
+    return fetchRetry(`${baseUrl}/territories`)
 }
 
 export const getDonations = async (
     numToSkip: number
 ): Promise<DonationsResult> => {
-    const response = await fetch(
+    return fetchRetry(
         `${baseUrl}/donations?numToSkip=${numToSkip}&orderDirection=desc&orderBy=lastUpdatedTimestamp&useUsers=false`
     )
-    return response.json()
 }
 
 export const getAvatars = async (): Promise<AvatarSearchResult> => {
-    const response = await fetch(`${baseUrl}/avatars`)
-    return response.json()
+    return fetchRetry(`${baseUrl}/avatars`)
 }
