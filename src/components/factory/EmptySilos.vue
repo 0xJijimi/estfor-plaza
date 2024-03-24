@@ -62,6 +62,31 @@
                         </div>
                     </label>
                 </div>
+                <div class="flex items-end gap-2">
+                    <label class="form-control w-full">
+                        <div class="label">
+                            <span class="label-text">Number of Heroes</span>
+                        </div>
+                        <input
+                            type="number"
+                            step="1"
+                            min="1"
+                            class="input input-bordered bg-base-100-50"
+                            v-model="quickAddNumber"
+                        />
+                    </label>
+                    <AvatarSelect
+                        :options="avatars"
+                        v-model="quickAddAvatarId"
+                    />
+                    <button
+                        type="button"
+                        class="btn btn-primary mt-5 me-2"
+                        @click="quickAddHeroes"
+                    >
+                        Quick Add
+                    </button>
+                </div>
                 <div class="flex">
                     <button
                         type="button"
@@ -109,6 +134,19 @@ const mintingHeroes = ref(false)
 const heroesToMint = ref([{ name: "", error: "", avatarId: 1 }])
 const avatars = ref<any[]>([])
 const chunks = ref(10)
+
+const quickAddNumber = ref(1)
+const quickAddAvatarId = ref(1)
+
+const quickAddHeroes = () => {
+    for (let i = 0; i < quickAddNumber.value; i++) {
+        heroesToMint.value.push({
+            name: "",
+            error: "",
+            avatarId: quickAddAvatarId.value,
+        })
+    }
+}
 
 const emptySilos = computed(() => factoryStore.emptyProxys)
 
