@@ -66,13 +66,12 @@ import {
 } from "../../store/factory"
 import { ComputedRef, computed, onMounted, ref } from "vue"
 import { itemNames } from "../../store/items"
-import { getUserItemNFTs } from "../../utils/api"
 import { UserItemNFT } from "@paintswap/estfor-definitions/types"
 import WithdrawFromBank from "../dialogs/WithdrawFromBank.vue"
 
 const factoryStore = useFactoryStore()
 const period = ref(24)
-const bankItems = ref<UserItemNFT[]>([])
+const bankItems = computed<UserItemNFT[]>(() => factoryStore.bankItems)
 
 const withdrawFromBankRef = ref<typeof WithdrawFromBank>()
 
@@ -92,20 +91,12 @@ const aggregatedItems: ComputedRef<AggregatedItem[]> = computed(() => {
         const outgoingItem = outgoingItems.find(
             (i) => i.itemTokenId === item.tokenId
         )
-        if (incomingItem) {
+        if (incomingItem || outgoingItem) {
             return {
                 tokenId: item.tokenId,
                 amount: item.amount,
-                rate: incomingItem.rate,
-                outgoingRate: 0,
-            }
-        }
-        if (outgoingItem) {
-            return {
-                tokenId: item.tokenId,
-                amount: item.amount,
-                rate: 0,
-                outgoingRate: outgoingItem.rate,
+                rate: incomingItem?.rate || 0,
+                outgoingRate: outgoingItem?.rate || 0,
             }
         }
         return {
@@ -156,8 +147,7 @@ const withdrawItems = async () => {
 const init = async () => {
     try {
         if (bank.value) {
-            const itemResult = await getUserItemNFTs(bank.value?.address, [])
-            bankItems.value = itemResult.userItemNFTs
+            await factoryStore.getBankItems()
         }
     } catch {
         // console.error(e)

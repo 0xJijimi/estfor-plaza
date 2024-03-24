@@ -4,10 +4,15 @@
     >
         <div class="card-body">
             <div role="tablist" class="tabs tabs-bordered tabs-lg mb-4">
-                <router-link to="/territory-rankings" role="tab" class="tab text-sm md:text-md"
+                <router-link
+                    to="/territory-rankings"
+                    role="tab"
+                    class="tab text-sm md:text-md"
                     >Territory Rankings</router-link
                 >
-                <div role="tab" class="tab tab-active text-sm md:text-md">Vault Rankings</div>
+                <div role="tab" class="tab tab-active text-sm md:text-md">
+                    Vault Rankings
+                </div>
             </div>
             <div class="form-control items-end">
                 <label class="label cursor-pointer">

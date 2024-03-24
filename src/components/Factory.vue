@@ -1,5 +1,8 @@
 <template>
-    <div role="alert" class="alert alert-warning mt-2 md:mt-10 mx-auto md:w-[760px]">
+    <div
+        role="alert"
+        class="alert alert-warning mt-2 md:mt-10 mx-auto md:w-[760px]"
+    >
         <svg
             xmlns="http://www.w3.org/2000/svg"
             class="stroke-current shrink-0 h-6 w-6"
@@ -53,21 +56,30 @@
                         />
                     </label>
                 </div>
-                <button
-                    type="button"
-                    class="btn btn-primary mt-5 w-full"
-                    @click="createSilos"
-                    :disabled="loading || creating"
-                >
-                    Create {{ Math.floor(silosToCreate) }} Silo{{
-                        silosToCreate > 1 ? "s" : ""
-                    }}
-                    {{
-                        neededTransactions > 1
-                            ? `(${neededTransactions} transactions)`
-                            : ""
-                    }}
-                </button>
+                <div class="flex">
+                    <button
+                        type="button"
+                        class="btn btn-primary mt-5 me-2"
+                        @click="viewSilos"
+                    >
+                        View Silos
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-primary mt-5 grow"
+                        @click="createSilos"
+                        :disabled="loading || creating"
+                    >
+                        Create {{ Math.floor(silosToCreate) }} Silo{{
+                            silosToCreate > 1 ? "s" : ""
+                        }}
+                        {{
+                            neededTransactions > 1
+                                ? `(${neededTransactions} transactions)`
+                                : ""
+                        }}
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -75,6 +87,7 @@
     <UnassignedSilos v-if="factoryStore.unassignedProxys.length > 0" />
     <ItemBank v-if="factoryStore.proxys.length > 0" />
     <AssignedSilos v-if="factoryStore.assignedProxys.length > 0" />
+    <ViewSilos ref="viewSilosRef" />
 </template>
 
 <script setup lang="ts">
@@ -88,6 +101,7 @@ import UnassignedSilos from "./factory/UnassignedSilos.vue"
 import AssignedSilos from "./factory/AssignedSilos.vue"
 import { getAccount } from "@wagmi/core"
 import ItemBank from "./factory/ItemBank.vue"
+import ViewSilos from "./dialogs/ViewSilos.vue"
 
 const factoryStore = useFactoryStore()
 const app = useAppStore()
@@ -95,6 +109,8 @@ const loading = ref(false)
 const creating = ref(false)
 const silosToCreate = ref(5)
 const chunks = ref(15)
+
+const viewSilosRef = ref<typeof ViewSilos>()
 
 const account = getAccount()
 
@@ -171,6 +187,10 @@ const createSilos = async () => {
     } finally {
         creating.value = false
     }
+}
+
+const viewSilos = () => {
+    viewSilosRef.value?.openDialog()
 }
 
 onError(async () => {

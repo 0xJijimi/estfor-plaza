@@ -5,7 +5,9 @@
             :id="coreStore.playerState?.avatarId"
             :name="coreStore.playerState?.name"
         />
-        <div class="grow 2xl:flex-initial card bg-base-100-50 shadow-xl rounded-lg 2xl:w-[280px]">
+        <div
+            class="grow 2xl:flex-initial card bg-base-100-50 shadow-xl rounded-lg 2xl:w-[280px]"
+        >
             <div class="card-body flex flex-wrap">
                 <ItemSelect
                     :items="headItems"
@@ -104,7 +106,9 @@
                 </div>
             </div>
         </div>
-        <div class="max-xl:hidden my-2 md:my-10 w-1/2 flex flex-col justify-center items-center">
+        <div
+            class="max-xl:hidden my-2 md:my-10 w-1/2 flex flex-col justify-center items-center"
+        >
             <HeroStats />
         </div>
     </div>

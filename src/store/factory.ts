@@ -27,7 +27,7 @@ import estforPlayerNFTAbi from "../abi/estforPlayerNFT.json"
 import factoryAbi from "../abi/factoryRegistry.json"
 import epProxyAbi from "../abi/epProxy.json"
 import {
-    getPlayersByIds,
+    getPlayersByOwner,
     getUserItemNFTs,
     searchQueuedActions,
 } from "../utils/api"
@@ -45,6 +45,7 @@ export interface ProxySilo {
     address: string
     owner: string
     index: number
+    allPlayers: Player[]
     playerId: string
     playerState: Player
     isPaused: boolean
@@ -54,6 +55,7 @@ export interface ProxySilo {
 
 export interface FactoryState {
     proxys: ProxySilo[]
+    bankItems: UserItemNFT[]
     initialised: boolean
     initialisedAt: Date | null
 }
@@ -253,6 +255,7 @@ export const useFactoryStore = defineStore({
             proxys: [] as ProxySilo[],
             initialised: false,
             initialisedAt: null,
+            bankItems: [] as UserItemNFT[],
         }) as FactoryState,
     getters: {
         emptyProxys(state: FactoryState) {
@@ -342,34 +345,34 @@ export const useFactoryStore = defineStore({
                 chainId: fantom.id,
             }
 
-            const data = await multicall({
-                contracts: this.proxys.map((p) => ({
-                    address: playerAddress as `0x${string}`,
-                    abi: estforPlayerAbi,
-                    functionName: "activePlayer",
-                    args: [p.address],
-                })) as any,
-            })
+            const playerPromises = await Promise.all(
+                this.proxys.map((p) => getPlayersByOwner(p.address))
+            )
 
-            const proxysWithPlayerId = this.proxys.map((p, i) => ({
-                ...p,
-                playerId:
-                    data[i].result !== BigInt(0)
-                        ? data[i].result?.toString() || ""
-                        : "",
-            }))
+            const proxysWithPlayerId = this.proxys.map((p) => {
+                const result = playerPromises.find(
+                    (x) =>
+                        x.players?.some(
+                            (y) =>
+                                y.owner?.toLowerCase() ===
+                                p.address.toLowerCase()
+                        )
+                )
+                return {
+                    ...p,
+                    playerId:
+                        result?.players?.find((x) => x.isActive)?.tokenId || "",
+                    allPlayers: result?.players || [],
+                    playerState:
+                        result?.players?.find((x) => x.isActive) ||
+                        ({} as Player),
+                }
+            })
 
             const playerIdsToGet = proxysWithPlayerId
                 .filter((p) => p.playerId !== "")
                 .map((p) => p.playerId)
             if (playerIdsToGet.length > 0) {
-                const playerStateResults: Player[] = []
-                // call getPlayersByIds in 100 player chunks
-                for (let i = 0; i < playerIdsToGet.length; i += 100) {
-                    const chunk = playerIdsToGet.slice(i, i + 100)
-                    const result = await getPlayersByIds(chunk)
-                    playerStateResults.push(...result.players)
-                }
                 const queuedActionPromises = await Promise.all(
                     playerIdsToGet.map((id) => searchQueuedActions(id))
                 )
@@ -400,9 +403,6 @@ export const useFactoryStore = defineStore({
 
                 this.proxys = proxysWithPlayerId.map((p, i) => ({
                     ...p,
-                    playerState:
-                        playerStateResults.find((ps) => ps.id === p.playerId) ||
-                        ({} as Player),
                     queuedActions: queuedActionPromises
                         .filter((x) =>
                             x.queuedActions.find(
@@ -456,6 +456,7 @@ export const useFactoryStore = defineStore({
             this.proxys = proxys.map((d) => ({
                 address: d.proxy,
                 index: d.proxyId,
+                allPlayers: [],
                 playerId: "",
                 playerState: {} as Player,
                 queuedActions: [] as QueuedAction[],
@@ -517,6 +518,7 @@ export const useFactoryStore = defineStore({
                         address: d.result as string,
                         index: i,
                         playerId: "",
+                        allPlayers: [],
                         playerState: {} as Player,
                         queuedActions: [] as QueuedAction[],
                         owner: account.address as string,
@@ -712,6 +714,7 @@ export const useFactoryStore = defineStore({
                 })
                 await waitForTransaction({ hash: tx.hash })
             }
+            await this.getBankItems()
         },
         async updateQueuedActions() {
             const queuedActionPromises = await Promise.all(
@@ -908,13 +911,21 @@ export const useFactoryStore = defineStore({
                 )
             )
 
-            const tx = await writeContract({
-                address: factoryAddress as `0x${string}`,
-                abi: factoryAbi,
-                functionName: "multicall",
-                args: [selectorArray],
-            })
-            await waitForTransaction({ hash: tx.hash })
+            if (selectorArray.length > 0) {
+                const tx = await writeContract({
+                    address: factoryAddress as `0x${string}`,
+                    abi: factoryAbi,
+                    functionName: "multicall",
+                    args: [selectorArray],
+                })
+                await waitForTransaction({ hash: tx.hash })
+            }
+        },
+        async getBankItems() {
+            if (this.bank) {
+                const result = await getUserItemNFTs(this.bank.address, [])
+                this.bankItems = result.userItemNFTs || []
+            }
         },
     },
 })

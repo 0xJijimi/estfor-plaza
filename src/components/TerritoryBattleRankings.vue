@@ -4,8 +4,13 @@
     >
         <div class="card-body">
             <div role="tablist" class="tabs tabs-bordered tabs-lg mb-4">
-                <div role="tab" class="tab tab-active text-sm md:text-md">Territory Rankings</div>
-                <router-link to="/vault-rankings" role="tab" class="tab text-sm md:text-md"
+                <div role="tab" class="tab tab-active text-sm md:text-md">
+                    Territory Rankings
+                </div>
+                <router-link
+                    to="/vault-rankings"
+                    role="tab"
+                    class="tab text-sm md:text-md"
                     >Vault Rankings</router-link
                 >
             </div>

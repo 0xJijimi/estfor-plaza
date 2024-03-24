@@ -198,7 +198,9 @@ watch(() => broochStore.hasAccess(0), init)
                             class="z-[1] menu dropdown-content p-2 shadow bg-base-100 rounded-box w-52"
                         >
                             <li>
-                                <router-link to="/hero-select">Hero Select</router-link>
+                                <router-link to="/hero-select"
+                                    >Hero Select</router-link
+                                >
                             </li>
                             <li>
                                 <router-link to="/combat"
@@ -206,7 +208,9 @@ watch(() => broochStore.hasAccess(0), init)
                                 >
                             </li>
                             <li>
-                                <router-link to="/skills">Skill Training</router-link>
+                                <router-link to="/skills"
+                                    >Skill Training</router-link
+                                >
                             </li>
                             <li>
                                 <router-link to="/lotteries"
@@ -214,7 +218,9 @@ watch(() => broochStore.hasAccess(0), init)
                                 >
                             </li>
                             <li>
-                                <router-link to="/clan-battle" @click="showBrooch(0)"
+                                <router-link
+                                    to="/clan-battle"
+                                    @click="showBrooch(0)"
                                     >Clan Battle
                                     <img
                                         src="/src/assets/emerald_brooch_icon.png"
@@ -246,7 +252,9 @@ watch(() => broochStore.hasAccess(0), init)
                             </li>
 
                             <li>
-                                <router-link to="/factory" @click="showBrooch(1)"
+                                <router-link
+                                    to="/factory"
+                                    @click="showBrooch(1)"
                                     >Factory
                                     <img
                                         src="/src/assets/ruby_brooch_icon.png"
@@ -255,7 +263,6 @@ watch(() => broochStore.hasAccess(0), init)
                                 /></router-link>
                             </li>
                         </ul>
-                
                     </details>
                 </li>
             </ul>

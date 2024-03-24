@@ -116,6 +116,13 @@ export const getPlayers = async (
     return response.json()
 }
 
+export const getPlayersByOwner = async (
+    address: string
+): Promise<PlayerSearchResult> => {
+    const response = await fetch(`${baseUrl}/players?owner=${address}`)
+    return response.json()
+}
+
 export const getExactPlayers = async (
     searchTerm: string
 ): Promise<PlayerSearchResult> => {

@@ -175,12 +175,22 @@ const interval = ref<NodeJS.Timeout>()
 const pageSize = ref(20)
 const pageNumber = ref(0)
 const selectAll = ref(false)
-const searchValue = ref('')
+const searchValue = ref("")
 
 const assignHeroRef = ref<typeof AssignHero>()
 const executeActionsRef = ref<typeof ExecuteSiloActions>()
 
-const assignedSilos = computed(() => factoryStore.assignedProxys.filter((s) => s.playerState.name?.toLowerCase()?.indexOf(searchValue.value?.toLowerCase()) > -1 || decodeTransaction(s.savedTransactions)?.toLowerCase()?.indexOf(searchValue.value?.toLowerCase()) > -1))
+const assignedSilos = computed(() =>
+    factoryStore.assignedProxys.filter(
+        (s) =>
+            s.playerState.name
+                ?.toLowerCase()
+                ?.indexOf(searchValue.value?.toLowerCase()) > -1 ||
+            decodeTransaction(s.savedTransactions)
+                ?.toLowerCase()
+                ?.indexOf(searchValue.value?.toLowerCase()) > -1
+    )
+)
 const assignedSilosRef = ref(
     assignedSilos.value.map((s, i) => ({ ...s, selected: i === 0 }))
 )

@@ -7,6 +7,11 @@
                 }}
             </h3>
 
+            <div class="mt-5">
+                Please execute the following in order unless you know what
+                you're doing.
+            </div>
+
             <button
                 type="button"
                 class="btn btn-primary mt-5 w-full"
@@ -17,7 +22,7 @@
                     actionInputsExecuted
                 "
             >
-                Execute
+                1. Execute
                 {{ silosWithEmptyQueuesOrActionInputOnly.length }} Simple
                 Action{{
                     silosWithEmptyQueuesOrActionInputOnly.length === 1
@@ -34,25 +39,19 @@
                 type="button"
                 class="btn btn-primary mt-5 w-full"
                 @click="transferItemsToBank"
-                :disabled="
-                    loading ||
-                    (silosWithEmptyQueuesOrActionInputOnly.length > 0 &&
-                        !actionInputsExecuted) ||
-                    itemsTransferredToBank
-                "
+                :disabled="loading || itemsTransferredToBank"
             >
-                Transfer Items to Bank
+                2. Transfer Items to Bank
             </button>
             <button
                 v-if="silosWithActionChoicesOnly.length > 0"
                 type="button"
                 class="btn btn-primary mt-5 w-full"
                 @click="executeActionChoiceSavedTransactions"
-                :disabled="loading || !itemsTransferredToBank"
+                :disabled="loading"
             >
-                Execute {{ silosWithActionChoicesOnly.length }} Complex Action{{
-                    silosWithActionChoicesOnly.length === 1 ? "" : "s"
-                }}
+                3. Execute {{ silosWithActionChoicesOnly.length }} Complex
+                Action{{ silosWithActionChoicesOnly.length === 1 ? "" : "s" }}
                 {{
                     actionInputChoicesNeededTransactions > 1
                         ? `(${actionInputChoicesNeededTransactions} transactions)`
@@ -67,6 +66,9 @@
                 >
                     {{ item }}
                 </div>
+            </div>
+            <div v-if="loading" class="mt-5">
+                Please wait while the transaction is being processed.
             </div>
         </div>
         <form method="dialog" class="modal-backdrop">

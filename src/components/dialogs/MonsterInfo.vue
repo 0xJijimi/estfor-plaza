@@ -11,7 +11,14 @@
             />
 
             <div class="text-center mt-5">
-                {{ monster?.info.numSpawned / 1000 }} spawned per hour for {{ (monster?.info.xpPerHour / (monster?.info.numSpawned / 1000)).toFixed(0) }} xp each
+                {{ monster?.info.numSpawned / 1000 }} spawned per hour for
+                {{
+                    (
+                        monster?.info.xpPerHour /
+                        (monster?.info.numSpawned / 1000)
+                    ).toFixed(0)
+                }}
+                xp each
             </div>
 
             <div class="overflow-x-auto mt-5">
