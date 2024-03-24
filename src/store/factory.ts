@@ -74,6 +74,10 @@ export interface NeededItem {
     items: { tokenId: number; amount: number }[]
 }
 
+export interface TransferUserItemNFT extends UserItemNFT {
+    transferAmount: number
+}
+
 export const calculateActionChoiceSuccessPercent = (
     a: ActionChoiceInput,
     playerXP: string,
@@ -282,6 +286,68 @@ export const useFactoryStore = defineStore({
         },
     },
     actions: {
+        async setActive(siloAddress: string, playerId: string) {
+            const coreStore = useCoreStore()
+            const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
+            const playersAddress = coreStore.getAddress(Address.estforPlayers)
+            const account = getAccount()
+
+            if (!factoryAddress || !playersAddress || !account.isConnected) {
+                return
+            }
+
+            const playersInterface = new Interface(estforPlayerAbi)
+            const data = playersInterface.encodeFunctionData(
+                "setActivePlayer",
+                [playerId]
+            )
+
+            const tx = await writeContract({
+                address: factoryAddress as `0x${string}`,
+                abi: factoryAbi,
+                functionName: "execute",
+                args: [siloAddress, playersAddress, data],
+            })
+
+            await waitForTransaction({ hash: tx.hash })
+        },
+        async transferHero(
+            siloAddress: string,
+            playerId: string,
+            toAddress: string
+        ) {
+            const coreStore = useCoreStore()
+            const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
+            const playerNFTAddress = coreStore.getAddress(
+                Address.estforPlayerNFT
+            )
+            const account = getAccount()
+
+            if (!factoryAddress || !playerNFTAddress || !account.isConnected) {
+                return
+            }
+
+            const playerNFTInterface = new Interface(estforPlayerNFTAbi)
+            const data = playerNFTInterface.encodeFunctionData(
+                "safeTransferFrom",
+                [
+                    siloAddress,
+                    toAddress,
+                    playerId,
+                    1,
+                    solidityPacked(["bytes"], ["0x"]),
+                ]
+            )
+
+            const tx = await writeContract({
+                address: factoryAddress as `0x${string}`,
+                abi: factoryAbi,
+                functionName: "execute",
+                args: [siloAddress, playerNFTAddress, data],
+            })
+
+            await waitForTransaction({ hash: tx.hash })
+        },
         async mintHeroes(heroes: any[], chunks: number) {
             const coreStore = useCoreStore()
             const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
@@ -480,7 +546,12 @@ export const useFactoryStore = defineStore({
                         }
                         return 0
                     })
-                    proxyId = (Number(proxyId) + sameProxyIds.findIndex((p) => p.proxy === d.proxy) - sameProxyIds.length + 1).toString()
+                    proxyId = (
+                        Number(proxyId) +
+                        sameProxyIds.findIndex((p) => p.proxy === d.proxy) -
+                        sameProxyIds.length +
+                        1
+                    ).toString()
                 }
                 return {
                     address: d.proxy,
@@ -493,6 +564,16 @@ export const useFactoryStore = defineStore({
                     isPaused: true,
                     savedTransactions: [] as SavedTransaction[],
                 }
+            })
+
+            this.proxys.sort((a, b) => {
+                if (Number(a.index) > Number(b.index)) {
+                    return 1
+                }
+                if (Number(a.index) < Number(b.index)) {
+                    return -1
+                }
+                return 0
             })
         },
         setQueuedActions(proxy: string, queuedActions: QueuedAction[]) {
@@ -950,6 +1031,41 @@ export const useFactoryStore = defineStore({
                 })
                 await waitForTransaction({ hash: tx.hash })
             }
+        },
+
+        async transferItemsToAddress(
+            siloAddress: string,
+            toAddress: string,
+            items: TransferUserItemNFT[]
+        ) {
+            const coreStore = useCoreStore()
+            const itemAddress = coreStore.getAddress(Address.itemNFT)
+            const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
+            const account = getAccount()
+            if (!factoryAddress || !itemAddress || !account.isConnected) {
+                return
+            }
+
+            const itemInterface = new Interface(itemNFTAbi)
+
+            const data = itemInterface.encodeFunctionData(
+                "safeBatchTransferFrom",
+                [
+                    siloAddress,
+                    toAddress,
+                    items.map((i) => i.tokenId),
+                    items.map((i) => i.transferAmount),
+                    solidityPacked(["bytes"], ["0x"]),
+                ]
+            )
+
+            const tx = await writeContract({
+                address: factoryAddress as `0x${string}`,
+                abi: factoryAbi,
+                functionName: "execute",
+                args: [siloAddress, itemAddress, data],
+            })
+            await waitForTransaction({ hash: tx.hash })
         },
         async getBankItems() {
             if (this.bank) {

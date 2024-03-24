@@ -113,7 +113,8 @@ export const getUserItemNFTs = async (
     user: string,
     tokenIds: number[]
 ): Promise<UserItemNFTResult> => {
-    return fetchRetry(`${baseUrl}/user-item-nfts/${user}?${tokenIds
+    return fetchRetry(
+        `${baseUrl}/user-item-nfts/${user}?${tokenIds
             .map((x) => `tokenIds[]=${x}`)
             .join("&")}`
     )
@@ -163,9 +164,7 @@ export const getLotteries = async (
 export const getRaffleEntries = async (
     numToSkip: number
 ): Promise<RaffleEntryResult> => {
-    return fetchRetry(
-        `${baseUrl}/raffle-entries?numToSkip=${numToSkip}`
-    )
+    return fetchRetry(`${baseUrl}/raffle-entries?numToSkip=${numToSkip}`)
 }
 
 export const getClanMembers = async (

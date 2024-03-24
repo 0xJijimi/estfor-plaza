@@ -8,4 +8,5 @@ export const formatDate = (ms: string) => {
     return date.toLocaleDateString()
 }
 
-export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+export const sleep = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms))
