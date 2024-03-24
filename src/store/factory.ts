@@ -28,6 +28,7 @@ import factoryAbi from "../abi/factoryRegistry.json"
 import epProxyAbi from "../abi/epProxy.json"
 import {
     PlayerSearchResult,
+    SearchQueuedActionsResult,
     getPlayersByOwner,
     getUserItemNFTs,
     searchQueuedActions,
@@ -400,12 +401,16 @@ export const useFactoryStore = defineStore({
 
             await this.getAllProxyStates()
         },
-        async getAllProxyStates() {
+        async getAllProxyStates(proxys: ProxySilo[] = []) {
             const coreStore = useCoreStore()
             const playerAddress = coreStore.getAddress(Address.estforPlayers)
             const account = getAccount()
             if (!playerAddress || !account.isConnected) {
                 return
+            }
+
+            if (proxys.length === 0) {
+                proxys = this.proxys
             }
 
             const proxyContract = {
@@ -452,10 +457,19 @@ export const useFactoryStore = defineStore({
                 .filter((p) => p.playerId !== "")
                 .map((p) => p.playerId)
             if (playerIdsToGet.length > 0) {
-                const queuedActionPromises = await Promise.all(
-                    playerIdsToGet.map((id) => searchQueuedActions(id))
-                )
-
+                const queuedActionPromises: SearchQueuedActionsResult[] = []
+                const chunks = 20
+                const queueChunks = Math.ceil(playerIdsToGet.length / chunks)
+    
+                for (let i = 0; i < queueChunks; i++) {
+                    const promises = await Promise.all(
+                        playerIdsToGet
+                            .slice(i * chunks, (i + 1) * chunks)
+                            .map((p) => searchQueuedActions(p))
+                    )
+                    queuedActionPromises.push(...promises)
+                    await sleep(200)
+                }
                 const proxyData = await multicall({
                     contracts: proxysWithPlayerId.map(
                         (p) =>
@@ -778,7 +792,7 @@ export const useFactoryStore = defineStore({
                     )
                 )
 
-                const splits = Math.ceil(itemsNeeded.length / chunks)
+                const splits = Math.ceil(selectorArray.length / chunks)
                 for (let i = 0; i < splits; i++) {
                     const tx = await writeContract({
                         address: factoryAddress as `0x${string}`,
@@ -901,7 +915,7 @@ export const useFactoryStore = defineStore({
             })
             await waitForTransaction({ hash: tx.hash })
         },
-        async transferItemsToBank() {
+        async transferItemsToBank(chunks: number) {
             const coreStore = useCoreStore()
             const itemAddress = coreStore.getAddress(Address.itemNFT)
             const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
@@ -1023,13 +1037,16 @@ export const useFactoryStore = defineStore({
             )
 
             if (selectorArray.length > 0) {
-                const tx = await writeContract({
-                    address: factoryAddress as `0x${string}`,
-                    abi: factoryAbi,
-                    functionName: "multicall",
-                    args: [selectorArray],
-                })
-                await waitForTransaction({ hash: tx.hash })
+                const splits = Math.ceil(selectorArray.length / chunks)
+                for (let i = 0; i < splits; i++) {
+                    const tx = await writeContract({
+                        address: factoryAddress as `0x${string}`,
+                        abi: factoryAbi,
+                        functionName: "multicall",
+                        args: [selectorArray.slice(i * chunks, (i + 1) * chunks),],
+                    })
+                    await waitForTransaction({ hash: tx.hash })
+                }
             }
         },
 

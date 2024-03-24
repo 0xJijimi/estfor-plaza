@@ -40,6 +40,7 @@
                             </th>
                             <th>Name</th>
                             <th>Saved Action</th>
+                            <th>Queued Action</th>
                             <th>Time Left</th>
                             <th class="w-[80px] text-center">Status</th>
                             <th></th>
@@ -62,6 +63,11 @@
                             </td>
                             <td>
                                 {{ decodeTransaction(silo.savedTransactions) }}
+                            </td>
+                            <td>
+                                {{ actionNames[Number(silo.queuedActions[0]?.actionId)] ||
+                                    actionChoiceNames[Number(silo.queuedActions[0]?.choice.id)] ||
+                                    "" }}
                             </td>
                             <td>
                                 {{ calculateTimeLeft(silo.queuedActions) }}
@@ -180,8 +186,30 @@ const searchValue = ref("")
 const assignHeroRef = ref<typeof AssignHero>()
 const executeActionsRef = ref<typeof ExecuteSiloActions>()
 
-const assignedSilos = computed(() =>
-    factoryStore.assignedProxys.filter(
+const decodeTransaction = (savedTransactions: SavedTransaction[]) => {
+    if (savedTransactions.length === 0) {
+        return "No action"
+    }
+
+    // first transaction is the action queue
+    const decoded = decode(
+        savedTransactions[0].data,
+        "startActions",
+        estforPlayerAbi
+    )
+
+    // [playerId, actions[[attire, actionId, regenId, choiceId], [], []], action queue type]
+    const actionId = decoded?.[1]?.[0]?.[1] || BigInt(0)
+    const choiceId = decoded?.[1]?.[0]?.[3] || BigInt(0)
+    return (
+        actionNames[Number(actionId)] ||
+        actionChoiceNames[Number(choiceId)] ||
+        "Unknown"
+    )
+}
+
+const assignedSilos = computed(() => {
+    const assignedProxys = factoryStore.assignedProxys.filter(
         (s) =>
             s.playerState.name
                 ?.toLowerCase()
@@ -190,7 +218,19 @@ const assignedSilos = computed(() =>
                 ?.toLowerCase()
                 ?.indexOf(searchValue.value?.toLowerCase()) > -1
     )
-)
+    assignedProxys.sort((a, b) => {
+        const aDecoded = decodeTransaction(a.savedTransactions)
+        const bDecoded = decodeTransaction(b.savedTransactions)
+        if (aDecoded < bDecoded) {
+            return -1
+        }
+        if (aDecoded > bDecoded) {
+            return 1
+        }
+        return 0
+    })
+    return assignedProxys
+})
 const assignedSilosRef = ref(
     assignedSilos.value.map((s, i) => ({ ...s, selected: i === 0 }))
 )
@@ -261,26 +301,6 @@ const calculateTimeLeft = (queuedActions: QueuedAction[]) => {
     const timeLeft = endTime * 1000 - Date.now()
     // return time left in hours only
     return timeLeft > 0 ? `${Math.round(timeLeft / 1000 / 60 / 60)}h` : "Ready"
-}
-
-const decodeTransaction = (savedTransactions: SavedTransaction[]) => {
-    if (savedTransactions.length === 0) {
-        return "No action"
-    }
-    // first transaction is the action queue
-    const decoded = decode(
-        savedTransactions[0].data,
-        "startActions",
-        estforPlayerAbi
-    )
-    // [playerId, actions[[attire, actionId, regenId, choiceId], [], []], action queue type]
-    const actionId = decoded?.[1]?.[0]?.[1] || BigInt(0)
-    const choiceId = decoded?.[1]?.[0]?.[3] || BigInt(0)
-    return (
-        actionNames[Number(actionId)] ||
-        actionChoiceNames[Number(choiceId)] ||
-        "Unknown"
-    )
 }
 
 onMounted(() => {

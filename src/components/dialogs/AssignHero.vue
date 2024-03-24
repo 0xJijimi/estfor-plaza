@@ -71,6 +71,12 @@
             >
                 {{ item }}
             </div>
+            <div v-if="checking" class="flex justify-between items-center mt-5">
+                <span>Checking all heroes have the correct items for action...</span>
+                <span
+                    class="loading loading-spinner loading-md mx-auto"
+                ></span>
+            </div>
             <button
                 type="button"
                 class="btn btn-primary mt-5 w-full"
@@ -127,6 +133,7 @@ const factoryStore = useFactoryStore()
 const app = useAppStore()
 
 const loading = ref(false)
+const checking = ref(false)
 const active = ref(true)
 const heroesToAssign = ref<ProxySilo[]>([])
 const missingItems = ref<string[]>([])
@@ -148,6 +155,7 @@ const checkRequiredItems = async () => {
     missingItems.value = []
     rightHandItems.value = []
     loading.value = true
+    checking.value = true
     try {
         if (actionId.value > 0) {
             const action = allActions.find((x) => x.actionId == actionId.value)
@@ -184,13 +192,15 @@ const checkRequiredItems = async () => {
     } catch {
     } finally {
         loading.value = false
+        checking.value = false
     }
 }
 
 const checkActionChoiceRequiredItems = async () => {
     missingItems.value = []
     rightHandItems.value = []
-    loading.value = true
+    loading.value = true    
+    checking.value = true
     try {
         if (actionChoiceOutputId.value > 0) {
             const action = allActions.find((x) => x.info.skill == skillId.value) // only 1 for action choice
@@ -227,6 +237,7 @@ const checkActionChoiceRequiredItems = async () => {
     } catch {
     } finally {
         loading.value = false
+        checking.value = false
     }
 }
 

@@ -42,6 +42,11 @@
                 :disabled="loading || itemsTransferredToBank"
             >
                 2. Transfer Items to Bank
+                {{
+                    transferItemsNeededTransactions > 1
+                        ? `(${transferItemsNeededTransactions} transactions)`
+                        : ""
+                }}
             </button>
             <button
                 v-if="silosWithActionChoicesOnly.length > 0"
@@ -101,6 +106,7 @@ const silosToExecute = ref<ProxySilo[]>([])
 const missingItems = ref<string[]>([])
 const chunks = ref(10)
 const actionChoiceChunks = ref(10)
+const transferItemChunks = ref(50)
 
 // gas cost for execute action is 800k gas, split into chunks of 10
 const actionInputsNeededTransactions = computed(() => {
@@ -126,7 +132,15 @@ const actionInputChoicesNeededTransactions = computed(() => {
 
 const silosWithActionChoicesOnly = computed(() => {
     return silosToExecute.value.filter((s) =>
+        s.queuedActions.length > 0 &&
         s.queuedActions.every((a) => a.choice !== null)
+    )
+})
+
+// gas cost for transfer items is 100k gas, split into chunks of 50
+const transferItemsNeededTransactions = computed(() => {
+    return Math.ceil(
+        factoryStore.assignedProxys.length / transferItemChunks.value
     )
 })
 
@@ -165,11 +179,10 @@ const executeSavedTransactions = async () => {
 const transferItemsToBank = async () => {
     loading.value = true
     try {
-        await factoryStore.transferItemsToBank()
+        await factoryStore.transferItemsToBank(transferItemChunks.value)
         app.addToast(`Items transferred to Bank`, "alert-success", 5000)
         itemsTransferredToBank.value = true
     } catch {
-        // console.error(e)
         // user declined tx
     } finally {
         loading.value = false
@@ -296,8 +309,8 @@ const executeActionChoiceSavedTransactions = async () => {
                 dialog.close()
             }
         }
-    } catch {
-        // console.error(e)
+    } catch (e) {
+        console.error(e)
         // user declined tx
     } finally {
         loading.value = false
