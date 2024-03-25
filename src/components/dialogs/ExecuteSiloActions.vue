@@ -104,8 +104,8 @@ const actionInputsExecuted = ref(false)
 const itemsTransferredToBank = ref(false)
 const silosToExecute = ref<ProxySilo[]>([])
 const missingItems = ref<string[]>([])
-const chunks = ref(10)
-const actionChoiceChunks = ref(10)
+const chunks = ref(8)
+const actionChoiceChunks = ref(8)
 const transferItemChunks = ref(50)
 
 // gas cost for execute action is 800k gas, split into chunks of 10

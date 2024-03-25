@@ -1,5 +1,5 @@
 <template>
-    <dialog id="emerald_brooch_paywall_modal" class="modal">
+    <dialog :id="props.id" class="modal">
         <div class="modal-box bg-base-100 border-2 border-primary">
             <h3
                 v-if="!broochStore.hasAccess(0)"
@@ -62,6 +62,13 @@ import { useBroochStore } from "../../store/brooch"
 const app = useAppStore()
 const broochStore = useBroochStore()
 
+const props = defineProps({
+    id: {
+        type: String,
+        required: true,
+    },
+})
+
 const loading = ref(false)
 
 const brooch = computed(() => {
@@ -88,7 +95,7 @@ const openDialog = (_monsterId: number) => {
     }
 
     const dialog = document.getElementById(
-        "emerald_brooch_paywall_modal"
+        props.id
     ) as HTMLDialogElement
     dialog.showModal()
     init()
@@ -114,7 +121,7 @@ const mintNFT = async () => {
     } finally {
         loading.value = false
         const dialog = document.getElementById(
-            "emerald_brooch_paywall_modal"
+            props.id
         ) as HTMLDialogElement
         dialog.close()
         init()

@@ -109,11 +109,11 @@
         <div
             class="max-xl:hidden my-2 md:my-10 w-1/2 flex flex-col justify-center items-center"
         >
-            <HeroStats />
+            <HeroStats id="horizontal_hero_stats" />
         </div>
     </div>
     <div class="xl:hidden my-2 md:my-10">
-        <HeroStats />
+        <HeroStats id="vertical_hero_stats" />
     </div>
     <BoostPanel :hide-non-combat="true" class="my-2 md:my-10" />
     <ItemSearch class="my-2 md:my-10 lg:hidden" />

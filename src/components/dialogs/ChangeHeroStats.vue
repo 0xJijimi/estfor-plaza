@@ -1,5 +1,5 @@
 <template>
-    <dialog id="change_hero_stats_modal" class="modal">
+    <dialog :id="props.id" class="modal">
         <div class="modal-box bg-base-100 border-2 border-primary">
             <h3 class="font-bold text-lg text-center">Change Hero Stats</h3>
 
@@ -87,6 +87,13 @@ const rangedLevel = ref(getLevel(coreStore.playerState?.rangedXP))
 const magicLevel = ref(getLevel(coreStore.playerState?.magicXP))
 const defenceLevel = ref(getLevel(coreStore.playerState?.defenceXP))
 
+const props = defineProps({
+    id: {
+        type: String,
+        required: true,
+    },
+})
+
 const openDialog = (_monsterId: number) => {
     const account = getAccount()
     if (account.isDisconnected) {
@@ -99,7 +106,7 @@ const openDialog = (_monsterId: number) => {
     defenceLevel.value = getLevel(coreStore.playerState?.defenceXP)
 
     const dialog = document.getElementById(
-        "change_hero_stats_modal"
+        props.id
     ) as HTMLDialogElement
     dialog.showModal()
 }
@@ -107,7 +114,7 @@ const openDialog = (_monsterId: number) => {
 const reset = () => {
     coreStore.resetPlayerState()
     const dialog = document.getElementById(
-        "change_hero_stats_modal"
+        props.id
     ) as HTMLDialogElement
     dialog.close()
 }

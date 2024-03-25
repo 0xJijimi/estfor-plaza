@@ -311,8 +311,8 @@
             </div>
         </div>
     </div>
-    <ChangeHeroStats ref="changeHeroStatsRef" />
-    <EmeraldBroochPaywall ref="emeraldBroochPaywallRef" />
+    <ChangeHeroStats ref="changeHeroStatsRef" :id="`${props.id}_change_hero_stats_modal`" />
+    <EmeraldBroochPaywall ref="emeraldBroochPaywallRef" :id="`${props.id}_emerald_paywall_modal`" />
 </template>
 
 <script setup lang="ts">
@@ -326,6 +326,13 @@ import { useBroochStore } from "../store/brooch"
 const itemStore = useItemStore()
 const coreStore = useCoreStore()
 const broochStore = useBroochStore()
+
+const props = defineProps({
+    id: {
+        type: String,
+        required: true,
+    },
+})
 
 const changeHeroStatsRef = ref<typeof ChangeHeroStats>()
 const emeraldBroochPaywallRef = ref<typeof EmeraldBroochPaywall>()
