@@ -65,9 +65,15 @@
                                 {{ decodeTransaction(silo.savedTransactions) }}
                             </td>
                             <td>
-                                {{ actionNames[Number(silo.queuedActions[0]?.actionId)] ||
-                                    actionChoiceNames[Number(silo.queuedActions[0]?.choice.id)] ||
-                                    "" }}
+                                {{
+                                    actionNames[
+                                        Number(silo.queuedActions[0]?.actionId)
+                                    ] ||
+                                    actionChoiceNames[
+                                        Number(silo.queuedActions[0]?.choice.id)
+                                    ] ||
+                                    ""
+                                }}
                             </td>
                             <td>
                                 {{ calculateTimeLeft(silo.queuedActions) }}

@@ -460,7 +460,7 @@ export const useFactoryStore = defineStore({
                 const queuedActionPromises: SearchQueuedActionsResult[] = []
                 const chunks = 20
                 const queueChunks = Math.ceil(playerIdsToGet.length / chunks)
-    
+
                 for (let i = 0; i < queueChunks; i++) {
                     const promises = await Promise.all(
                         playerIdsToGet
@@ -661,6 +661,7 @@ export const useFactoryStore = defineStore({
             actionId: number,
             choiceId: number,
             rightHand: number[],
+            actionQueueStatus: ActionQueueStatus,
             activate: boolean,
             chunks: number
         ) {
@@ -692,7 +693,7 @@ export const useFactoryStore = defineStore({
                                         choiceId,
                                         rightHand[i]
                                     ), // solidity QueuedAction[] (different from api type)
-                                    ActionQueueStatus.KEEP_LAST_IN_PROGRESS, // action queue status - NONE / APPEND / KEEP_LAST_IN_PROGRESS
+                                    actionQueueStatus, // action queue status - NONE / APPEND / KEEP_LAST_IN_PROGRESS
                                 ]
                             ),
                         ]),
@@ -805,6 +806,7 @@ export const useFactoryStore = defineStore({
                     await waitForTransaction({ hash: tx.hash })
                 }
             }
+            await this.getBankItems()
         },
         async executeSavedTransactions(proxys: ProxySilo[], chunks: number) {
             const coreStore = useCoreStore()
@@ -914,6 +916,7 @@ export const useFactoryStore = defineStore({
                 args: [selectorArray],
             })
             await waitForTransaction({ hash: tx.hash })
+            await this.getBankItems()
         },
         async transferItemsToBank(chunks: number) {
             const coreStore = useCoreStore()
@@ -1043,11 +1046,14 @@ export const useFactoryStore = defineStore({
                         address: factoryAddress as `0x${string}`,
                         abi: factoryAbi,
                         functionName: "multicall",
-                        args: [selectorArray.slice(i * chunks, (i + 1) * chunks),],
+                        args: [
+                            selectorArray.slice(i * chunks, (i + 1) * chunks),
+                        ],
                     })
                     await waitForTransaction({ hash: tx.hash })
                 }
             }
+            await this.getBankItems()
         },
 
         async transferItemsToAddress(
@@ -1083,6 +1089,7 @@ export const useFactoryStore = defineStore({
                 args: [siloAddress, itemAddress, data],
             })
             await waitForTransaction({ hash: tx.hash })
+            await this.getBankItems()
         },
         async getBankItems() {
             if (this.bank) {

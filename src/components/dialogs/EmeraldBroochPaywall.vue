@@ -94,9 +94,7 @@ const openDialog = (_monsterId: number) => {
         return
     }
 
-    const dialog = document.getElementById(
-        props.id
-    ) as HTMLDialogElement
+    const dialog = document.getElementById(props.id) as HTMLDialogElement
     dialog.showModal()
     init()
 }
@@ -120,9 +118,7 @@ const mintNFT = async () => {
         console.log(error)
     } finally {
         loading.value = false
-        const dialog = document.getElementById(
-            props.id
-        ) as HTMLDialogElement
+        const dialog = document.getElementById(props.id) as HTMLDialogElement
         dialog.close()
         init()
     }

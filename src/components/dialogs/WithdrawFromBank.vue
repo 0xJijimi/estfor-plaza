@@ -10,6 +10,7 @@
                             <th>Item</th>
                             <th class="text-right">Amount</th>
                             <th class="text-right">Amount to withdraw</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -22,11 +23,27 @@
                                 <input
                                     type="number"
                                     dir="rtl"
-                                    class="input input-bordered w-full bg-base-100-50 text-right input-sm"
+                                    class="input input-bordered w-[100px] bg-base-100-50 text-right input-sm"
                                     v-model="item.amountToWithdraw"
                                     min="0"
                                     :max="item.amount"
                                 />
+                            </td>
+                            <td class="justify-end items-center">
+                                <button
+                                    type="button"
+                                    class="btn btn-primary btn-sm"
+                                    :disabled="
+                                        loading || item.amount === '0'
+                                    "
+                                    @click="
+                                        item.amountToWithdraw = Number(
+                                            item.amount
+                                        )
+                                    "
+                                >
+                                    Max
+                                </button>
                             </td>
                         </tr>
                     </tbody>

@@ -92,13 +92,44 @@
             </div>
 
             <div v-if="selectedSilo">
-                <button
-                    type="button"
-                    class="btn btn-primary btn-sm mt-5"
-                    @click="goBack()"
-                >
-                    Go Back
-                </button>
+                <div class="flex justify-between">
+                    <button
+                        type="button"
+                        class="btn btn-primary btn-sm mt-5"
+                        @click="goBack()"
+                    >
+                        Go Back
+                    </button>
+                    <div>
+                        <button
+                            type="button"
+                            class="btn btn-primary btn-sm mt-5 me-2"
+                            :disabled="
+                                loading ||
+                                factoryStore.proxys.findIndex(
+                                    (p) => p.address === selectedSilo?.address
+                                ) === 0
+                            "
+                            @click="selectPreviousHero()"
+                        >
+                            Previous Hero
+                        </button>
+                        <button
+                            type="button"
+                            class="btn btn-primary btn-sm mt-5"
+                            :disabled="
+                                loading ||
+                                factoryStore.proxys.findIndex(
+                                    (p) => p.address === selectedSilo?.address
+                                ) ===
+                                    factoryStore.proxys.length - 1
+                            "
+                            @click="selectNextHero()"
+                        >
+                            Next Hero
+                        </button>
+                    </div>
+                </div>
 
                 <label class="form-control w-full mt-5">
                     <div class="label">
@@ -187,6 +218,7 @@
                                 <th>Name</th>
                                 <th>Amount</th>
                                 <th>Transfer Amount</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -198,14 +230,31 @@
                                     <b>{{ itemNames[item.tokenId] }}</b>
                                 </td>
                                 <td>{{ item.amount }}</td>
-                                <td class="flex justify-end">
+                                <td class="items-center text-right">
                                     <input
                                         type="number"
+                                        dir="rtl"
                                         step="1"
                                         min="0"
-                                        class="input input-sm input-bordered bg-base-100-50"
+                                        class="input input-sm input-bordered bg-base-100-50 w-[100px]"
                                         v-model="item.transferAmount"
                                     />
+                                </td>
+                                <td class="justify-end items-center">
+                                    <button
+                                        type="button"
+                                        class="btn btn-primary btn-sm"
+                                        :disabled="
+                                            loading || item.amount === '0'
+                                        "
+                                        @click="
+                                            item.transferAmount = Number(
+                                                item.amount
+                                            )
+                                        "
+                                    >
+                                        Max
+                                    </button>
                                 </td>
                             </tr>
                         </tbody>
@@ -269,22 +318,50 @@ const openDialog = () => {
 }
 
 const showSilo = async (index: number) => {
-    selectedSilo.value =
-        factoryStore.proxys.find((p) => p.index === index) || null
-    if (selectedSilo.value) {
-        const itemResult = await getUserItemNFTs(selectedSilo.value.address, [])
-        selectedSiloItems.value = itemResult.userItemNFTs.map((i) => {
-            return {
-                ...i,
-                transferAmount: 0,
-            }
-        })
+    loading.value = true
+    try {
+        selectedSilo.value =
+            factoryStore.proxys.find((p) => p.index === index) || null
+        if (selectedSilo.value) {
+            const itemResult = await getUserItemNFTs(
+                selectedSilo.value.address,
+                []
+            )
+            selectedSiloItems.value = itemResult.userItemNFTs.map((i) => {
+                return {
+                    ...i,
+                    transferAmount: 0,
+                }
+            })
+        }
+    } catch {
+        // console.log(e)
+    } finally {
+        loading.value = false
     }
 }
 
 const goBack = () => {
     selectedSilo.value = null
     selectedSiloItems.value = []
+}
+
+const selectPreviousHero = async () => {
+    const currentSiloIndex = factoryStore.proxys.findIndex(
+        (p) => p.address === selectedSilo.value?.address
+    )
+    if (currentSiloIndex > 0) {
+        await showSilo(factoryStore.proxys[currentSiloIndex - 1].index)
+    }
+}
+
+const selectNextHero = async () => {
+    const currentSiloIndex = factoryStore.proxys.findIndex(
+        (p) => p.address === selectedSilo.value?.address
+    )
+    if (currentSiloIndex < factoryStore.proxys.length - 1) {
+        await showSilo(factoryStore.proxys[currentSiloIndex + 1].index)
+    }
 }
 
 const transferHero = async (tokenId: string) => {

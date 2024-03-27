@@ -1,5 +1,6 @@
 {
     "tabWidth": 4,
     "trailingComma": "es5",
-    "semi": false
+    "semi": false,
+    "endOfLine": "auto"
 }

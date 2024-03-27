@@ -34,6 +34,7 @@
                 :heroes="heroesToAssign"
                 @update:model-value="checkActionChoiceRequiredItems"
             />
+            <ActionQueueStatusSelect class="mt-5" v-model="queueStatus" />
 
             <label class="label cursor-pointer mt-5">
                 <span class="label-text text-xs mr-2 items-center flex">
@@ -72,10 +73,11 @@
                 {{ item }}
             </div>
             <div v-if="checking" class="flex justify-between items-center mt-5">
-                <span>Checking all heroes have the correct items for action...</span>
                 <span
-                    class="loading loading-spinner loading-md mx-auto"
-                ></span>
+                    >Checking all heroes have the correct items for
+                    action...</span
+                >
+                <span class="loading loading-spinner loading-md mx-auto"></span>
             </div>
             <button
                 type="button"
@@ -110,13 +112,14 @@ import { computed, ref } from "vue"
 import { actionNames, skillNames, useSkillStore } from "../../store/skills"
 import { itemNames } from "../../store/items"
 import { allActions } from "../../data/actions"
-import { Skill } from "@paintswap/estfor-definitions/types"
+import { ActionQueueStatus, Skill } from "@paintswap/estfor-definitions/types"
 import { ProxySilo, useFactoryStore } from "../../store/factory"
 import SkillSelect from "../inputs/SkillSelect.vue"
 import ActionInputSelect from "../inputs/ActionInputSelect.vue"
 import ActionChoiceInputSelect from "../inputs/ActionChoiceInputSelect.vue"
 import { getUserItemNFTs } from "../../utils/api"
 import { useAppStore } from "../../store/app"
+import ActionQueueStatusSelect from "../inputs/ActionQueueStatusSelect.vue"
 
 const props = defineProps({
     id: {
@@ -126,6 +129,7 @@ const props = defineProps({
 })
 
 const skillId = ref(Skill.NONE)
+const queueStatus = ref(ActionQueueStatus.KEEP_LAST_IN_PROGRESS)
 const actionId = ref(0)
 const actionChoiceOutputId = ref(0)
 const skillStore = useSkillStore()
@@ -199,7 +203,7 @@ const checkRequiredItems = async () => {
 const checkActionChoiceRequiredItems = async () => {
     missingItems.value = []
     rightHandItems.value = []
-    loading.value = true    
+    loading.value = true
     checking.value = true
     try {
         if (actionChoiceOutputId.value > 0) {
@@ -253,6 +257,7 @@ const assignHeroes = async () => {
                 actionId.value,
                 0,
                 rightHandItems.value,
+                queueStatus.value,
                 active.value,
                 chunks.value
             )
@@ -266,6 +271,7 @@ const assignHeroes = async () => {
                     ?.actionId || 0,
                 actionChoiceOutputId.value,
                 rightHandItems.value,
+                queueStatus.value,
                 active.value,
                 chunks.value
             )

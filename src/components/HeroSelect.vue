@@ -181,7 +181,10 @@
             </div>
         </div>
     </div>
-    <EmeraldBroochPaywall ref="emeraldBroochPaywallRef" id="hero_select_emerald_brooch_modal" />
+    <EmeraldBroochPaywall
+        ref="emeraldBroochPaywallRef"
+        id="hero_select_emerald_brooch_modal"
+    />
 </template>
 
 <script setup lang="ts">

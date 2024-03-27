@@ -311,8 +311,14 @@
             </div>
         </div>
     </div>
-    <ChangeHeroStats ref="changeHeroStatsRef" :id="`${props.id}_change_hero_stats_modal`" />
-    <EmeraldBroochPaywall ref="emeraldBroochPaywallRef" :id="`${props.id}_emerald_paywall_modal`" />
+    <ChangeHeroStats
+        ref="changeHeroStatsRef"
+        :id="`${props.id}_change_hero_stats_modal`"
+    />
+    <EmeraldBroochPaywall
+        ref="emeraldBroochPaywallRef"
+        :id="`${props.id}_emerald_paywall_modal`"
+    />
 </template>
 
 <script setup lang="ts">

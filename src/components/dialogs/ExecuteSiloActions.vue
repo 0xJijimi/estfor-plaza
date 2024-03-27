@@ -131,9 +131,10 @@ const actionInputChoicesNeededTransactions = computed(() => {
 })
 
 const silosWithActionChoicesOnly = computed(() => {
-    return silosToExecute.value.filter((s) =>
-        s.queuedActions.length > 0 &&
-        s.queuedActions.every((a) => a.choice !== null)
+    return silosToExecute.value.filter(
+        (s) =>
+            s.queuedActions.length > 0 &&
+            s.queuedActions.every((a) => a.choice !== null)
     )
 })
 

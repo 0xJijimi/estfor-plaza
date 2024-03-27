@@ -105,17 +105,13 @@ const openDialog = (_monsterId: number) => {
     magicLevel.value = getLevel(coreStore.playerState?.magicXP)
     defenceLevel.value = getLevel(coreStore.playerState?.defenceXP)
 
-    const dialog = document.getElementById(
-        props.id
-    ) as HTMLDialogElement
+    const dialog = document.getElementById(props.id) as HTMLDialogElement
     dialog.showModal()
 }
 
 const reset = () => {
     coreStore.resetPlayerState()
-    const dialog = document.getElementById(
-        props.id
-    ) as HTMLDialogElement
+    const dialog = document.getElementById(props.id) as HTMLDialogElement
     dialog.close()
 }
 

@@ -50,11 +50,7 @@
             </div>
         </div>
     </div>
-    <WithdrawFromBank
-        ref="withdrawFromBankRef"
-        id="withdraw_from_bank_modal"
-        @withdrawn="init"
-    />
+    <WithdrawFromBank ref="withdrawFromBankRef" id="withdraw_from_bank_modal" />
 </template>
 
 <script setup lang="ts">
