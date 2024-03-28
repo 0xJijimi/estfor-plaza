@@ -87,7 +87,7 @@ const aggregatedItems: ComputedRef<AggregatedItem[]> = computed(() => {
         const outgoingItem = outgoingItems.find(
             (i) => i.itemTokenId === item.tokenId
         )
-        console.log(outgoingItem) 
+
         if (incomingItem || outgoingItem) {
             return {
                 tokenId: item.tokenId,
