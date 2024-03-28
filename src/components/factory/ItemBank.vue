@@ -87,7 +87,7 @@ const aggregatedItems: ComputedRef<AggregatedItem[]> = computed(() => {
         const outgoingItem = outgoingItems.find(
             (i) => i.itemTokenId === item.tokenId
         )
-
+        
         if (incomingItem || outgoingItem) {
             return {
                 tokenId: item.tokenId,
@@ -118,13 +118,18 @@ const aggregatedItems: ComputedRef<AggregatedItem[]> = computed(() => {
 
     // add missing outgoingItems
     for (const item of outgoingItems) {
-        if (!mergedItems.find((i) => i.tokenId === item.itemTokenId)) {
+        const existingItem = mergedItems.find(
+            (i) => i.tokenId === item.itemTokenId
+        )
+        if (!existingItem) {
             mergedItems.push({
                 tokenId: item.itemTokenId,
                 amount: "0",
                 rate: 0,
                 outgoingRate: item.rate,
             })
+        } else if (existingItem.amount === "0") {
+            existingItem.outgoingRate = item.rate
         }
     }
 
