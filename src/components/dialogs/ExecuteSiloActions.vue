@@ -218,7 +218,7 @@ const executeActionChoiceSavedTransactions = async () => {
                         amountRequired =
                             action.choice.inputAmounts[i] *
                             (action.choice.rate / 1000) *
-                            24
+                            action.timespan / 60 / 60
                     } else {
                         amountRequired =
                             action.choice.inputAmounts[i] *
