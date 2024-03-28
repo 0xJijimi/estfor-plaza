@@ -60,7 +60,7 @@ import {
     getOutgoingItems,
     useFactoryStore,
 } from "../../store/factory"
-import { ComputedRef, computed, onMounted, ref } from "vue"
+import { ComputedRef, computed, ref } from "vue"
 import { itemNames } from "../../store/items"
 import { UserItemNFT } from "@paintswap/estfor-definitions/types"
 import WithdrawFromBank from "../dialogs/WithdrawFromBank.vue"
@@ -87,6 +87,7 @@ const aggregatedItems: ComputedRef<AggregatedItem[]> = computed(() => {
         const outgoingItem = outgoingItems.find(
             (i) => i.itemTokenId === item.tokenId
         )
+        console.log(outgoingItem) 
         if (incomingItem || outgoingItem) {
             return {
                 tokenId: item.tokenId,
@@ -139,16 +140,4 @@ const aggregatedItems: ComputedRef<AggregatedItem[]> = computed(() => {
 const withdrawItems = async () => {
     withdrawFromBankRef.value?.openDialog(aggregatedItems.value)
 }
-
-const init = async () => {
-    try {
-        if (bank.value) {
-            await factoryStore.getBankItems()
-        }
-    } catch {
-        // console.error(e)
-    }
-}
-
-onMounted(init)
 </script>

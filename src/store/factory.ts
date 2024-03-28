@@ -509,6 +509,8 @@ export const useFactoryStore = defineStore({
                     isPaused: proxyPauseData[i].result as boolean,
                 }))
             }
+
+            await this.getBankItems()
         },
         async createProxy(proxyNumber: number, chunks: number) {
             const coreStore = useCoreStore()
@@ -546,7 +548,9 @@ export const useFactoryStore = defineStore({
         async setProxys(proxys: any[]) {
             const account = getAccount()
 
-            this.proxys = proxys.map((d) => {
+            this.proxys = proxys.filter((value, index, self) => {
+                return self.findIndex(v => v.proxyId === value.proxyId) === index;
+              }).map((d) => {
                 // Fix for pre-event proxys with the same id
                 let proxyId = d.proxyId
                 let sameProxyIds = proxys.filter((p) => p.proxyId === d.proxyId)
