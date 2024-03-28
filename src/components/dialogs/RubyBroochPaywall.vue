@@ -86,6 +86,7 @@ import { computed, ref } from "vue"
 import { getAccount, waitForTransaction } from "@wagmi/core"
 import { useAppStore } from "../../store/app"
 import { useBroochStore } from "../../store/brooch"
+import { config } from "../../config";
 
 const app = useAppStore()
 const broochStore = useBroochStore()
@@ -103,7 +104,7 @@ const brooch = computed(() => {
 
 const init = async () => {
     try {
-        const account = getAccount()
+        const account = getAccount(config)
         if (account.isConnected) {
             loading.value = true
             await broochStore.getBroochData(0, false)
@@ -116,7 +117,7 @@ const init = async () => {
 }
 
 const openDialog = (_monsterId: number) => {
-    const account = getAccount()
+    const account = getAccount(config)
     if (account.isDisconnected) {
         return
     }

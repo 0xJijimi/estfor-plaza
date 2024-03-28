@@ -6,6 +6,7 @@ import Donate from "../dialogs/Donate.vue"
 import RubyBroochPaywall from "../dialogs/RubyBroochPaywall.vue"
 import { useRoute } from "vue-router"
 import { useBroochStore } from "../../store/brooch"
+import { config } from "../../config"
 
 const itemStore = useItemStore()
 const broochStore = useBroochStore()
@@ -51,7 +52,7 @@ const allItemNames = computed(() => {
 const init = async () => {
     try {
         window.clearTimeout(broochTimeout.value)
-        const account = getAccount()
+        const account = getAccount(config)
         if (account.isConnected) {
             if (!broochStore.hasAccess(0)) {
                 broochTimeout.value = window.setTimeout(() => {

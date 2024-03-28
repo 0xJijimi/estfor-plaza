@@ -2,8 +2,9 @@
 import { onMounted, provide } from "vue"
 import { useAppStore } from "./store/app"
 import Header from "./components/layout/Header.vue"
-import { createWeb3Modal, defaultWagmiConfig } from "@web3modal/wagmi/vue"
-import { fantom } from "viem/chains"
+import { createWeb3Modal } from "@web3modal/wagmi/vue"
+import { reconnect } from '@wagmi/core'
+import { config } from './config'
 import {
     ApolloClient,
     createHttpLink,
@@ -22,21 +23,12 @@ onMounted(() => {
 })
 
 const projectId = import.meta.env.VITE_PROJECT_ID
-const metadata = {
-    name: "Deif's Estfor Plaza",
-    description: "",
-    url: "https://estfor.deif.eth.limo",
-    icons: [],
-}
 
-const chains = [fantom]
-const wagmiConfig = defaultWagmiConfig({ chains, projectId, metadata })
+reconnect(config)
 
 createWeb3Modal({
-    wagmiConfig,
+    wagmiConfig: config,
     projectId,
-    chains,
-    defaultChain: fantom,
     excludeWalletIds: [
         "19177a98252e07ddfc9af2083ba8e07ef627cb6103467ffebb3f8f4205fd7927",
     ], // exclude ledger

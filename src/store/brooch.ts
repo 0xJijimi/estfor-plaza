@@ -7,6 +7,7 @@ import {
 import broochAbi from "../abi/brooch.json"
 import broochUpgraderAbi from "../abi/broochUpgrader.json"
 import { solidityPacked } from "ethers"
+import { config } from "../config"
 
 export interface Brooch {
     tokenId: number
@@ -57,25 +58,25 @@ export const useBroochStore = defineStore({
             this.brooches = []
         },
         async getBroochData(tokenId: number, isUpgrade: boolean) {
-            const account = getAccount()
+            const account = getAccount(config)
             if (!account.isConnected) return
 
             let result: any[] = []
             if (!isUpgrade) {
                 result = await Promise.all([
-                    readContract({
+                    readContract(config, {
                         address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
                         abi: broochAbi,
                         functionName: "tokenSupply",
                         args: [tokenId],
                     }),
-                    readContract({
+                    readContract(config, {
                         address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
                         abi: broochAbi,
                         functionName: "baseTokenPrice",
                         args: [tokenId],
                     }),
-                    readContract({
+                    readContract(config, {
                         address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
                         abi: broochAbi,
                         functionName: "balanceOf",
@@ -84,19 +85,19 @@ export const useBroochStore = defineStore({
                 ])
             } else {
                 result = await Promise.all([
-                    readContract({
+                    readContract(config, {
                         address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
                         abi: broochAbi,
                         functionName: "tokenSupply",
                         args: [tokenId],
                     }),
-                    readContract({
+                    readContract(config, {
                         address: BROOCH_UPGRADER_ADDRESS as `0x${string}`,
                         abi: broochUpgraderAbi,
                         functionName: "upgradePrices",
                         args: [tokenId],
                     }),
-                    readContract({
+                    readContract(config, {
                         address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
                         abi: broochAbi,
                         functionName: "balanceOf",
@@ -128,8 +129,8 @@ export const useBroochStore = defineStore({
             )
         },
         mintNFT(tokenId: number) {
-            const account = getAccount()
-            return writeContract({
+            const account = getAccount(config)
+            return writeContract(config, {
                 address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
                 abi: broochAbi,
                 functionName: "mintBatch",
@@ -146,7 +147,7 @@ export const useBroochStore = defineStore({
             })
         },
         setApprovalForAll() {
-            return writeContract({
+            return writeContract(config, {
                 address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
                 abi: broochAbi,
                 functionName: "setApprovalForAll",
@@ -154,7 +155,7 @@ export const useBroochStore = defineStore({
             })
         },
         upgradeBrooch(tokenId: number) {
-            return writeContract({
+            return writeContract(config, {
                 address: BROOCH_UPGRADER_ADDRESS as `0x${string}`,
                 abi: broochUpgraderAbi,
                 functionName: "upgradeBrooch",
@@ -166,8 +167,8 @@ export const useBroochStore = defineStore({
             })
         },
         getApproval() {
-            const account = getAccount()
-            return readContract({
+            const account = getAccount(config)
+            return readContract(config, {
                 address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
                 abi: broochAbi,
                 functionName: "isApprovedForAll",

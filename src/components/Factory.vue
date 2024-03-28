@@ -102,6 +102,7 @@ import AssignedSilos from "./factory/AssignedSilos.vue"
 import { getAccount } from "@wagmi/core"
 import ItemBank from "./factory/ItemBank.vue"
 import ViewSilos from "./dialogs/ViewSilos.vue"
+import { config } from "../config"
 
 const factoryStore = useFactoryStore()
 const app = useAppStore()
@@ -112,7 +113,7 @@ const chunks = ref(15)
 
 const viewSilosRef = ref<typeof ViewSilos>()
 
-const account = getAccount()
+const account = getAccount(config)
 
 const { result, onError, refetch, fetchMore } = useQuery(
     gql`

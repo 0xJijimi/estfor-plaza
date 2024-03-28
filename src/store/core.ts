@@ -1,5 +1,5 @@
 import { defineStore } from "pinia"
-import { readContract, getAccount, getNetwork } from "@wagmi/core"
+import { readContract, getAccount } from "@wagmi/core"
 
 import estforPlayerAbi from "../abi/estforPlayer.json"
 import broochAbi from "../abi/brooch.json"
@@ -24,6 +24,7 @@ import { allFullAttireBonuses } from "../data/fullAttireBonuses"
 import { HOMEMADE_BROOCH_ADDRESS } from "../utils/addresses"
 import { fantom } from "viem/chains"
 import { useBroochStore } from "./brooch"
+import { config } from "../config"
 
 export const NATIVE_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
 export const MEDIA_URL = "https://media.estfor.com"
@@ -215,15 +216,15 @@ export const useCoreStore = defineStore({
         }) as CoreState,
     getters: {
         getNetworkAddressMap: (state: CoreState): AddressMap[] | undefined => {
-            const network = getNetwork()
-            return state.addresses.find((x) => x.network == network.chain?.id)
+            const network = getAccount(config)?.chainId
+            return state.addresses.find((x) => x.network == network)
                 ?.addresses
         },
         getAddress: (state: CoreState) => {
-            const network = getNetwork()
+            const network = getAccount(config)?.chainId
             return (name: Address) =>
                 state.addresses
-                    .find((x) => x.network == network.chain?.id)
+                    .find((x) => x.network == network)
                     ?.addresses.find((x) => x.name == name)?.address
         },
         globalBoostData: (state: CoreState) => {
@@ -428,12 +429,12 @@ export const useCoreStore = defineStore({
         },
         async getActivePlayer() {
             const playerAddress = this.getAddress(Address.estforPlayers)
-            const account = getAccount()
+            const account = getAccount(config)
             if (!playerAddress || !account.isConnected) {
                 return
             }
 
-            const activePlayer = await readContract({
+            const activePlayer = await readContract(config, {
                 address: playerAddress as `0x${string}`,
                 abi: estforPlayerAbi,
                 functionName: "activePlayer",
@@ -462,14 +463,14 @@ export const useCoreStore = defineStore({
             localStorage.setItem("heroRoster", JSON.stringify(this.heroRoster))
         },
         async loadPlayer(playerId: string) {
-            const account = getAccount()
-            const balance = await readContract({
+            const account = getAccount(config)
+            const balance = await readContract(config, {
                 address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
                 abi: broochAbi,
                 functionName: "balanceOf",
                 args: [account.address, 0],
             })
-            const balance1 = await readContract({
+            const balance1 = await readContract(config, {
                 address: HOMEMADE_BROOCH_ADDRESS as `0x${string}`,
                 abi: broochAbi,
                 functionName: "balanceOf",

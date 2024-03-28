@@ -287,6 +287,7 @@ import {
 import { getUserItemNFTs } from "../../utils/api"
 import { getAccount } from "@wagmi/core"
 import { itemNames } from "../../store/items"
+import { config } from "../../config"
 
 const factoryStore = useFactoryStore()
 const allSilos = computed(() =>
@@ -304,9 +305,9 @@ const allSilos = computed(() =>
 const searchValue = ref("")
 const selectedSilo = ref<ProxySilo | null>(null)
 const selectedSiloItems = ref<TransferUserItemNFT[]>([])
-const toAddress = ref(getAccount()?.address || "")
+const toAddress = ref(getAccount(config)?.address || "")
 const itemToAddress = ref(
-    factoryStore.bank?.address || getAccount()?.address || ""
+    factoryStore.bank?.address || getAccount(config)?.address || ""
 )
 const loading = ref(false)
 

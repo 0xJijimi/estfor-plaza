@@ -79,6 +79,7 @@
 import { getAccount } from "@wagmi/core"
 import { useCoreStore, getLevel, xpBoundaries } from "../../store/core"
 import { ref, watch } from "vue"
+import { config } from "../../config";
 
 const coreStore = useCoreStore()
 
@@ -95,7 +96,7 @@ const props = defineProps({
 })
 
 const openDialog = (_monsterId: number) => {
-    const account = getAccount()
+    const account = getAccount(config)
     if (account.isDisconnected) {
         return
     }

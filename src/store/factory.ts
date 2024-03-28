@@ -4,6 +4,7 @@ import {
     readContract,
     waitForTransaction,
     writeContract,
+    estimateGas,
 } from "@wagmi/core"
 import {
     ActionChoiceInput,
@@ -38,6 +39,7 @@ import { allActions } from "../data/actions"
 import { calculateChance } from "../utils/player"
 import { getActionChoiceById } from "./skills"
 import { sleep } from "../utils/time"
+import { config } from "../config"
 
 export interface SavedTransaction {
     to: string
@@ -291,7 +293,7 @@ export const useFactoryStore = defineStore({
             const coreStore = useCoreStore()
             const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
             const playersAddress = coreStore.getAddress(Address.estforPlayers)
-            const account = getAccount()
+            const account = getAccount(config)
 
             if (!factoryAddress || !playersAddress || !account.isConnected) {
                 return
@@ -303,7 +305,7 @@ export const useFactoryStore = defineStore({
                 [playerId]
             )
 
-            const tx = await writeContract({
+            const tx = await writeContract(config, {
                 address: factoryAddress as `0x${string}`,
                 abi: factoryAbi,
                 functionName: "execute",
@@ -322,7 +324,7 @@ export const useFactoryStore = defineStore({
             const playerNFTAddress = coreStore.getAddress(
                 Address.estforPlayerNFT
             )
-            const account = getAccount()
+            const account = getAccount(config)
 
             if (!factoryAddress || !playerNFTAddress || !account.isConnected) {
                 return
@@ -340,7 +342,7 @@ export const useFactoryStore = defineStore({
                 ]
             )
 
-            const tx = await writeContract({
+            const tx = await writeContract(config, {
                 address: factoryAddress as `0x${string}`,
                 abi: factoryAbi,
                 functionName: "execute",
@@ -355,7 +357,7 @@ export const useFactoryStore = defineStore({
             const playerNFTAddress = coreStore.getAddress(
                 Address.estforPlayerNFT
             )
-            const account = getAccount()
+            const account = getAccount(config)
             if (!factoryAddress || !playerNFTAddress || !account.isConnected) {
                 return
             }
@@ -390,7 +392,7 @@ export const useFactoryStore = defineStore({
 
             const splits = Math.ceil(heroes.length / chunks)
             for (let i = 0; i < splits; i++) {
-                const tx = await writeContract({
+                const tx = await writeContract(config, {
                     address: factoryAddress as `0x${string}`,
                     abi: factoryAbi,
                     functionName: "multicall",
@@ -404,7 +406,7 @@ export const useFactoryStore = defineStore({
         async getAllProxyStates(proxys: ProxySilo[] = []) {
             const coreStore = useCoreStore()
             const playerAddress = coreStore.getAddress(Address.estforPlayers)
-            const account = getAccount()
+            const account = getAccount(config)
             if (!playerAddress || !account.isConnected) {
                 return
             }
@@ -470,7 +472,7 @@ export const useFactoryStore = defineStore({
                     queuedActionPromises.push(...promises)
                     await sleep(200)
                 }
-                const proxyData = await multicall({
+                const proxyData = await multicall(config, {
                     contracts: proxysWithPlayerId.map(
                         (p) =>
                             ({
@@ -482,7 +484,7 @@ export const useFactoryStore = defineStore({
                     ),
                 })
 
-                const proxyPauseData = await multicall({
+                const proxyPauseData = await multicall(config, {
                     contracts: proxysWithPlayerId.map(
                         (p) =>
                             ({
@@ -515,7 +517,7 @@ export const useFactoryStore = defineStore({
         async createProxy(proxyNumber: number, chunks: number) {
             const coreStore = useCoreStore()
             const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
-            const account = getAccount()
+            const account = getAccount(config)
             if (!factoryAddress || !account.isConnected) {
                 return
             }
@@ -537,7 +539,7 @@ export const useFactoryStore = defineStore({
 
             const splits = Math.ceil(proxyNumber / chunks)
             for (let i = 0; i < splits; i++) {
-                const tx = await writeContract({
+                const tx = await writeContract(config, {
                     ...factoryContract,
                     functionName: "multicall",
                     args: [selectorArray.slice(i * chunks, (i + 1) * chunks)],
@@ -546,10 +548,10 @@ export const useFactoryStore = defineStore({
             }
         },
         async setProxys(proxys: any[]) {
-            const account = getAccount()
+            const account = getAccount(config)
 
             this.proxys = proxys.filter((value, index, self) => {
-                return self.findIndex(v => v.proxyId === value.proxyId) === index;
+                return self.findIndex(v => v.proxy === value.proxy) === index;
               }).map((d) => {
                 // Fix for pre-event proxys with the same id
                 let proxyId = d.proxyId
@@ -613,7 +615,7 @@ export const useFactoryStore = defineStore({
 
             const coreStore = useCoreStore()
             const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
-            const account = getAccount()
+            const account = getAccount(config)
             if (!factoryAddress || !account.isConnected) {
                 return
             }
@@ -624,13 +626,13 @@ export const useFactoryStore = defineStore({
                 chainId: fantom.id,
             }
 
-            const totalAddressCount: bigint = (await readContract({
+            const totalAddressCount: bigint = (await readContract(config, {
                 ...factoryContract,
                 functionName: "totalAddressCount",
                 args: [],
             })) as bigint
 
-            const data = await multicall({
+            const data = await multicall(config, {
                 contracts: Array.from(
                     { length: Number(totalAddressCount) },
                     (_, i) =>
@@ -672,7 +674,7 @@ export const useFactoryStore = defineStore({
             const coreStore = useCoreStore()
             const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
             const playersAddress = coreStore.getAddress(Address.estforPlayers)
-            const account = getAccount()
+            const account = getAccount(config)
             if (!factoryAddress || !playersAddress || !account.isConnected) {
                 return
             }
@@ -723,7 +725,7 @@ export const useFactoryStore = defineStore({
 
             const splits = Math.ceil(combined.length / chunks)
             for (let i = 0; i < splits; i++) {
-                const tx = await writeContract({
+                const tx = await writeContract(config, {
                     address: factoryAddress as `0x${string}`,
                     abi: factoryAbi,
                     functionName: "multicall",
@@ -766,7 +768,7 @@ export const useFactoryStore = defineStore({
             const coreStore = useCoreStore()
             const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
             const itemAddress = coreStore.getAddress(Address.itemNFT)
-            const account = getAccount()
+            const account = getAccount(config)
             if (!factoryAddress || !itemAddress || !account.isConnected) {
                 return
             }
@@ -799,7 +801,7 @@ export const useFactoryStore = defineStore({
 
                 const splits = Math.ceil(selectorArray.length / chunks)
                 for (let i = 0; i < splits; i++) {
-                    const tx = await writeContract({
+                    const tx = await writeContract(config, {
                         address: factoryAddress as `0x${string}`,
                         abi: factoryAbi,
                         functionName: "multicall",
@@ -816,7 +818,7 @@ export const useFactoryStore = defineStore({
             const coreStore = useCoreStore()
             const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
             const itemAddress = coreStore.getAddress(Address.itemNFT)
-            const account = getAccount()
+            const account = getAccount(config)
             if (!factoryAddress || !itemAddress || !account.isConnected) {
                 return
             }
@@ -837,7 +839,7 @@ export const useFactoryStore = defineStore({
 
             const splits = Math.ceil(proxys.length / chunks)
             for (let i = 0; i < splits; i++) {
-                const tx = await writeContract({
+                const tx = await writeContract(config, {
                     address: factoryAddress as `0x${string}`,
                     abi: factoryAbi,
                     functionName: "multicall",
@@ -878,7 +880,7 @@ export const useFactoryStore = defineStore({
             const coreStore = useCoreStore()
             const itemAddress = coreStore.getAddress(Address.itemNFT)
             const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
-            const account = getAccount()
+            const account = getAccount(config)
             if (!factoryAddress || !itemAddress || !account.isConnected) {
                 return
             }
@@ -913,7 +915,7 @@ export const useFactoryStore = defineStore({
                 ),
             ]
 
-            const tx = await writeContract({
+            const tx = await writeContract(config, {
                 address: factoryAddress as `0x${string}`,
                 abi: factoryAbi,
                 functionName: "multicall",
@@ -926,7 +928,7 @@ export const useFactoryStore = defineStore({
             const coreStore = useCoreStore()
             const itemAddress = coreStore.getAddress(Address.itemNFT)
             const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
-            const account = getAccount()
+            const account = getAccount(config)
             if (!factoryAddress || !itemAddress || !account.isConnected) {
                 return
             }
@@ -1046,7 +1048,7 @@ export const useFactoryStore = defineStore({
             if (selectorArray.length > 0) {
                 const splits = Math.ceil(selectorArray.length / chunks)
                 for (let i = 0; i < splits; i++) {
-                    const tx = await writeContract({
+                    const tx = await writeContract(config, {
                         address: factoryAddress as `0x${string}`,
                         abi: factoryAbi,
                         functionName: "multicall",
@@ -1068,7 +1070,7 @@ export const useFactoryStore = defineStore({
             const coreStore = useCoreStore()
             const itemAddress = coreStore.getAddress(Address.itemNFT)
             const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
-            const account = getAccount()
+            const account = getAccount(config)
             if (!factoryAddress || !itemAddress || !account.isConnected) {
                 return
             }
@@ -1086,7 +1088,7 @@ export const useFactoryStore = defineStore({
                 ]
             )
 
-            const tx = await writeContract({
+            const tx = await writeContract(config, {
                 address: factoryAddress as `0x${string}`,
                 abi: factoryAbi,
                 functionName: "execute",

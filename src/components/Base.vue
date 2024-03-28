@@ -116,12 +116,13 @@
 </template>
 
 <script setup lang="ts">
-import { getAccount, watchNetwork, watchAccount } from "@wagmi/core"
+import { getAccount, watchAccount } from "@wagmi/core"
 import { useWeb3Modal } from "@web3modal/wagmi/vue"
 import { computed, onMounted, ref } from "vue"
 import { useCoreStore } from "../store/core"
 import { useAppStore } from "../store/app"
 import { useBroochStore } from "../store/brooch"
+import { config } from "../config"
 
 const coreStore = useCoreStore()
 const broochStore = useBroochStore()
@@ -134,7 +135,7 @@ const isConnected = ref(false)
 
 const init = async () => {
     try {
-        const account = getAccount()
+        const account = getAccount(config)
         if (account.isConnected) {
             loading.value = true
             await coreStore.getActivePlayer()
@@ -154,8 +155,11 @@ const init = async () => {
 
 onMounted(init)
 
-watchNetwork(coreStore.disconnect)
-watchAccount(init)
+watchAccount(config, {
+    onChange() {
+        init()
+    }
+})
 </script>
 
 <style>
