@@ -55,7 +55,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue"
-import { getAccount, waitForTransaction } from "@wagmi/core"
+import { getAccount, waitForTransactionReceipt } from "@wagmi/core"
 import { useAppStore } from "../../store/app"
 import { useBroochStore } from "../../store/brooch"
 import { config } from "../../config";
@@ -111,8 +111,8 @@ const mintPrice = computed(() => {
 const mintNFT = async () => {
     loading.value = true
     try {
-        const data = await broochStore.mintNFT(0)
-        await waitForTransaction({ hash: data.hash })
+        const hash = await broochStore.mintNFT(0)
+        await waitForTransactionReceipt(config, { hash })
         app.addToast("Thank you for your support!", "alert-success", 5000)
     } catch (error) {
         // app.addToast('Failed to mint brooch', 'alert-error', 50000)

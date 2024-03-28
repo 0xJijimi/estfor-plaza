@@ -2,9 +2,8 @@ import {
     getAccount,
     multicall,
     readContract,
-    waitForTransaction,
+    waitForTransactionReceipt,
     writeContract,
-    estimateGas,
 } from "@wagmi/core"
 import {
     ActionChoiceInput,
@@ -305,14 +304,14 @@ export const useFactoryStore = defineStore({
                 [playerId]
             )
 
-            const tx = await writeContract(config, {
+            const hash = await writeContract(config, {
                 address: factoryAddress as `0x${string}`,
                 abi: factoryAbi,
                 functionName: "execute",
                 args: [siloAddress, playersAddress, data],
             })
 
-            await waitForTransaction({ hash: tx.hash })
+            await waitForTransactionReceipt(config, { hash })
         },
         async transferHero(
             siloAddress: string,
@@ -342,14 +341,14 @@ export const useFactoryStore = defineStore({
                 ]
             )
 
-            const tx = await writeContract(config, {
+            const hash = await writeContract(config, {
                 address: factoryAddress as `0x${string}`,
                 abi: factoryAbi,
                 functionName: "execute",
                 args: [siloAddress, playerNFTAddress, data],
             })
 
-            await waitForTransaction({ hash: tx.hash })
+            await waitForTransactionReceipt(config, { hash })
         },
         async mintHeroes(heroes: any[], chunks: number) {
             const coreStore = useCoreStore()
@@ -392,13 +391,13 @@ export const useFactoryStore = defineStore({
 
             const splits = Math.ceil(heroes.length / chunks)
             for (let i = 0; i < splits; i++) {
-                const tx = await writeContract(config, {
+                const hash = await writeContract(config, {
                     address: factoryAddress as `0x${string}`,
                     abi: factoryAbi,
                     functionName: "multicall",
                     args: [selectorArray.slice(i * chunks, (i + 1) * chunks)],
                 })
-                await waitForTransaction({ hash: tx.hash })
+                await waitForTransactionReceipt(config, { hash })
             }
 
             await this.getAllProxyStates()
@@ -539,12 +538,12 @@ export const useFactoryStore = defineStore({
 
             const splits = Math.ceil(proxyNumber / chunks)
             for (let i = 0; i < splits; i++) {
-                const tx = await writeContract(config, {
+                const hash = await writeContract(config, {
                     ...factoryContract,
                     functionName: "multicall",
                     args: [selectorArray.slice(i * chunks, (i + 1) * chunks)],
                 })
-                await waitForTransaction({ hash: tx.hash })
+                await waitForTransactionReceipt(config, { hash })
             }
         },
         async setProxys(proxys: any[]) {
@@ -725,13 +724,13 @@ export const useFactoryStore = defineStore({
 
             const splits = Math.ceil(combined.length / chunks)
             for (let i = 0; i < splits; i++) {
-                const tx = await writeContract(config, {
+                const hash = await writeContract(config, {
                     address: factoryAddress as `0x${string}`,
                     abi: factoryAbi,
                     functionName: "multicall",
                     args: [combined.slice(i * chunks, (i + 1) * chunks)],
                 })
-                await waitForTransaction({ hash: tx.hash })
+                await waitForTransactionReceipt(config, { hash })
             }
 
             // update savedTransactions and isPaused in state
@@ -801,7 +800,7 @@ export const useFactoryStore = defineStore({
 
                 const splits = Math.ceil(selectorArray.length / chunks)
                 for (let i = 0; i < splits; i++) {
-                    const tx = await writeContract(config, {
+                    const hash = await writeContract(config, {
                         address: factoryAddress as `0x${string}`,
                         abi: factoryAbi,
                         functionName: "multicall",
@@ -809,7 +808,7 @@ export const useFactoryStore = defineStore({
                             selectorArray.slice(i * chunks, (i + 1) * chunks),
                         ],
                     })
-                    await waitForTransaction({ hash: tx.hash })
+                    await waitForTransactionReceipt(config, { hash })
                 }
             }
             await this.getBankItems()
@@ -839,13 +838,13 @@ export const useFactoryStore = defineStore({
 
             const splits = Math.ceil(proxys.length / chunks)
             for (let i = 0; i < splits; i++) {
-                const tx = await writeContract(config, {
+                const hash = await writeContract(config, {
                     address: factoryAddress as `0x${string}`,
                     abi: factoryAbi,
                     functionName: "multicall",
                     args: [selectorArray.slice(i * chunks, (i + 1) * chunks)],
                 })
-                await waitForTransaction({ hash: tx.hash })
+                await waitForTransactionReceipt(config, { hash })
             }
             await this.getBankItems()
         },
@@ -915,13 +914,13 @@ export const useFactoryStore = defineStore({
                 ),
             ]
 
-            const tx = await writeContract(config, {
+            const hash = await writeContract(config, {
                 address: factoryAddress as `0x${string}`,
                 abi: factoryAbi,
                 functionName: "multicall",
                 args: [selectorArray],
             })
-            await waitForTransaction({ hash: tx.hash })
+            await waitForTransactionReceipt(config, { hash })
             await this.getBankItems()
         },
         async transferItemsToBank(chunks: number) {
@@ -1048,7 +1047,7 @@ export const useFactoryStore = defineStore({
             if (selectorArray.length > 0) {
                 const splits = Math.ceil(selectorArray.length / chunks)
                 for (let i = 0; i < splits; i++) {
-                    const tx = await writeContract(config, {
+                    const hash = await writeContract(config, {
                         address: factoryAddress as `0x${string}`,
                         abi: factoryAbi,
                         functionName: "multicall",
@@ -1056,7 +1055,7 @@ export const useFactoryStore = defineStore({
                             selectorArray.slice(i * chunks, (i + 1) * chunks),
                         ],
                     })
-                    await waitForTransaction({ hash: tx.hash })
+                    await waitForTransactionReceipt(config, { hash })
                 }
             }
             await this.getBankItems()
@@ -1088,13 +1087,13 @@ export const useFactoryStore = defineStore({
                 ]
             )
 
-            const tx = await writeContract(config, {
+            const hash = await writeContract(config, {
                 address: factoryAddress as `0x${string}`,
                 abi: factoryAbi,
                 functionName: "execute",
                 args: [siloAddress, itemAddress, data],
             })
-            await waitForTransaction({ hash: tx.hash })
+            await waitForTransactionReceipt(config, { hash })
             await this.getBankItems()
         },
         async getBankItems() {
