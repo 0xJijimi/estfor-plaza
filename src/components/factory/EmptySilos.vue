@@ -108,11 +108,6 @@
                         Mint {{ heroesToMint.length }} Hero{{
                             heroesToMint.length > 1 ? "es" : ""
                         }}
-                        {{
-                            neededTransactions > 1
-                                ? `(${neededTransactions} transactions)`
-                                : ""
-                        }}
                     </button>
                 </div>
             </div>
@@ -133,7 +128,6 @@ const app = useAppStore()
 const mintingHeroes = ref(false)
 const heroesToMint = ref([{ name: "", error: "", avatarId: 1 }])
 const avatars = ref<any[]>([])
-const chunks = ref(10)
 
 const quickAddNumber = ref(1)
 const quickAddAvatarId = ref(1)
@@ -149,11 +143,6 @@ const quickAddHeroes = () => {
 }
 
 const emptySilos = computed(() => factoryStore.emptyProxys)
-
-// gas cost for mint hero is 900k gas, split into chunks of 10
-const neededTransactions = computed(() => {
-    return Math.ceil(heroesToMint.value.length / chunks.value)
-})
 
 const mintHeroes = async () => {
     for (const hero of heroesToMint.value) {
@@ -174,7 +163,7 @@ const mintHeroes = async () => {
 
     mintingHeroes.value = true
     try {
-        await factoryStore.mintHeroes(heroesToMint.value, chunks.value)
+        await factoryStore.mintHeroes(heroesToMint.value)
         app.addToast(
             `${heroesToMint.value.length} hero${
                 heroesToMint.value.length > 1 ? "es" : ""

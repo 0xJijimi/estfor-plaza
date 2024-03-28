@@ -1,6 +1,6 @@
-import { injected, walletConnect } from '@wagmi/connectors'
-import { http, createConfig } from '@wagmi/core'
-import { fantom } from '@wagmi/core/chains'
+import { injected, walletConnect } from "@wagmi/connectors"
+import { http, createConfig } from "@wagmi/core"
+import { fantom } from "@wagmi/core/chains"
 
 const metadata = {
     name: "Deif's Estfor Plaza",

@@ -29,11 +29,6 @@
                         ? ""
                         : "s"
                 }}
-                {{
-                    actionInputsNeededTransactions > 1
-                        ? `(${actionInputsNeededTransactions} transactions)`
-                        : ""
-                }}
             </button>
             <button
                 type="button"
@@ -42,11 +37,6 @@
                 :disabled="loading || itemsTransferredToBank"
             >
                 2. Transfer Items to Bank
-                {{
-                    transferItemsNeededTransactions > 1
-                        ? `(${transferItemsNeededTransactions} transactions)`
-                        : ""
-                }}
             </button>
             <button
                 v-if="silosWithActionChoicesOnly.length > 0"
@@ -57,11 +47,6 @@
             >
                 3. Execute {{ silosWithActionChoicesOnly.length }} Complex
                 Action{{ silosWithActionChoicesOnly.length === 1 ? "" : "s" }}
-                {{
-                    actionInputChoicesNeededTransactions > 1
-                        ? `(${actionInputChoicesNeededTransactions} transactions)`
-                        : ""
-                }}
             </button>
             <div class="mt-5">
                 <div
@@ -72,8 +57,22 @@
                     {{ item }}
                 </div>
             </div>
-            <div v-if="loading" class="mt-5">
-                Please wait while the transaction is being processed.
+            <div
+                v-if="loading && factoryStore.currentTransactionNumber > 0"
+                class="mt-5"
+            >
+                Executing
+                <span class="text-success">{{
+                    factoryStore.currentTransactionNumber
+                }}</span>
+                of
+                <span class="text-success">{{
+                    factoryStore.totalTransactionNumber
+                }}</span>
+                transactions
+            </div>
+            <div v-else-if="loading" class="mt-5">
+                Calculating transactions... Please wait
             </div>
         </div>
         <form method="dialog" class="modal-backdrop">
@@ -104,16 +103,6 @@ const actionInputsExecuted = ref(false)
 const itemsTransferredToBank = ref(false)
 const silosToExecute = ref<ProxySilo[]>([])
 const missingItems = ref<string[]>([])
-const chunks = ref(8)
-const actionChoiceChunks = ref(8)
-const transferItemChunks = ref(50)
-
-// gas cost for execute action is 800k gas, split into chunks of 10
-const actionInputsNeededTransactions = computed(() => {
-    return Math.ceil(
-        silosWithEmptyQueuesOrActionInputOnly.value.length / chunks.value
-    )
-})
 
 const silosWithEmptyQueuesOrActionInputOnly = computed(() => {
     return silosToExecute.value.filter(
@@ -123,25 +112,11 @@ const silosWithEmptyQueuesOrActionInputOnly = computed(() => {
     )
 })
 
-// gas cost for execute action is 800k gas, split into chunks of 10
-const actionInputChoicesNeededTransactions = computed(() => {
-    return Math.ceil(
-        silosWithActionChoicesOnly.value.length / actionChoiceChunks.value
-    )
-})
-
 const silosWithActionChoicesOnly = computed(() => {
     return silosToExecute.value.filter(
         (s) =>
             s.queuedActions.length > 0 &&
             s.queuedActions.every((a) => a.choice !== null)
-    )
-})
-
-// gas cost for transfer items is 100k gas, split into chunks of 50
-const transferItemsNeededTransactions = computed(() => {
-    return Math.ceil(
-        factoryStore.assignedProxys.length / transferItemChunks.value
     )
 })
 
@@ -156,8 +131,7 @@ const executeSavedTransactions = async () => {
     loading.value = true
     try {
         await factoryStore.executeSavedTransactions(
-            silosWithEmptyQueuesOrActionInputOnly.value,
-            chunks.value
+            silosWithEmptyQueuesOrActionInputOnly.value
         )
         app.addToast(
             `${silosWithEmptyQueuesOrActionInputOnly.value.length} hero${
@@ -169,8 +143,8 @@ const executeSavedTransactions = async () => {
             5000
         )
         actionInputsExecuted.value = true
-    } catch {
-        // console.error(e)
+    } catch (e) {
+        console.error(e)
         // user declined tx
     } finally {
         loading.value = false
@@ -180,7 +154,7 @@ const executeSavedTransactions = async () => {
 const transferItemsToBank = async () => {
     loading.value = true
     try {
-        await factoryStore.transferItemsToBank(transferItemChunks.value)
+        await factoryStore.transferItemsToBank()
         app.addToast(`Items transferred to Bank`, "alert-success", 5000)
         itemsTransferredToBank.value = true
     } catch {
@@ -216,9 +190,11 @@ const executeActionChoiceSavedTransactions = async () => {
                     let amountRequired = 0
                     if (Number(action.startTime) + action.timespan < now) {
                         amountRequired =
-                            action.choice.inputAmounts[i] *
-                            (action.choice.rate / 1000) *
-                            action.timespan / 60 / 60
+                            (action.choice.inputAmounts[i] *
+                                (action.choice.rate / 1000) *
+                                action.timespan) /
+                            60 /
+                            60
                     } else {
                         amountRequired =
                             action.choice.inputAmounts[i] *
@@ -291,8 +267,7 @@ const executeActionChoiceSavedTransactions = async () => {
             if (missingItems.value.length === 0) {
                 await factoryStore.transferItemsFromBankToProxys(itemsNeeded)
                 await factoryStore.executeSavedTransactions(
-                    silosWithActionChoicesOnly.value,
-                    actionChoiceChunks.value
+                    silosWithActionChoicesOnly.value
                 )
                 app.addToast(
                     `${silosWithActionChoicesOnly.value.length} hero${

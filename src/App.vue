@@ -3,8 +3,8 @@ import { onMounted, provide } from "vue"
 import { useAppStore } from "./store/app"
 import Header from "./components/layout/Header.vue"
 import { createWeb3Modal } from "@web3modal/wagmi/vue"
-import { reconnect } from '@wagmi/core'
-import { config } from './config'
+import { reconnect } from "@wagmi/core"
+import { config } from "./config"
 import {
     ApolloClient,
     createHttpLink,

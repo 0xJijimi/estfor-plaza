@@ -158,7 +158,7 @@ onMounted(init)
 watchAccount(config, {
     onChange() {
         init()
-    }
+    },
 })
 </script>
 

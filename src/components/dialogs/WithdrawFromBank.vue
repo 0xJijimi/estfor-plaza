@@ -33,9 +33,7 @@
                                 <button
                                     type="button"
                                     class="btn btn-primary btn-sm"
-                                    :disabled="
-                                        loading || item.amount === '0'
-                                    "
+                                    :disabled="loading || item.amount === '0'"
                                     @click="
                                         item.amountToWithdraw = Number(
                                             item.amount

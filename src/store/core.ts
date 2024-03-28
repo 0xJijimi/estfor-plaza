@@ -217,8 +217,7 @@ export const useCoreStore = defineStore({
     getters: {
         getNetworkAddressMap: (state: CoreState): AddressMap[] | undefined => {
             const network = getAccount(config)?.chainId
-            return state.addresses.find((x) => x.network == network)
-                ?.addresses
+            return state.addresses.find((x) => x.network == network)?.addresses
         },
         getAddress: (state: CoreState) => {
             const network = getAccount(config)?.chainId

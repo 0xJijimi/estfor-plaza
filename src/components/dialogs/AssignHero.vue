@@ -94,11 +94,6 @@
                 }}
                 to {{ skillNames[skillId] || "" }}
                 {{ actionNames[actionId] || "" }}
-                {{
-                    neededTransactions > 1
-                        ? `(${neededTransactions} transactions)`
-                        : ""
-                }}
             </button>
         </div>
         <form method="dialog" class="modal-backdrop">
@@ -108,7 +103,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue"
+import { ref } from "vue"
 import { actionNames, skillNames, useSkillStore } from "../../store/skills"
 import { itemNames } from "../../store/items"
 import { allActions } from "../../data/actions"
@@ -142,12 +137,6 @@ const active = ref(true)
 const heroesToAssign = ref<ProxySilo[]>([])
 const missingItems = ref<string[]>([])
 const rightHandItems = ref<number[]>([])
-const chunks = ref(40)
-
-// gas cost for assign hero is 200k gas, split into chunks of 40
-const neededTransactions = computed(() => {
-    return Math.ceil(heroesToAssign.value.length / chunks.value)
-})
 
 const openDialog = (heroes: ProxySilo[]) => {
     heroesToAssign.value = heroes
@@ -258,8 +247,7 @@ const assignHeroes = async () => {
                 0,
                 rightHandItems.value,
                 queueStatus.value,
-                active.value,
-                chunks.value
+                active.value
             )
         } else if (
             skillId.value > 0 &&
@@ -272,8 +260,7 @@ const assignHeroes = async () => {
                 actionChoiceOutputId.value,
                 rightHandItems.value,
                 queueStatus.value,
-                active.value,
-                chunks.value
+                active.value
             )
         }
 

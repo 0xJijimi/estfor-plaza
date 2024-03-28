@@ -58,7 +58,7 @@ import { computed, ref } from "vue"
 import { getAccount, waitForTransactionReceipt } from "@wagmi/core"
 import { useAppStore } from "../../store/app"
 import { useBroochStore } from "../../store/brooch"
-import { config } from "../../config";
+import { config } from "../../config"
 
 const app = useAppStore()
 const broochStore = useBroochStore()
