@@ -66,12 +66,15 @@ const minHeroXPForSkill = computed(() => {
                 if (!a) {
                     continue
                 }
-                if (parseInt(action.startTime) < timenow) {
-                    const timeNotInAction =
-                        timenow - parseInt(action.startTime) - action.timespan
+                if (parseInt(action.startTime) + action.timespan < timenow) {
+                    extraXP += action.choice.xpPerHour * (action.timespan / 60 / 60)
+                }
+                else if (parseInt(action.startTime) < timenow) {
+                    const timeInAction =
+                        timenow - parseInt(action.startTime)
                     extraXP +=
                         action.choice.xpPerHour *
-                        ((action.timespan - timeNotInAction) / 60 / 60)
+                        ((timeInAction) / 60 / 60)
                 }
             }
 

@@ -116,7 +116,7 @@ const silosWithActionChoicesOnly = computed(() => {
     return silosToExecute.value.filter(
         (s) =>
             s.queuedActions.length > 0 &&
-            s.queuedActions.every((a) => a.choice !== null)
+            s.queuedActions.some((a) => a.choice !== null)
     )
 })
 
@@ -179,7 +179,7 @@ const executeActionChoiceSavedTransactions = async () => {
             const userItemNFTResult = userItemNFTPromises.find((u) =>
                 u.userItemNFTs.some((t) => t.user === proxy.address)
             )
-            for (const action of proxy.queuedActions) {
+            for (const action of proxy.queuedActions.filter(x => x.choice !== null)) {
                 let i = 0
                 for (const input of action.choice.inputTokenIds) {
                     const ownedItem = userItemNFTResult?.userItemNFTs.find(
@@ -195,7 +195,7 @@ const executeActionChoiceSavedTransactions = async () => {
                                 action.timespan) /
                             60 /
                             60
-                    } else {
+                    } else if (Number(action.startTime) < now) {
                         amountRequired =
                             action.choice.inputAmounts[i] *
                             (action.choice.rate / 1000) *

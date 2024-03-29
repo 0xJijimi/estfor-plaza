@@ -4,26 +4,33 @@
     >
         <div class="card-body">
             <h2 class="text-2xl font-bold text-center">Assigned Heroes</h2>
-            <div class="join items-center justify-end">
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    class="w-6 h-6 mr-2 text-primary"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+            <div class="flex items-center justify-end">
+                <div class="join items-center justify-end">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="w-6 h-6 mr-2 text-primary"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+                        />
+                    </svg>
+                    <input
+                        type="text"
+                        placeholder="Search"
+                        class="input input-bordered bg-base-100-50 input-sm"
+                        v-model="searchValue"
                     />
-                </svg>
-                <input
-                    type="text"
-                    placeholder="Search"
-                    class="input input-bordered bg-base-100-50 input-sm"
-                    v-model="searchValue"
+                </div>
+                <AssignedHeroGroupSelect
+                    class="ms-2"
+                    v-model="selectedHeroGroup"
+                    :heroes="factoryStore.assignedProxys"
                 />
             </div>
             <div class="overflow-x-auto">
@@ -41,7 +48,6 @@
                             <th>Name</th>
                             <th>Saved Action</th>
                             <th>Queued Action</th>
-                            <th>Time Left</th>
                             <th class="w-[80px] text-center">Status</th>
                             <th></th>
                         </tr>
@@ -65,18 +71,10 @@
                                 {{ decodeTransaction(silo.savedTransactions) }}
                             </td>
                             <td>
-                                {{
-                                    actionNames[
-                                        Number(silo.queuedActions[0]?.actionId)
-                                    ] ||
-                                    actionChoiceNames[
-                                        Number(silo.queuedActions[0]?.choice.id)
-                                    ] ||
-                                    ""
-                                }}
-                            </td>
-                            <td>
-                                {{ calculateTimeLeft(silo.queuedActions) }}
+                                <div v-for="(action, i) in silo.queuedActions" :key="i" class="flex items-center justify-between">
+                                    <div>{{ actionNames[Number(action.actionId)] || actionChoiceNames[Number(action.choice.id)] || "" }}</div>
+                                    <div>{{ calculateTimeLeft(action) }}</div>
+                                </div>
                             </td>
                             <td>
                                 <div
@@ -180,6 +178,7 @@ import estforPlayerAbi from "../../abi/estforPlayer.json"
 import { actionChoiceNames, actionNames } from "../../store/skills"
 import { decode } from "../../utils/abi"
 import ExecuteSiloActions from "../dialogs/ExecuteSiloActions.vue"
+import AssignedHeroGroupSelect from "../inputs/AssignedHeroGroupSelect.vue"
 
 const factoryStore = useFactoryStore()
 const executing = ref(false)
@@ -188,6 +187,7 @@ const pageSize = ref(20)
 const pageNumber = ref(0)
 const selectAll = ref(false)
 const searchValue = ref("")
+const selectedHeroGroup = ref("")
 
 const assignHeroRef = ref<typeof AssignHero>()
 const executeActionsRef = ref<typeof ExecuteSiloActions>()
@@ -223,6 +223,8 @@ const assignedSilos = computed(() => {
             decodeTransaction(s.savedTransactions)
                 ?.toLowerCase()
                 ?.indexOf(searchValue.value?.toLowerCase()) > -1
+    ).filter(
+        (s) => selectedHeroGroup.value === "" || decodeTransaction(s.savedTransactions) === selectedHeroGroup.value
     )
     assignedProxys.sort((a, b) => {
         const aDecoded = decodeTransaction(a.savedTransactions)
@@ -267,7 +269,7 @@ const pagesToSelect = computed(() => {
             }
         }
     } else {
-        for (let i = 1; i < totalPages.value; i++) {
+        for (let i = 1; i <= totalPages.value; i++) {
             pages.push(i)
         }
     }
@@ -294,16 +296,9 @@ const assignHeroes = () => {
     )
 }
 
-const calculateTimeLeft = (queuedActions: QueuedAction[]) => {
-    if (queuedActions.length === 0) {
-        return "Ready"
-    }
-    const totalTime = queuedActions.reduce(
-        (acc, action) => acc + action.timespan,
-        0
-    )
-    const startTime = parseInt(queuedActions[0].startTime)
-    const endTime = startTime + totalTime
+const calculateTimeLeft = (queuedAction: QueuedAction) => {
+    const startTime = parseInt(queuedAction.startTime)
+    const endTime = startTime + queuedAction.timespan
     const timeLeft = endTime * 1000 - Date.now()
     // return time left in hours only
     return timeLeft > 0 ? `${Math.round(timeLeft / 1000 / 60 / 60)}h` : "Ready"
