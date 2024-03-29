@@ -330,5 +330,5 @@ watch(
             selected: false,
         }))
     }
-)
+, { deep: true })
 </script>

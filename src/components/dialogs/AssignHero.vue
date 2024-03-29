@@ -21,7 +21,6 @@
                 v-model="actionId"
                 :skill-id="skillId"
                 :heroes="heroesToAssign"
-                @update:model-value="checkRequiredItems"
             />
             <ActionChoiceInputSelect
                 v-if="
@@ -32,7 +31,6 @@
                 v-model="actionChoiceOutputId"
                 :skill-id="skillId"
                 :heroes="heroesToAssign"
-                @update:model-value="checkActionChoiceRequiredItems"
             />
             <ActionQueueStatusSelect class="mt-5" v-model="queueStatus" />
 
@@ -108,13 +106,15 @@ import { actionNames, skillNames, useSkillStore } from "../../store/skills"
 import { itemNames } from "../../store/items"
 import { allActions } from "../../data/actions"
 import { ActionQueueStatus, Skill } from "@paintswap/estfor-definitions/types"
-import { ProxySilo, useFactoryStore } from "../../store/factory"
+import { calculateExtraXPForHeroActionInput, ProxySilo, useFactoryStore } from "../../store/factory"
 import SkillSelect from "../inputs/SkillSelect.vue"
 import ActionInputSelect from "../inputs/ActionInputSelect.vue"
 import ActionChoiceInputSelect from "../inputs/ActionChoiceInputSelect.vue"
 import { getUserItemNFTs } from "../../utils/api"
 import { useAppStore } from "../../store/app"
 import ActionQueueStatusSelect from "../inputs/ActionQueueStatusSelect.vue"
+import { allItems } from "../../data/items"
+import { skillToXPMap } from "../../store/core"
 
 const props = defineProps({
     id: {
@@ -140,6 +140,8 @@ const rightHandItems = ref<number[]>([])
 
 const openDialog = (heroes: ProxySilo[]) => {
     heroesToAssign.value = heroes
+    missingItems.value = []
+    rightHandItems.value = []
     const dialog = document.getElementById(props.id) as HTMLDialogElement
     dialog.showModal()
 }
@@ -147,7 +149,6 @@ const openDialog = (heroes: ProxySilo[]) => {
 const checkRequiredItems = async () => {
     missingItems.value = []
     rightHandItems.value = []
-    loading.value = true
     checking.value = true
     try {
         if (actionId.value > 0) {
@@ -161,11 +162,22 @@ const checkRequiredItems = async () => {
                 (_, i) => i + min
             )
 
+
             if (requiredItems.some((x) => x > 0)) {
                 for (const h of heroesToAssign.value) {
                     const userItemsResult = await getUserItemNFTs(h.address, [])
+                    // filter out user items that are below minXP
+                    const extraXP = calculateExtraXPForHeroActionInput(h, skillId.value)
+                    const filteredItems = userItemsResult.userItemNFTs.filter(
+                        (x) => {
+                            return allItems.find((y) => y.tokenId == x.tokenId)?.minXP <=
+                            // @ts-ignore
+                            Number(h.playerState[skillToXPMap[x.item.skill]]) + extraXP
+                        }
+                    )
+
                     if (
-                        !userItemsResult.userItemNFTs.some((x) =>
+                        !filteredItems.some((x) =>
                             requiredItems.includes(x.tokenId)
                         )
                     ) {
@@ -175,7 +187,7 @@ const checkRequiredItems = async () => {
                     }
                     // find first item in the requiredItems array that the user has
                     rightHandItems.value.push(
-                        userItemsResult.userItemNFTs.find((x) =>
+                        filteredItems.find((x) =>
                             requiredItems.includes(x.tokenId)
                         )?.tokenId || 0
                     )
@@ -184,7 +196,6 @@ const checkRequiredItems = async () => {
         }
     } catch {
     } finally {
-        loading.value = false
         checking.value = false
     }
 }
@@ -192,7 +203,6 @@ const checkRequiredItems = async () => {
 const checkActionChoiceRequiredItems = async () => {
     missingItems.value = []
     rightHandItems.value = []
-    loading.value = true
     checking.value = true
     try {
         if (actionChoiceOutputId.value > 0) {
@@ -209,8 +219,17 @@ const checkActionChoiceRequiredItems = async () => {
             if (requiredItems.some((x) => x > 0)) {
                 for (const h of heroesToAssign.value) {
                     const userItemsResult = await getUserItemNFTs(h.address, [])
+                    // filter out user items that are below minXP
+                    const extraXP = calculateExtraXPForHeroActionInput(h, skillId.value)
+                    const filteredItems = userItemsResult.userItemNFTs.filter(
+                        (x) => {
+                            return allItems.find((y) => y.tokenId == x.tokenId)?.minXP <=
+                            // @ts-ignore
+                            Number(h.playerState[skillToXPMap[x.item.skill]]) + extraXP
+                        }
+                    )
                     if (
-                        !userItemsResult.userItemNFTs.some((x) =>
+                        !filteredItems.some((x) =>
                             requiredItems.includes(x.tokenId)
                         )
                     ) {
@@ -220,7 +239,7 @@ const checkActionChoiceRequiredItems = async () => {
                     }
                     // find first item in the requiredItems array that the user has
                     rightHandItems.value.push(
-                        userItemsResult.userItemNFTs.find((x) =>
+                        filteredItems.find((x) =>
                             requiredItems.includes(x.tokenId)
                         )?.tokenId || 0
                     )
@@ -229,7 +248,6 @@ const checkActionChoiceRequiredItems = async () => {
         }
     } catch {
     } finally {
-        loading.value = false
         checking.value = false
     }
 }
@@ -241,6 +259,10 @@ const assignHeroes = async () => {
             skillId.value > 0 &&
             skillStore.getActionInputsForSkill(skillId.value).length > 0
         ) {
+            await checkRequiredItems()
+            if (missingItems.value.length > 0) {
+                return
+            }
             await factoryStore.assignActionToProxy(
                 heroesToAssign.value,
                 actionId.value,
@@ -253,6 +275,10 @@ const assignHeroes = async () => {
             skillId.value > 0 &&
             skillStore.getActionChoiceInputsForSkill(skillId.value).length > 0
         ) {
+            await checkActionChoiceRequiredItems()
+            if (missingItems.value.length > 0) {
+                return
+            }
             await factoryStore.assignActionToProxy(
                 heroesToAssign.value,
                 allActions.find((x) => x.info.skill == skillId.value)

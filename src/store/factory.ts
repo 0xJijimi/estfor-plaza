@@ -37,7 +37,7 @@ import {
 import { decode } from "../utils/abi"
 import { allActions } from "../data/actions"
 import { calculateChance } from "../utils/player"
-import { getActionChoiceById } from "./skills"
+import { getActionChoiceById, useSkillStore } from "./skills"
 import { sleep } from "../utils/time"
 import { config } from "../config"
 
@@ -259,6 +259,62 @@ const constructQueuedActions = (
     ]
 }
 
+export const calculateExtraXPForHeroActionInput = (h: ProxySilo, skillId: Skill): number => {
+    const skillStore = useSkillStore()
+    const relevantActions = h.queuedActions.filter(
+        (x) => x.skill == skillId
+    )
+    let extraXP = 0
+    const timenow = Date.now() / 1000
+    for (const action of relevantActions) {
+        const a = skillStore
+            .getActionInputsForSkill(skillId)
+            .find((s) => s.actionId == action.actionId)
+        if (!a) {
+            continue
+        }
+        if (parseInt(action.startTime) + action.timespan < timenow) {
+            extraXP += a.info.xpPerHour * (action.timespan / 60 / 60)
+        }
+        else if (parseInt(action.startTime) < timenow) {
+            const timeInAction =
+                timenow - parseInt(action.startTime)
+            extraXP +=
+                a.info.xpPerHour *
+                ((timeInAction) / 60 / 60)
+        }
+    }
+    return extraXP
+}
+
+export const calculateExtraXPForHeroActionChoiceInput = (h: ProxySilo, skillId: Skill): number => {
+    const skillStore = useSkillStore()
+    const relevantActions = h.queuedActions.filter(
+        (x) => x.skill == skillId
+    )
+    let extraXP = 0
+    const timenow = Date.now() / 1000
+    for (const action of relevantActions) {
+        const a = skillStore
+            .getActionChoiceInputsForSkill(skillId)
+            .find((s) => s === Number(action.choice.id))
+        if (!a) {
+            continue
+        }
+        if (parseInt(action.startTime) + action.timespan < timenow) {
+            extraXP += action.choice.xpPerHour * (action.timespan / 60 / 60)
+        }
+        else if (parseInt(action.startTime) < timenow) {
+            const timeInAction =
+                timenow - parseInt(action.startTime)
+            extraXP +=
+                action.choice.xpPerHour *
+                ((timeInAction) / 60 / 60)
+        }
+    }
+    return extraXP
+}
+
 const getChunksForMulticall = async (
     data: any[],
     to: string,
@@ -272,15 +328,20 @@ const getChunksForMulticall = async (
         try {
             const splits = Math.ceil(data.length / actualChunks)
             for (let i = 0; i < splits; i++) {
-                await estimateGas(config, {
+                const result = await estimateGas(config, {
+                    account: getAccount(config).address,
                     to: to as `0x${string}`,
                     data: contract.encodeFunctionData("multicall", [
                         data.slice(i * actualChunks, (i + 1) * actualChunks),
                     ]) as `0x${string}`,
+                    type: 'legacy', // ftm is lame
                 })
+                if (result > 10000000) {
+                    throw new Error("Gas estimate too high")
+                }
             }
             success = true
-        } catch {
+        } catch (e) {
             actualChunks -= 5
             attempts++
             if (actualChunks < 1) {
@@ -349,6 +410,7 @@ export const useFactoryStore = defineStore({
                 abi: factoryAbi,
                 functionName: "execute",
                 args: [siloAddress, playersAddress, data],
+                type: 'legacy',
             })
 
             await waitForTransactionReceipt(config, { hash })
@@ -386,6 +448,7 @@ export const useFactoryStore = defineStore({
                 abi: factoryAbi,
                 functionName: "execute",
                 args: [siloAddress, playerNFTAddress, data],
+                type: 'legacy',
             })
 
             await waitForTransactionReceipt(config, { hash })
@@ -450,6 +513,7 @@ export const useFactoryStore = defineStore({
                                 (i + 1) * actualChunks
                             ),
                         ],
+                        type: 'legacy',
                     })
                     await waitForTransactionReceipt(config, { hash })
                 }
@@ -613,6 +677,7 @@ export const useFactoryStore = defineStore({
                                 (i + 1) * actualChunks
                             ),
                         ],
+                        type: 'legacy',
                     })
                     await waitForTransactionReceipt(config, { hash })
                 }
@@ -825,6 +890,7 @@ export const useFactoryStore = defineStore({
                                 (i + 1) * actualChunks
                             ),
                         ],
+                        type: 'legacy',
                     })
                     await waitForTransactionReceipt(config, { hash })
                 }
@@ -852,7 +918,7 @@ export const useFactoryStore = defineStore({
                                         choiceId,
                                         rightHand[i]
                                     ),
-                                    ActionQueueStatus.KEEP_LAST_IN_PROGRESS,
+                                    actionQueueStatus,
                                 ]
                             ),
                         },
@@ -918,6 +984,7 @@ export const useFactoryStore = defineStore({
                                     (i + 1) * actualChunks
                                 ),
                             ],
+                            type: 'legacy',
                         })
                         await waitForTransactionReceipt(config, { hash })
                     }
@@ -974,6 +1041,7 @@ export const useFactoryStore = defineStore({
                                 (i + 1) * actualChunks
                             ),
                         ],
+                        type: 'legacy',
                     })
                     await waitForTransactionReceipt(config, { hash })
                 }
@@ -984,6 +1052,7 @@ export const useFactoryStore = defineStore({
                 this.currentTransactionNumber = 0
             }
             await this.getBankItems()
+            await this.updateQueuedActions()
         },
         async updateQueuedActions() {
             const queuedActionPromises = await Promise.all(
@@ -1056,6 +1125,7 @@ export const useFactoryStore = defineStore({
                 abi: factoryAbi,
                 functionName: "multicall",
                 args: [selectorArray],
+                type: 'legacy',
             })
             await waitForTransactionReceipt(config, { hash })
             await this.getBankItems()
@@ -1203,6 +1273,7 @@ export const useFactoryStore = defineStore({
                                     (i + 1) * actualChunks
                                 ),
                             ],
+                            type: 'legacy',
                         })
                         await waitForTransactionReceipt(config, { hash })
                     }
@@ -1247,6 +1318,7 @@ export const useFactoryStore = defineStore({
                 abi: factoryAbi,
                 functionName: "execute",
                 args: [siloAddress, itemAddress, data],
+                type: 'legacy',
             })
             await waitForTransactionReceipt(config, { hash })
             await this.getBankItems()

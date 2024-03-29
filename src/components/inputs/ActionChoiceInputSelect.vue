@@ -20,7 +20,7 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import { actionChoiceNames, useSkillStore } from "../../store/skills"
-import { ProxySilo } from "../../store/factory"
+import { calculateExtraXPForHeroActionChoiceInput, ProxySilo } from "../../store/factory"
 import { getLevel, skillToXPMap } from "../../store/core"
 
 const skillStore = useSkillStore()
@@ -54,29 +54,7 @@ const value = computed({
 const minHeroXPForSkill = computed(() => {
     return Math.min(
         ...props.heroes.map((h) => {
-            const relevantActions = h.queuedActions.filter(
-                (x) => x.skill == props.skillId
-            )
-            let extraXP = 0
-            const timenow = Date.now() / 1000
-            for (const action of relevantActions) {
-                const a = skillStore
-                    .getActionChoiceInputsForSkill(props.skillId)
-                    .find((s) => s === Number(action.choice.id))
-                if (!a) {
-                    continue
-                }
-                if (parseInt(action.startTime) + action.timespan < timenow) {
-                    extraXP += action.choice.xpPerHour * (action.timespan / 60 / 60)
-                }
-                else if (parseInt(action.startTime) < timenow) {
-                    const timeInAction =
-                        timenow - parseInt(action.startTime)
-                    extraXP +=
-                        action.choice.xpPerHour *
-                        ((timeInAction) / 60 / 60)
-                }
-            }
+            const extraXP = calculateExtraXPForHeroActionChoiceInput(h, props.skillId)
 
             // @ts-ignore
             return Number(h.playerState[skillToXPMap[props.skillId]]) + extraXP
