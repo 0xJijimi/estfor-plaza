@@ -336,7 +336,7 @@ const getChunksForMulticall = async (
                     ]) as `0x${string}`,
                     type: 'legacy', // ftm is lame
                 })
-                if (result > 10000000) {
+                if (result > 6660000) {
                     throw new Error("Gas estimate too high")
                 }
             }
