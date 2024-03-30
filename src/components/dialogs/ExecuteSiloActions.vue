@@ -243,7 +243,7 @@ const executeActionChoiceSavedTransactions = async () => {
             )
             const bankItems = itemResult.userItemNFTs
 
-            const itemTotals: { [key: number]: number } = {}
+            const itemTotals: { [key: string]: number } = {}
             for (const item of itemsNeeded) {
                 for (const i of item.items) {
                     if (itemTotals[i.tokenId]) {
@@ -255,11 +255,11 @@ const executeActionChoiceSavedTransactions = async () => {
             }
 
             for (const tokenId in itemTotals) {
-                const ownedItem = bankItems.find((t) => t.tokenId === tokenId)
+                const ownedItem = bankItems.find((t) => Number(t.tokenId) === Number(tokenId))                
                 if (!ownedItem || itemTotals[tokenId] > Number(ownedItem.amount)) {
                     missingItems.value.push(
                         `${itemTotals[tokenId] - Number(ownedItem?.amount || 0)} ${
-                            itemNames[tokenId]
+                            itemNames[Number(tokenId)]
                         } is missing from the Bank`
                     )
                 }
