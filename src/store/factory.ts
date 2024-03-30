@@ -341,7 +341,7 @@ const getChunksForMulticall = async (
                 }
             }
             success = true
-        } catch (e) {
+        } catch {
             actualChunks -= 5
             attempts++
             if (actualChunks < 1) {
