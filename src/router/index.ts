@@ -3,6 +3,19 @@ import { useBroochStore } from "../store/brooch"
 import Base from "../components/Base.vue"
 import { useAppStore } from "../store/app"
 
+// import all components here rather than lazy load
+import CombatCalculator from "../components/CombatCalculator.vue"
+import SkillTraining from "../components/SkillTraining.vue"
+import HeroSelect from "../components/HeroSelect.vue"
+import LotteryRanking from "../components/LotteryRanking.vue"
+import ClanBattle from "../components/ClanBattle.vue"
+import TerritoryBattleRankings from "../components/TerritoryBattleRankings.vue"
+import VaultBattleRankings from "../components/VaultBattleRankings.vue"
+import ClanManagement from "../components/ClanManagement.vue"
+import WishContributions from "../components/clan-management/WishContributions.vue"
+import Factory from "../components/Factory.vue"
+
+
 declare module "vue-router" {
     interface RouteMeta {
         showItemSearch?: boolean
@@ -22,60 +35,55 @@ const routes: Array<RouteRecordRaw> = [
             },
             {
                 path: "combat",
-                component: () => import("../components/CombatCalculator.vue"),
+                component: CombatCalculator,
                 meta: {
                     showItemSearch: true,
                 },
             },
             {
                 path: "skills",
-                component: () => import("../components/SkillTraining.vue"),
+                component: SkillTraining,
                 meta: {
                     showItemSearch: true,
                 },
             },
             {
                 path: "hero-select",
-                component: () => import("../components/HeroSelect.vue"),
+                component: HeroSelect,
             },
             {
                 path: "lotteries",
-                component: () => import("../components/LotteryRanking.vue"),
+                component: LotteryRanking,
             },
             {
                 path: "clan-battle",
-                component: () => import("../components/ClanBattle.vue"),
+                component: ClanBattle,
                 meta: {
                     requiresEmeraldBrooch: true,
                 },
             },
             {
                 path: "territory-rankings",
-                component: () =>
-                    import("../components/TerritoryBattleRankings.vue"),
+                component: TerritoryBattleRankings,
                 meta: {
                     requiresEmeraldBrooch: true,
                 },
             },
             {
                 path: "vault-rankings",
-                component: () =>
-                    import("../components/VaultBattleRankings.vue"),
+                component: VaultBattleRankings,
                 meta: {
                     requiresEmeraldBrooch: true,
                 },
             },
             {
                 path: "clan-management",
-                component: () => import("../components/ClanManagement.vue"),
+                component: ClanManagement,
                 redirect: "/clan-management/wishing-well",
                 children: [
                     {
                         path: "wishing-well",
-                        component: () =>
-                            import(
-                                "../components/clan-management/WishContributions.vue"
-                            ),
+                        component: WishContributions,
                         meta: {
                             requiresEmeraldBrooch: true,
                         },
@@ -85,7 +93,7 @@ const routes: Array<RouteRecordRaw> = [
             },
             {
                 path: "factory",
-                component: () => import("../components/Factory.vue"),
+                component: Factory,
                 meta: {
                     requiresRubyBrooch: true,
                 },
