@@ -234,7 +234,7 @@ const checkActionChoiceRequiredItems = async () => {
                         )
                     ) {
                         missingItems.value.push(
-                            `${h.playerState.name} is missing ${itemNames[min]}`
+                            `${h.playerState.name} is missing ${itemNames[min]} (${h.address})`
                         )
                     }
                     // find first item in the requiredItems array that the user has

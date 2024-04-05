@@ -104,12 +104,10 @@ const { result, onError, refetch, fetchMore } = useQuery(
 
 watch(result, async (v) => {
     if (v?.factoryRegistryCreateds?.length > 0) {
-        await factoryStore.setProxys(v.factoryRegistryCreateds)
-
         if (v.factoryRegistryCreateds.length % 100 === 0) {
-            await fetchMore({
+            const a = await fetchMore({
                 variables: {
-                    offset: factoryStore.proxys.length - 1,
+                    offset: v?.factoryRegistryCreateds?.length,
                 },
                 updateQuery: (previousResult, { fetchMoreResult }) => {
                     if (!fetchMoreResult) {
@@ -121,13 +119,16 @@ watch(result, async (v) => {
                             ...fetchMoreResult.factoryRegistryCreateds,
                         ],
                     }
-                },
+                },                
             })
+            if (a?.data?.factoryRegistryCreateds?.length === 0) {  
+                await factoryStore.setProxys(v.factoryRegistryCreateds)
+                await factoryStore.getAllProxyStates()
+            }
         } else {
-            await factoryStore.getAllProxyStates()
+            await factoryStore.setProxys(v.factoryRegistryCreateds)
+            await factoryStore.getAllProxyStates()        
         }
-    } else {
-        await factoryStore.getAllProxyStates()
     }
 })
 

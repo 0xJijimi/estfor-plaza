@@ -81,7 +81,7 @@ const assignHeroRef = ref<typeof AssignHero>()
 
 const unassignedSilos = computed(() => factoryStore.unassignedProxys)
 const unassignedSilosRef = ref(
-    unassignedSilos.value.map((s, i) => ({ ...s, selected: i === 0 }))
+    unassignedSilos.value.map((s) => ({ ...s, selected: false }))
 )
 
 const selectedSilos = computed(() =>

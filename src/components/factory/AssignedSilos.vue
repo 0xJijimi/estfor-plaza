@@ -240,7 +240,7 @@ const assignedSilos = computed(() => {
     return assignedProxys
 })
 const assignedSilosRef = ref(
-    assignedSilos.value.map((s, i) => ({ ...s, selected: i === 0 }))
+    assignedSilos.value.map((s) => ({ ...s, selected: false }))
 )
 
 const pagedAssignedSilos = computed(() => {
