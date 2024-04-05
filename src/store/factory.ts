@@ -1130,37 +1130,25 @@ export const useFactoryStore = defineStore({
             await waitForTransactionReceipt(config, { hash })
             await this.getBankItems()
         },
-        async transferItemsToBank() {
-            const coreStore = useCoreStore()
-            const itemAddress = coreStore.getAddress(Address.itemNFT)
-            const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
-            const account = getAccount(config)
-            if (!factoryAddress || !itemAddress || !account.isConnected) {
-                return
-            }
-
-            const toAddress = this.bank?.address
-            if (!toAddress) {
-                return
-            }
-
-            const itemResultPromises = this.assignedProxys
+        async getRelevantItemsForProxies(proxys: ProxySilo[]) {
+            const itemResultPromises = proxys
                 .filter((p) => p.address !== this.bank?.address)
                 .map((p) => getUserItemNFTs(p.address, []))
             const results = await Promise.all(itemResultPromises)
+            const distinctItems: number[] = []
 
-            // match proxy on item result user address and work out the outputs from the decoded saved transaction
-            const deposits: { items: UserItemNFT[]; proxy: string }[] = []
             for (const result of results.filter(
                 (r) => r.userItemNFTs.length > 0
             )) {
-                const proxy = this.assignedProxys.find(
-                    (p) => p.address === result.userItemNFTs[0].user
-                )
-                if (!proxy) {
-                    continue
+                for (const item of result.userItemNFTs) {
+                    if (!distinctItems.includes(item.tokenId)) {
+                        distinctItems.push(item.tokenId)
+                    }
                 }
+            }
 
+            const relevantTokenIds: number[] = []
+            for (const proxy of proxys) {
                 const decoded = decode(
                     proxy.savedTransactions[0].data,
                     "startActions",
@@ -1175,7 +1163,7 @@ export const useFactoryStore = defineStore({
                     Number(actionId),
                     Number(actionChoiceId)
                 )
-                const relevantTokenIds: number[] = []
+                
                 if (action) {
                     relevantTokenIds.push(
                         ...action.guaranteedRewards.map((r) => r.itemTokenId)
@@ -1209,6 +1197,39 @@ export const useFactoryStore = defineStore({
                             )
                         }
                     }
+                }
+            }
+            return { relevantTokenIds, distinctItems }
+        },
+        async transferItemsToBank(relevantTokenIds: number[], proxys: ProxySilo[]) {
+            const coreStore = useCoreStore()
+            const itemAddress = coreStore.getAddress(Address.itemNFT)
+            const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
+            const account = getAccount(config)
+            if (!factoryAddress || !itemAddress || !account.isConnected) {
+                return
+            }
+
+            const toAddress = this.bank?.address
+            if (!toAddress) {
+                return
+            }
+
+            const itemResultPromises = proxys
+                .filter((p) => p.address !== this.bank?.address)
+                .map((p) => getUserItemNFTs(p.address, []))
+            const results = await Promise.all(itemResultPromises)
+
+            // match proxy on item result user address and work out the outputs from the decoded saved transaction
+            const deposits: { items: UserItemNFT[]; proxy: string }[] = []
+            for (const result of results.filter(
+                (r) => r.userItemNFTs.length > 0
+            )) {
+                const proxy = proxys.find(
+                    (p) => p.address === result.userItemNFTs[0].user
+                )
+                if (!proxy) {
+                    continue
                 }
 
                 for (const item of result.userItemNFTs.filter((i) =>
@@ -1286,7 +1307,6 @@ export const useFactoryStore = defineStore({
             }
             await this.getBankItems()
         },
-
         async transferItemsToAddress(
             siloAddress: string,
             toAddress: string,

@@ -1,78 +1,124 @@
 <template>
     <dialog :id="props.id" class="modal">
         <div class="modal-box bg-base-100 border-2 border-primary">
-            <h3 class="font-bold text-lg text-center">
-                Execute {{ silosToExecute.length }} Action{{
-                    silosToExecute.length === 1 ? "" : "s"
-                }}
-            </h3>
+            <div v-if="!transferScreenSelected">
+                <h3 class="font-bold text-lg text-center">
+                    Execute {{ silosToExecute.length }} Action{{
+                        silosToExecute.length === 1 ? "" : "s"
+                    }}
+                </h3>
 
-            <div class="mt-5">
-                Please execute the following in order unless you know what
-                you're doing.
-            </div>
+                <div class="mt-5">
+                    Please execute the following in order unless you know what
+                    you're doing.
+                </div>
 
-            <button
-                type="button"
-                class="btn btn-primary mt-5 w-full"
-                @click="executeSavedTransactions"
-                :disabled="
-                    loading ||
-                    silosWithEmptyQueuesOrActionInputOnly.length === 0 ||
-                    actionInputsExecuted
-                "
-            >
-                1. Execute
-                {{ silosWithEmptyQueuesOrActionInputOnly.length }} Simple
-                Action{{
-                    silosWithEmptyQueuesOrActionInputOnly.length === 1
-                        ? ""
-                        : "s"
-                }}
-            </button>
-            <button
-                type="button"
-                class="btn btn-primary mt-5 w-full"
-                @click="transferItemsToBank"
-                :disabled="loading || itemsTransferredToBank"
-            >
-                2. Transfer Items to Bank
-            </button>
-            <button
-                v-if="silosWithActionChoicesOnly.length > 0"
-                type="button"
-                class="btn btn-primary mt-5 w-full"
-                @click="executeActionChoiceSavedTransactions"
-                :disabled="loading"
-            >
-                3. Execute {{ silosWithActionChoicesOnly.length }} Complex
-                Action{{ silosWithActionChoicesOnly.length === 1 ? "" : "s" }}
-            </button>
-            <div class="mt-5">
-                <div
-                    v-for="item in missingItems"
-                    :key="item"
-                    class="text-error text-sm"
+                <button
+                    type="button"
+                    class="btn btn-primary mt-5 w-full"
+                    @click="executeSavedTransactions"
+                    :disabled="
+                        loading ||
+                        silosWithEmptyQueuesOrActionInputOnly.length === 0 ||
+                        actionInputsExecuted
+                    "
                 >
-                    {{ item }}
+                    1. Execute
+                    {{ silosWithEmptyQueuesOrActionInputOnly.length }} Simple
+                    Action{{
+                        silosWithEmptyQueuesOrActionInputOnly.length === 1
+                            ? ""
+                            : "s"
+                    }}
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-primary mt-5 w-full"
+                    @click="goToTransferScreen"
+                    :disabled="loading || itemsTransferredToBank"
+                >
+                    2. Transfer Items to Bank
+                </button>
+                <button
+                    v-if="silosWithActionChoicesOnly.length > 0"
+                    type="button"
+                    class="btn btn-primary mt-5 w-full"
+                    @click="executeActionChoiceSavedTransactions"
+                    :disabled="loading"
+                >
+                    3. Execute {{ silosWithActionChoicesOnly.length }} Complex
+                    Action{{ silosWithActionChoicesOnly.length === 1 ? "" : "s" }}
+                </button>
+                <div class="mt-5">
+                    <div
+                        v-for="item in missingItems"
+                        :key="item"
+                        class="text-error text-sm"
+                    >
+                        {{ item }}
+                    </div>
+                </div>
+                <div
+                    v-if="loading && factoryStore.currentTransactionNumber > 0"
+                    class="mt-5"
+                >
+                    Executing
+                    <span class="text-success">{{
+                        factoryStore.currentTransactionNumber
+                    }}</span>
+                    of
+                    <span class="text-success">{{
+                        factoryStore.totalTransactionNumber
+                    }}</span>
+                    transactions
+                </div>
+                <div v-else-if="loading" class="mt-5">
+                    Calculating transactions... Please wait
                 </div>
             </div>
-            <div
-                v-if="loading && factoryStore.currentTransactionNumber > 0"
-                class="mt-5"
-            >
-                Executing
-                <span class="text-success">{{
-                    factoryStore.currentTransactionNumber
-                }}</span>
-                of
-                <span class="text-success">{{
-                    factoryStore.totalTransactionNumber
-                }}</span>
-                transactions
-            </div>
-            <div v-else-if="loading" class="mt-5">
-                Calculating transactions... Please wait
+
+            <div v-if="transferScreenSelected">
+                <h3 class="font-bold text-lg text-center">
+                    Transfer Items to Bank
+                </h3>
+
+                <button
+                    type="button"
+                    class="btn btn-primary btn-sm mt-5"
+                    @click="transferScreenSelected = false"
+                >
+                    Go Back
+                </button>
+
+                <span
+                    v-if="loading"
+                    class="loading loading-spinner text-primary loading-md mx-auto"
+                ></span>
+
+                <div v-for="token in relevantTokens" :key="token.tokenId"  class="mt-5">
+                    <div class="form-control">
+                        <label class="label cursor-pointer justify-start gap-5">
+                            <input
+                                type="checkbox"
+                                v-model="token.selected"
+                                :checked="token.selected"
+                                class="checkbox checkbox-primary card"
+                            />
+                            <span class="label-text mt-1">
+                                {{ itemNames[token.tokenId] }}
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <button
+                    type="button"
+                    class="btn btn-primary mt-5 w-full"
+                    @click="transferItemsToBank"
+                    :disabled="loading || itemsTransferredToBank || relevantTokens.filter(t => t.selected).length === 0"
+                >
+                    Transfer Items to Bank
+                </button>
             </div>
         </div>
         <form method="dialog" class="modal-backdrop">
@@ -103,6 +149,8 @@ const actionInputsExecuted = ref(false)
 const itemsTransferredToBank = ref(false)
 const silosToExecute = ref<ProxySilo[]>([])
 const missingItems = ref<string[]>([])
+const transferScreenSelected = ref(false)
+const relevantTokens = ref<{ selected: boolean, tokenId: number }[]>([])
 
 const silosWithEmptyQueuesOrActionInputOnly = computed(() => {
     return silosToExecute.value.filter(
@@ -121,6 +169,8 @@ const silosWithActionChoicesOnly = computed(() => {
 })
 
 const openDialog = (heroes: ProxySilo[]) => {
+    itemsTransferredToBank.value = false
+    actionInputsExecuted.value = false
     silosToExecute.value = heroes
     missingItems.value = []
     const dialog = document.getElementById(props.id) as HTMLDialogElement
@@ -151,12 +201,26 @@ const executeSavedTransactions = async () => {
     }
 }
 
+const goToTransferScreen = async () => {
+    transferScreenSelected.value = true
+    loading.value = true
+    try {
+        const result = await factoryStore.getRelevantItemsForProxies(silosToExecute.value)
+        relevantTokens.value = result.distinctItems.map(t => ({ selected: result.relevantTokenIds.includes(t), tokenId: t }))
+    } catch {
+        // 
+    } finally {
+        loading.value = false    
+    }
+}
+
 const transferItemsToBank = async () => {
     loading.value = true
     try {
-        await factoryStore.transferItemsToBank()
+        await factoryStore.transferItemsToBank(relevantTokens.value.filter(t => t.selected).map(t => t.tokenId), silosToExecute.value)
         app.addToast(`Items transferred to Bank`, "alert-success", 5000)
         itemsTransferredToBank.value = true
+        transferScreenSelected.value = false
     } catch {
         // user declined tx
     } finally {
