@@ -82,20 +82,29 @@
                     Transfer Items to Bank
                 </h3>
 
-                <button
-                    type="button"
-                    class="btn btn-primary btn-sm mt-5"
-                    @click="transferScreenSelected = false"
-                >
-                    Go Back
-                </button>
+                <div class="flex">
+                    <button
+                        type="button"
+                        class="btn btn-primary btn-sm my-5"
+                        @click="transferScreenSelected = false"
+                    >
+                        Go Back
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-primary btn-sm my-5 ms-2"
+                        @click="selectAllItems(toggle)"
+                    >
+                        {{ toggle ? 'Select' : 'Deselect' }} All Items
+                    </button>
+                </div>
 
                 <span
                     v-if="loading"
-                    class="loading loading-spinner text-primary loading-md mx-auto"
+                    class="loading loading-spinner text-primary loading-md mx-auto text-gray-100"
                 ></span>
 
-                <div v-for="token in relevantTokens" :key="token.tokenId"  class="mt-5">
+                <div v-if="!loading" v-for="token in relevantTokens" :key="token.tokenId">
                     <div class="form-control">
                         <label class="label cursor-pointer justify-start gap-5">
                             <input
@@ -109,6 +118,10 @@
                             </span>
                         </label>
                     </div>
+                </div>                
+
+                <div class="mt-5 text-sm">
+                    Don't transfer the tools your heroes are currently using!
                 </div>
 
                 <button
@@ -151,6 +164,7 @@ const itemsTransferredToBank = ref(false)
 const silosToExecute = ref<ProxySilo[]>([])
 const missingItems = ref<string[]>([])
 const transferScreenSelected = ref(false)
+const toggle = ref(true)
 const relevantTokens = ref<{ selected: boolean, tokenId: number }[]>([])
 
 const silosWithEmptyQueuesOrActionInputOnly = computed(() => {
@@ -168,6 +182,13 @@ const silosWithActionChoicesOnly = computed(() => {
             s.queuedActions.some((a) => a.choice !== null)
     )
 })
+
+const selectAllItems = (selected: boolean) => {
+    for (const token of relevantTokens.value) {
+        token.selected = selected
+    }
+    toggle.value = !toggle.value
+}
 
 const openDialog = (heroes: ProxySilo[]) => {
     itemsTransferredToBank.value = false
