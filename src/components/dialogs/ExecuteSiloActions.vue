@@ -132,7 +132,8 @@ import { computed, ref } from "vue"
 import { ProxySilo, NeededItem, useFactoryStore } from "../../store/factory"
 import { getUserItemNFTs } from "../../utils/api"
 import { useAppStore } from "../../store/app"
-import { itemNames } from "../../store/items"
+import { itemNames, starterItems } from "../../store/items"
+import { allItems } from "../../data/items"
 
 const props = defineProps({
     id: {
@@ -206,7 +207,7 @@ const goToTransferScreen = async () => {
     loading.value = true
     try {
         const result = await factoryStore.getRelevantItemsForProxies(silosToExecute.value)
-        relevantTokens.value = result.distinctItems.map(t => ({ selected: result.relevantTokenIds.includes(t), tokenId: t }))
+        relevantTokens.value = result.distinctItems.map(t => ({ selected: result.relevantTokenIds.includes(t), tokenId: t })).filter((i) => allItems.find(t => t.tokenId === i.tokenId)?.isTransferable && !starterItems.includes(i.tokenId))
     } catch {
         // 
     } finally {
