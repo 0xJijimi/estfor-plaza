@@ -55,7 +55,7 @@
             </div>
         </div>
     </div>
-    <EmptySilos v-if="factoryStore.emptyProxys.length > 0" />
+    <EmptySilos v-if="factoryStore.emptyProxys.length > 0" @create-heroes="onCreateHeroes" />
     <UnassignedSilos v-if="factoryStore.unassignedProxys.length > 0" />
     <ItemBank v-if="factoryStore.proxys.length > 0" />
     <AssignedSilos v-if="factoryStore.assignedProxys.length > 0" />
@@ -131,6 +131,11 @@ watch(result, async (v) => {
         }
     }
 })
+
+const onCreateHeroes = async () => {
+    await new Promise((resolve) => setTimeout(resolve, 2000))    
+    await refetch()
+}
 
 const createSilos = async () => {
     creating.value = true

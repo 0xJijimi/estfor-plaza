@@ -94,9 +94,6 @@ const routes: Array<RouteRecordRaw> = [
             {
                 path: "factory",
                 component: Factory,
-                meta: {
-                    requiresRubyBrooch: true,
-                },
             },
         ],
     },

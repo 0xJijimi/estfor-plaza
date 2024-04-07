@@ -123,6 +123,8 @@ import { getAvatars, getExactPlayers } from "../../utils/api"
 import { avatarBoostSkills } from "../../store/core"
 import AvatarSelect from "../inputs/AvatarSelect.vue"
 
+const emit = defineEmits(["create-heroes"])
+
 const factoryStore = useFactoryStore()
 const app = useAppStore()
 const mintingHeroes = ref(false)
@@ -172,6 +174,7 @@ const mintHeroes = async () => {
             5000
         )
         heroesToMint.value = [{ name: "", error: "", avatarId: 1 }]
+        emit("create-heroes")
     } catch {
     } finally {
         mintingHeroes.value = false

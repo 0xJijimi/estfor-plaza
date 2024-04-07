@@ -40,6 +40,7 @@ import { calculateChance } from "../utils/player"
 import { getActionChoiceById, useSkillStore } from "./skills"
 import { sleep } from "../utils/time"
 import { config } from "../config"
+import { useBroochStore } from "./brooch"
 
 export interface SavedTransaction {
     to: string
@@ -65,6 +66,7 @@ export interface FactoryState {
     initialisedAt: Date | null
     totalTransactionNumber: number
     currentTransactionNumber: number
+    transactionCharge: bigint
 }
 
 export interface AggregatedItem {
@@ -365,6 +367,7 @@ export const useFactoryStore = defineStore({
             bankItems: [] as UserItemNFT[],
             totalTransactionNumber: 0,
             currentTransactionNumber: 0,
+            transactionCharge: BigInt(0),
         }) as FactoryState,
     getters: {
         emptyProxys(state: FactoryState) {
@@ -635,6 +638,22 @@ export const useFactoryStore = defineStore({
             }
 
             await this.getBankItems()
+            await this.getTransactionCharge()
+        },
+        async getTransactionCharge() {
+            const coreStore = useCoreStore()
+            const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
+            if (!factoryAddress) {
+                return
+            }
+
+            const result = await readContract(config, {
+                address: factoryAddress as `0x${string}`,
+                abi: factoryAbi,
+                functionName: "transactionCharge",
+                args: [],
+            })
+            this.transactionCharge = result as bigint
         },
         async createProxy(proxyNumber: number) {
             const coreStore = useCoreStore()
@@ -1006,50 +1025,79 @@ export const useFactoryStore = defineStore({
                 return
             }
 
+            const broochStore = useBroochStore()
+            const hasRubyBrooch = broochStore.brooches.some(i => i.tokenId === 1 && i.balance > 0)
+
             const factoryInterface = new Interface(factoryAbi)
 
-            const selectorArray = proxys.map((h) =>
-                solidityPacked(
-                    ["bytes"],
-                    [
-                        factoryInterface.encodeFunctionData(
-                            "executeSavedTransactions",
-                            [h.address]
-                        ),
-                    ]
-                )
-            )
-
-            const actualChunks = await getChunksForMulticall(
-                selectorArray,
-                factoryAddress,
-                factoryInterface,
-                20
-            )
-            const splits = Math.ceil(selectorArray.length / actualChunks)
-            this.totalTransactionNumber = splits
-            try {
-                for (let i = 0; i < splits; i++) {
-                    this.currentTransactionNumber = i + 1
-                    const hash = await writeContract(config, {
-                        address: factoryAddress as `0x${string}`,
-                        abi: factoryAbi,
-                        functionName: "multicall",
-                        args: [
-                            selectorArray.slice(
-                                i * actualChunks,
-                                (i + 1) * actualChunks
+            if (hasRubyBrooch) {
+                const selectorArray = proxys.map((h) =>
+                    solidityPacked(
+                        ["bytes"],
+                        [
+                            factoryInterface.encodeFunctionData(
+                                "executeSavedTransactions",
+                                [h.address]
                             ),
-                        ],
-                        type: 'legacy',
-                    })
-                    await waitForTransactionReceipt(config, { hash })
+                        ]
+                    )
+                )
+
+                const actualChunks = await getChunksForMulticall(
+                    selectorArray,
+                    factoryAddress,
+                    factoryInterface,
+                    20
+                )
+                const splits = Math.ceil(selectorArray.length / actualChunks)
+                this.totalTransactionNumber = splits
+                try {
+                    for (let i = 0; i < splits; i++) {
+                        this.currentTransactionNumber = i + 1
+                        const hash = await writeContract(config, {
+                            address: factoryAddress as `0x${string}`,
+                            abi: factoryAbi,
+                            functionName: "multicall",
+                            args: [
+                                selectorArray.slice(
+                                    i * actualChunks,
+                                    (i + 1) * actualChunks
+                                ),
+                            ],
+                            type: 'legacy',
+                        })
+                        await waitForTransactionReceipt(config, { hash })
+                    }
+                } catch (e) {
+                    throw e
+                } finally {
+                    this.totalTransactionNumber = 0
+                    this.currentTransactionNumber = 0
                 }
-            } catch (e) {
-                throw e
-            } finally {
-                this.totalTransactionNumber = 0
-                this.currentTransactionNumber = 0
+            } else {
+                // execute one by one
+                this.totalTransactionNumber = proxys.length
+                try {
+                    for (let i = 0; i < proxys.length; i++) {
+                        this.currentTransactionNumber = i + 1
+                        const hash = await writeContract(config, {
+                            address: factoryAddress as `0x${string}`,
+                            abi: factoryAbi,
+                            functionName: "executeSavedTransactions",
+                            args: [
+                                proxys[i].address,
+                            ],
+                            type: 'legacy',
+                            value: this.transactionCharge,
+                        })
+                        await waitForTransactionReceipt(config, { hash })
+                    }
+                } catch (e) {
+                    throw e
+                } finally {
+                    this.totalTransactionNumber = 0
+                    this.currentTransactionNumber = 0
+                }
             }
             await this.getBankItems()
             await this.updateQueuedActions()

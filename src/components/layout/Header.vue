@@ -163,13 +163,8 @@ watch(() => broochStore.hasAccess(0), init)
                             <li>
                                 <router-link
                                     to="/factory"
-                                    @click="showBrooch(1)"
                                     >Factory
-                                    <img
-                                        src="/src/assets/ruby_brooch_icon.png"
-                                        class="rounded-lg w-[20px] inline cursor-pointer"
-                                        alt="Ruby Brooch"
-                                /></router-link>
+                                </router-link>
                             </li>
                         </ul>
                     </details>
@@ -255,13 +250,8 @@ watch(() => broochStore.hasAccess(0), init)
                             <li>
                                 <router-link
                                     to="/factory"
-                                    @click="showBrooch(1)"
                                     >Factory
-                                    <img
-                                        src="/src/assets/ruby_brooch_icon.png"
-                                        class="rounded-lg w-[20px] inline cursor-pointer"
-                                        alt="Ruby Brooch"
-                                /></router-link>
+                                </router-link>
                             </li>
                         </ul>
                     </details>
