@@ -42,7 +42,7 @@
             </p>
             <img
                 src="/src/assets/ruby_brooch_web.png"
-                class="rounded-lg"
+                class="rounded-lg mt-5"
                 alt="Ruby Brooch"
             />
             <div class="flex mt-5">
