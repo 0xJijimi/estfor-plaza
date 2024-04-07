@@ -47,7 +47,9 @@
                     :disabled="loading"
                 >
                     3. Execute {{ silosWithActionChoicesOnly.length }} Complex
-                    Action{{ silosWithActionChoicesOnly.length === 1 ? "" : "s" }}
+                    Action{{
+                        silosWithActionChoicesOnly.length === 1 ? "" : "s"
+                    }}
                 </button>
                 <div class="mt-5">
                     <div
@@ -95,7 +97,7 @@
                         class="btn btn-primary btn-sm my-5 ms-2"
                         @click="selectAllItems(toggle)"
                     >
-                        {{ toggle ? 'Select' : 'Deselect' }} All Items
+                        {{ toggle ? "Select" : "Deselect" }} All Items
                     </button>
                 </div>
 
@@ -104,7 +106,11 @@
                     class="loading loading-spinner text-primary loading-md mx-auto text-gray-100"
                 ></span>
 
-                <div v-if="!loading" v-for="token in relevantTokens" :key="token.tokenId">
+                <div
+                    v-if="!loading"
+                    v-for="token in relevantTokens"
+                    :key="token.tokenId"
+                >
                     <div class="form-control">
                         <label class="label cursor-pointer justify-start gap-5">
                             <input
@@ -118,7 +124,7 @@
                             </span>
                         </label>
                     </div>
-                </div>                
+                </div>
 
                 <div class="mt-5 text-sm">
                     Don't transfer the tools your heroes are currently using!
@@ -128,7 +134,11 @@
                     type="button"
                     class="btn btn-primary mt-5 w-full"
                     @click="transferItemsToBank"
-                    :disabled="loading || itemsTransferredToBank || relevantTokens.filter(t => t.selected).length === 0"
+                    :disabled="
+                        loading ||
+                        itemsTransferredToBank ||
+                        relevantTokens.filter((t) => t.selected).length === 0
+                    "
                 >
                     Transfer Items to Bank
                 </button>
@@ -165,7 +175,7 @@ const silosToExecute = ref<ProxySilo[]>([])
 const missingItems = ref<string[]>([])
 const transferScreenSelected = ref(false)
 const toggle = ref(true)
-const relevantTokens = ref<{ selected: boolean, tokenId: number }[]>([])
+const relevantTokens = ref<{ selected: boolean; tokenId: number }[]>([])
 
 const silosWithEmptyQueuesOrActionInputOnly = computed(() => {
     return silosToExecute.value.filter(
@@ -227,19 +237,35 @@ const goToTransferScreen = async () => {
     transferScreenSelected.value = true
     loading.value = true
     try {
-        const result = await factoryStore.getRelevantItemsForProxies(silosToExecute.value)
-        relevantTokens.value = result.distinctItems.map(t => ({ selected: result.relevantTokenIds.includes(t), tokenId: t })).filter((i) => allItems.find(t => t.tokenId === i.tokenId)?.isTransferable && !starterItems.includes(i.tokenId))
+        const result = await factoryStore.getRelevantItemsForProxies(
+            silosToExecute.value
+        )
+        relevantTokens.value = result.distinctItems
+            .map((t) => ({
+                selected: result.relevantTokenIds.includes(t),
+                tokenId: t,
+            }))
+            .filter(
+                (i) =>
+                    allItems.find((t) => t.tokenId === i.tokenId)
+                        ?.isTransferable && !starterItems.includes(i.tokenId)
+            )
     } catch {
-        // 
+        //
     } finally {
-        loading.value = false    
+        loading.value = false
     }
 }
 
 const transferItemsToBank = async () => {
     loading.value = true
     try {
-        await factoryStore.transferItemsToBank(relevantTokens.value.filter(t => t.selected).map(t => t.tokenId), silosToExecute.value)
+        await factoryStore.transferItemsToBank(
+            relevantTokens.value
+                .filter((t) => t.selected)
+                .map((t) => t.tokenId),
+            silosToExecute.value
+        )
         app.addToast(`Items transferred to Bank`, "alert-success", 5000)
         itemsTransferredToBank.value = true
         transferScreenSelected.value = false
@@ -265,7 +291,9 @@ const executeActionChoiceSavedTransactions = async () => {
             const userItemNFTResult = userItemNFTPromises.find((u) =>
                 u.userItemNFTs.some((t) => t.user === proxy.address)
             )
-            for (const action of proxy.queuedActions.filter(x => x.choice !== null)) {
+            for (const action of proxy.queuedActions.filter(
+                (x) => x.choice !== null
+            )) {
                 let i = 0
                 for (const input of action.choice.inputTokenIds) {
                     const ownedItem = userItemNFTResult?.userItemNFTs.find(
@@ -341,10 +369,17 @@ const executeActionChoiceSavedTransactions = async () => {
             }
 
             for (const tokenId in itemTotals) {
-                const ownedItem = bankItems.find((t) => Number(t.tokenId) === Number(tokenId))                
-                if (!ownedItem || itemTotals[tokenId] > Number(ownedItem.amount)) {
+                const ownedItem = bankItems.find(
+                    (t) => Number(t.tokenId) === Number(tokenId)
+                )
+                if (
+                    !ownedItem ||
+                    itemTotals[tokenId] > Number(ownedItem.amount)
+                ) {
                     missingItems.value.push(
-                        `${itemTotals[tokenId] - Number(ownedItem?.amount || 0)} ${
+                        `${
+                            itemTotals[tokenId] - Number(ownedItem?.amount || 0)
+                        } ${
                             itemNames[Number(tokenId)]
                         } is missing from the Bank`
                     )

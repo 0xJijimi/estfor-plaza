@@ -11,38 +11,34 @@
                 type="button"
                 class="btn btn-primary mt-5 w-full"
                 @click="approveBrush"
-                :disabled="
-                    loading || approved
-                "
+                :disabled="loading || approved"
             >
-                1. Approve {{ Number(cost) / 10 ** 18 * heroesToEvolve.length }} BRUSH
+                1. Approve
+                {{ (Number(cost) / 10 ** 18) * heroesToEvolve.length }} BRUSH
             </button>
             <button
                 type="button"
                 class="btn btn-primary mt-5 w-full"
                 @click="sendBrush"
-                :disabled="
-                    loading || sentBrush
-                "
+                :disabled="loading || sentBrush"
             >
-                2. Send {{ Number(cost) / 10 ** 18 * heroesToEvolve.length }} BRUSH
+                2. Send
+                {{ (Number(cost) / 10 ** 18) * heroesToEvolve.length }} BRUSH
             </button>
             <button
                 type="button"
                 class="btn btn-primary mt-5 w-full"
                 @click="evolveHeroes"
-                :disabled="
-                    loading
-                "
+                :disabled="loading"
             >
                 3. Evolve {{ heroesToEvolve.length }} Hero{{
                     heroesToEvolve.length === 1 ? "" : "es"
                 }}
             </button>
             <div
-                    v-if="loading && factoryStore.currentTransactionNumber > 0"
-                    class="mt-5"
-                >
+                v-if="loading && factoryStore.currentTransactionNumber > 0"
+                class="mt-5"
+            >
                 Executing
                 <span class="text-success">{{
                     factoryStore.currentTransactionNumber
@@ -67,7 +63,7 @@
 import { ref } from "vue"
 import { ProxySilo, useFactoryStore } from "../../store/factory"
 import { useAppStore } from "../../store/app"
-import { useCoreStore } from "../../store/core";
+import { useCoreStore } from "../../store/core"
 
 const props = defineProps({
     id: {
@@ -97,10 +93,10 @@ const openDialog = async (heroes: ProxySilo[]) => {
 
 const approveBrush = async () => {
     loading.value = true
-    try {        
+    try {
         await factoryStore.approveBrush(
             heroesToEvolve.value,
-            BigInt(cost.value),
+            BigInt(cost.value)
         )
         approved.value = true
     } catch {
@@ -113,12 +109,9 @@ const approveBrush = async () => {
 
 const sendBrush = async () => {
     loading.value = true
-    try {    
-        console.log('hello')    
-        await factoryStore.sendBrush(
-            heroesToEvolve.value,
-            BigInt(cost.value),
-        )
+    try {
+        console.log("hello")
+        await factoryStore.sendBrush(heroesToEvolve.value, BigInt(cost.value))
         sentBrush.value = true
     } catch {
         // console.log(e)
@@ -131,10 +124,7 @@ const sendBrush = async () => {
 const evolveHeroes = async () => {
     loading.value = true
     try {
-        
-        await factoryStore.evolveHeroes(
-            heroesToEvolve.value,
-        )
+        await factoryStore.evolveHeroes(heroesToEvolve.value)
 
         app.addToast(
             `${heroesToEvolve.value.length} hero${

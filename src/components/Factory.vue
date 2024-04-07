@@ -14,8 +14,20 @@
                     alt="Ruby Brooch"
                     @click.prevent="rubyBroochPaywallRef?.openDialog()"
                 />
-                <span>As you don't have a Ruby Brooch, you do not get the full benefits of the Factory - there is a {{ (Number(factoryStore.transactionCharge / BigInt(10**15)) / 1000) || 'small' }} FTM charge per execution, and you cannot batch execute actions.<br />If you want to get a Ruby Brooch, first get an Emerald Brooch (click the tree icon in the top left), then click the Ruby brooch to the left of this message.</span> 
-            </p>            
+                <span
+                    >As you don't have a Ruby Brooch, you do not get the full
+                    benefits of the Factory - there is a
+                    {{
+                        Number(
+                            factoryStore.transactionCharge / BigInt(10 ** 15)
+                        ) / 1000 || "small"
+                    }}
+                    FTM charge per execution, and you cannot batch execute
+                    actions.<br />If you want to get a Ruby Brooch, first get an
+                    Emerald Brooch (click the tree icon in the top left), then
+                    click the Ruby brooch to the left of this message.</span
+                >
+            </p>
             <span
                 v-if="loading"
                 class="loading loading-spinner text-primary loading-md mx-auto"
@@ -64,7 +76,10 @@
             </div>
         </div>
     </div>
-    <EmptySilos v-if="factoryStore.emptyProxys.length > 0" @create-heroes="onCreateHeroes" />
+    <EmptySilos
+        v-if="factoryStore.emptyProxys.length > 0"
+        @create-heroes="onCreateHeroes"
+    />
     <UnassignedSilos v-if="factoryStore.unassignedProxys.length > 0" />
     <ItemBank v-if="factoryStore.proxys.length > 0" />
     <AssignedSilos v-if="factoryStore.assignedProxys.length > 0" />
@@ -138,21 +153,21 @@ watch(result, async (v) => {
                             ...fetchMoreResult.factoryRegistryCreateds,
                         ],
                     }
-                },                
+                },
             })
-            if (a?.data?.factoryRegistryCreateds?.length === 0) {  
+            if (a?.data?.factoryRegistryCreateds?.length === 0) {
                 await factoryStore.setProxys(v.factoryRegistryCreateds)
                 await factoryStore.getAllProxyStates()
             }
         } else {
             await factoryStore.setProxys(v.factoryRegistryCreateds)
-            await factoryStore.getAllProxyStates()        
+            await factoryStore.getAllProxyStates()
         }
     }
 })
 
 const onCreateHeroes = async () => {
-    await new Promise((resolve) => setTimeout(resolve, 2000))    
+    await new Promise((resolve) => setTimeout(resolve, 2000))
     await refetch()
 }
 

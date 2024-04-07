@@ -30,7 +30,8 @@
                 class="my-5"
             >
                 The Factory is a place where you can create your own Estfor
-                industrial workflow. If you have a Ruby brooch you can run your factory without charge!
+                industrial workflow. If you have a Ruby brooch you can run your
+                factory without charge!
             </p>
             <p v-else-if="brooch.balance >= 1" class="my-5">
                 You already have access to use this feature. But feel free to

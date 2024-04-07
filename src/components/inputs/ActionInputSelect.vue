@@ -20,7 +20,10 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import { actionNames, useSkillStore } from "../../store/skills"
-import { calculateExtraXPForHeroActionInput, ProxySilo } from "../../store/factory"
+import {
+    calculateExtraXPForHeroActionInput,
+    ProxySilo,
+} from "../../store/factory"
 import { getLevel, skillToXPMap } from "../../store/core"
 
 const skillStore = useSkillStore()
@@ -53,7 +56,7 @@ const value = computed({
 
 const minHeroXPForSkill = computed(() => {
     return Math.min(
-        ...props.heroes.map((h) => {   
+        ...props.heroes.map((h) => {
             const extraXP = calculateExtraXPForHeroActionInput(h, props.skillId)
 
             // @ts-ignore

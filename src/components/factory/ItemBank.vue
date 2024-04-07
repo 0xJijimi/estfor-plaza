@@ -62,7 +62,7 @@ import {
 } from "../../store/factory"
 import { ComputedRef, computed, ref } from "vue"
 import { itemNames, starterItems } from "../../store/items"
-import { BoostType, UserItemNFT } from "@paintswap/estfor-definitions/types"
+import { UserItemNFT } from "@paintswap/estfor-definitions/types"
 import WithdrawFromBank from "../dialogs/WithdrawFromBank.vue"
 import { allItems } from "../../data/items"
 
@@ -88,7 +88,7 @@ const aggregatedItems: ComputedRef<AggregatedItem[]> = computed(() => {
         const outgoingItem = outgoingItems.find(
             (i) => i.itemTokenId === item.tokenId
         )
-        
+
         if (incomingItem || outgoingItem) {
             return {
                 tokenId: item.tokenId,
@@ -140,7 +140,11 @@ const aggregatedItems: ComputedRef<AggregatedItem[]> = computed(() => {
         return 0
     })
 
-    return mergedItems.filter((i) => allItems.find(t => t.tokenId === i.tokenId)?.isTransferable && !starterItems.includes(i.tokenId))
+    return mergedItems.filter(
+        (i) =>
+            allItems.find((t) => t.tokenId === i.tokenId)?.isTransferable &&
+            !starterItems.includes(i.tokenId)
+    )
 })
 
 const withdrawItems = async () => {

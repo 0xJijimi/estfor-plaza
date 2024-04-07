@@ -71,8 +71,22 @@
                                 {{ decodeTransaction(silo.savedTransactions) }}
                             </td>
                             <td>
-                                <div v-for="(action, i) in silo.queuedActions" :key="i" class="flex items-center justify-between">
-                                    <div>{{ actionNames[Number(action.actionId)] || actionChoiceNames[Number(action.choice.id)] || "" }}</div>
+                                <div
+                                    v-for="(action, i) in silo.queuedActions"
+                                    :key="i"
+                                    class="flex items-center justify-between"
+                                >
+                                    <div>
+                                        {{
+                                            actionNames[
+                                                Number(action.actionId)
+                                            ] ||
+                                            actionChoiceNames[
+                                                Number(action.choice.id)
+                                            ] ||
+                                            ""
+                                        }}
+                                    </div>
                                     <div>{{ calculateTimeLeft(action) }}</div>
                                 </div>
                             </td>
@@ -227,22 +241,40 @@ const decodeTransaction = (savedTransactions: SavedTransaction[]) => {
 }
 
 const assignedSilos = computed(() => {
-    const assignedProxys = factoryStore.assignedProxys.filter(
-        (s) =>
-            s.playerState.name
-                ?.toLowerCase()
-                ?.indexOf(searchValue.value?.toLowerCase()) > -1 ||
-            decodeTransaction(s.savedTransactions)
-                ?.toLowerCase()
-                ?.indexOf(searchValue.value?.toLowerCase()) > -1 ||
-            s.queuedActions
-                ?.map((a) => actionNames[Number(a.actionId)] || actionChoiceNames[Number(a.choice?.id)] || "")
-                ?.join(" ")
-                ?.toLowerCase()
-                ?.indexOf(searchValue.value?.toLowerCase()) > -1
-    ).filter(
-        (s) => selectedHeroGroup.value === "" || decodeTransaction(s.savedTransactions) === selectedHeroGroup.value || s.queuedActions.map((a) => (actionNames[Number(a.actionId)] || actionChoiceNames[Number(a.choice?.id)] || "")).includes(selectedHeroGroup.value)
-    )
+    const assignedProxys = factoryStore.assignedProxys
+        .filter(
+            (s) =>
+                s.playerState.name
+                    ?.toLowerCase()
+                    ?.indexOf(searchValue.value?.toLowerCase()) > -1 ||
+                decodeTransaction(s.savedTransactions)
+                    ?.toLowerCase()
+                    ?.indexOf(searchValue.value?.toLowerCase()) > -1 ||
+                s.queuedActions
+                    ?.map(
+                        (a) =>
+                            actionNames[Number(a.actionId)] ||
+                            actionChoiceNames[Number(a.choice?.id)] ||
+                            ""
+                    )
+                    ?.join(" ")
+                    ?.toLowerCase()
+                    ?.indexOf(searchValue.value?.toLowerCase()) > -1
+        )
+        .filter(
+            (s) =>
+                selectedHeroGroup.value === "" ||
+                decodeTransaction(s.savedTransactions) ===
+                    selectedHeroGroup.value ||
+                s.queuedActions
+                    .map(
+                        (a) =>
+                            actionNames[Number(a.actionId)] ||
+                            actionChoiceNames[Number(a.choice?.id)] ||
+                            ""
+                    )
+                    .includes(selectedHeroGroup.value)
+        )
     assignedProxys.sort((a, b) => {
         const aDecoded = decodeTransaction(a.savedTransactions)
         const bDecoded = decodeTransaction(b.savedTransactions)
@@ -315,7 +347,9 @@ const assignHeroes = () => {
 
 const evolveHeroes = () => {
     evolveHeroRef.value?.openDialog(
-        assignedSilosRef.value.filter((x) => x.selected && !x.playerState.isFullMode)
+        assignedSilosRef.value.filter(
+            (x) => x.selected && !x.playerState.isFullMode
+        )
     )
 }
 
@@ -334,6 +368,7 @@ watch(
             ...s,
             selected: false,
         }))
-    }
-, { deep: true })
+    },
+    { deep: true }
+)
 </script>

@@ -15,7 +15,6 @@ import ClanManagement from "../components/ClanManagement.vue"
 import WishContributions from "../components/clan-management/WishContributions.vue"
 import Factory from "../components/Factory.vue"
 
-
 declare module "vue-router" {
     interface RouteMeta {
         showItemSearch?: boolean

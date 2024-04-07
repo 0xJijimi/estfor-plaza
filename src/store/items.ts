@@ -401,7 +401,8 @@ export const itemNames = {
 
 export const starterItems = [
     allItems.find((x) => x.tokenId === EstforConstants.BRONZE_SWORD)?.tokenId,
-    allItems.find((x) => x.tokenId === EstforConstants.MAGIC_FIRE_STARTER)?.tokenId,
+    allItems.find((x) => x.tokenId === EstforConstants.MAGIC_FIRE_STARTER)
+        ?.tokenId,
     allItems.find((x) => x.tokenId === EstforConstants.BRONZE_AXE)?.tokenId,
     allItems.find((x) => x.tokenId === EstforConstants.NET_STICK)?.tokenId,
     allItems.find((x) => x.tokenId === EstforConstants.BRONZE_PICKAXE)?.tokenId,

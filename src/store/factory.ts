@@ -262,11 +262,12 @@ const constructQueuedActions = (
     ]
 }
 
-export const calculateExtraXPForHeroActionInput = (h: ProxySilo, skillId: Skill): number => {
+export const calculateExtraXPForHeroActionInput = (
+    h: ProxySilo,
+    skillId: Skill
+): number => {
     const skillStore = useSkillStore()
-    const relevantActions = h.queuedActions.filter(
-        (x) => x.skill == skillId
-    )
+    const relevantActions = h.queuedActions.filter((x) => x.skill == skillId)
     let extraXP = 0
     const timenow = Date.now() / 1000
     for (const action of relevantActions) {
@@ -278,23 +279,20 @@ export const calculateExtraXPForHeroActionInput = (h: ProxySilo, skillId: Skill)
         }
         if (parseInt(action.startTime) + action.timespan < timenow) {
             extraXP += a.info.xpPerHour * (action.timespan / 60 / 60)
-        }
-        else if (parseInt(action.startTime) < timenow) {
-            const timeInAction =
-                timenow - parseInt(action.startTime)
-            extraXP +=
-                a.info.xpPerHour *
-                ((timeInAction) / 60 / 60)
+        } else if (parseInt(action.startTime) < timenow) {
+            const timeInAction = timenow - parseInt(action.startTime)
+            extraXP += a.info.xpPerHour * (timeInAction / 60 / 60)
         }
     }
     return extraXP
 }
 
-export const calculateExtraXPForHeroActionChoiceInput = (h: ProxySilo, skillId: Skill): number => {
+export const calculateExtraXPForHeroActionChoiceInput = (
+    h: ProxySilo,
+    skillId: Skill
+): number => {
     const skillStore = useSkillStore()
-    const relevantActions = h.queuedActions.filter(
-        (x) => x.skill == skillId
-    )
+    const relevantActions = h.queuedActions.filter((x) => x.skill == skillId)
     let extraXP = 0
     const timenow = Date.now() / 1000
     for (const action of relevantActions) {
@@ -306,13 +304,9 @@ export const calculateExtraXPForHeroActionChoiceInput = (h: ProxySilo, skillId: 
         }
         if (parseInt(action.startTime) + action.timespan < timenow) {
             extraXP += action.choice.xpPerHour * (action.timespan / 60 / 60)
-        }
-        else if (parseInt(action.startTime) < timenow) {
-            const timeInAction =
-                timenow - parseInt(action.startTime)
-            extraXP +=
-                action.choice.xpPerHour *
-                ((timeInAction) / 60 / 60)
+        } else if (parseInt(action.startTime) < timenow) {
+            const timeInAction = timenow - parseInt(action.startTime)
+            extraXP += action.choice.xpPerHour * (timeInAction / 60 / 60)
         }
     }
     return extraXP
@@ -337,7 +331,7 @@ const getChunksForMulticall = async (
                     data: contract.encodeFunctionData("multicall", [
                         data.slice(i * actualChunks, (i + 1) * actualChunks),
                     ]) as `0x${string}`,
-                    type: 'legacy', // ftm is lame
+                    type: "legacy", // ftm is lame
                 })
                 if (result > 6660000) {
                     throw new Error("Gas estimate too high")
@@ -414,7 +408,7 @@ export const useFactoryStore = defineStore({
                 abi: factoryAbi,
                 functionName: "execute",
                 args: [siloAddress, playersAddress, data],
-                type: 'legacy',
+                type: "legacy",
             })
 
             await waitForTransactionReceipt(config, { hash })
@@ -452,7 +446,7 @@ export const useFactoryStore = defineStore({
                 abi: factoryAbi,
                 functionName: "execute",
                 args: [siloAddress, playerNFTAddress, data],
-                type: 'legacy',
+                type: "legacy",
             })
 
             await waitForTransactionReceipt(config, { hash })
@@ -529,7 +523,7 @@ export const useFactoryStore = defineStore({
                                 (i + 1) * actualChunks
                             ),
                         ],
-                        type: 'legacy',
+                        type: "legacy",
                     })
                     await waitForTransactionReceipt(config, { hash })
                 }
@@ -543,14 +537,17 @@ export const useFactoryStore = defineStore({
         async approveBrush(proxys: ProxySilo[], amount: bigint) {
             const coreStore = useCoreStore()
             const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
-            const brushAddress = coreStore.getAddress(
-                Address.brush
-            )
+            const brushAddress = coreStore.getAddress(Address.brush)
             const playerNFTAddress = coreStore.getAddress(
                 Address.estforPlayerNFT
             )
             const account = getAccount(config)
-            if (!factoryAddress || !brushAddress || !playerNFTAddress || !account.isConnected) {
+            if (
+                !factoryAddress ||
+                !brushAddress ||
+                !playerNFTAddress ||
+                !account.isConnected
+            ) {
                 return
             }
 
@@ -566,7 +563,7 @@ export const useFactoryStore = defineStore({
                             brushAddress,
                             brushInterface.encodeFunctionData("approve", [
                                 playerNFTAddress,
-                                amount
+                                amount,
                             ]),
                         ]),
                     ]
@@ -577,9 +574,7 @@ export const useFactoryStore = defineStore({
         },
         async sendBrush(proxys: ProxySilo[], amount: bigint) {
             const coreStore = useCoreStore()
-            const brushAddress = coreStore.getAddress(
-                Address.brush
-            )
+            const brushAddress = coreStore.getAddress(Address.brush)
             const account = getAccount(config)
             if (!brushAddress || !account.isConnected) {
                 return
@@ -591,12 +586,11 @@ export const useFactoryStore = defineStore({
                 for (const p of proxys) {
                     this.currentTransactionNumber++
                     const hash = await writeContract(config, {
-                            address: brushAddress as `0x${string}`,
-                            abi: brushAbi as any,
-                            functionName: "transfer",
-                            args: [p.address, amount]
-                        }
-                    )
+                        address: brushAddress as `0x${string}`,
+                        abi: brushAbi as any,
+                        functionName: "transfer",
+                        args: [p.address, amount],
+                    })
                     await waitForTransactionReceipt(config, { hash })
                 }
             } catch (e) {
@@ -627,14 +621,17 @@ export const useFactoryStore = defineStore({
                         factoryInterface.encodeFunctionData("execute", [
                             h.address,
                             playerNFTAddress,
-                            playerNFTInterface.encodeFunctionData("editPlayer", [
-                                h.playerId,
-                                h.playerState.name,
-                                "",
-                                "",
-                                "",
-                                true,
-                            ]),
+                            playerNFTInterface.encodeFunctionData(
+                                "editPlayer",
+                                [
+                                    h.playerId,
+                                    h.playerState.name,
+                                    "",
+                                    "",
+                                    "",
+                                    true,
+                                ]
+                            ),
                         ]),
                     ]
                 )
@@ -810,7 +807,7 @@ export const useFactoryStore = defineStore({
                                 (i + 1) * actualChunks
                             ),
                         ],
-                        type: 'legacy',
+                        type: "legacy",
                     })
                     await waitForTransactionReceipt(config, { hash })
                 }
@@ -1080,7 +1077,9 @@ export const useFactoryStore = defineStore({
             }
 
             const broochStore = useBroochStore()
-            const hasRubyBrooch = broochStore.brooches.some(i => i.tokenId === 1 && i.balance > 0)
+            const hasRubyBrooch = broochStore.brooches.some(
+                (i) => i.tokenId === 1 && i.balance > 0
+            )
 
             const factoryInterface = new Interface(factoryAbi)
 
@@ -1108,10 +1107,8 @@ export const useFactoryStore = defineStore({
                             address: factoryAddress as `0x${string}`,
                             abi: factoryAbi,
                             functionName: "executeSavedTransactions",
-                            args: [
-                                proxys[i].address,
-                            ],
-                            type: 'legacy',
+                            args: [proxys[i].address],
+                            type: "legacy",
                             value: this.transactionCharge,
                         })
                         await waitForTransactionReceipt(config, { hash })
@@ -1197,7 +1194,7 @@ export const useFactoryStore = defineStore({
                 abi: factoryAbi,
                 functionName: "multicall",
                 args: [selectorArray],
-                type: 'legacy',
+                type: "legacy",
             })
             await waitForTransactionReceipt(config, { hash })
             await this.getBankItems()
@@ -1235,7 +1232,7 @@ export const useFactoryStore = defineStore({
                     Number(actionId),
                     Number(actionChoiceId)
                 )
-                
+
                 if (action) {
                     relevantTokenIds.push(
                         ...action.guaranteedRewards.map((r) => r.itemTokenId)
@@ -1273,7 +1270,10 @@ export const useFactoryStore = defineStore({
             }
             return { relevantTokenIds, distinctItems }
         },
-        async transferItemsToBank(relevantTokenIds: number[], proxys: ProxySilo[]) {
+        async transferItemsToBank(
+            relevantTokenIds: number[],
+            proxys: ProxySilo[]
+        ) {
             const coreStore = useCoreStore()
             const itemAddress = coreStore.getAddress(Address.itemNFT)
             const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
@@ -1380,7 +1380,7 @@ export const useFactoryStore = defineStore({
                 abi: factoryAbi,
                 functionName: "execute",
                 args: [siloAddress, itemAddress, data],
-                type: 'legacy',
+                type: "legacy",
             })
             await waitForTransactionReceipt(config, { hash })
             await this.getBankItems()

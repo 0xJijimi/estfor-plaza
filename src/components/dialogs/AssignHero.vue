@@ -106,7 +106,11 @@ import { actionNames, skillNames, useSkillStore } from "../../store/skills"
 import { itemNames } from "../../store/items"
 import { allActions } from "../../data/actions"
 import { ActionQueueStatus, Skill } from "@paintswap/estfor-definitions/types"
-import { calculateExtraXPForHeroActionInput, ProxySilo, useFactoryStore } from "../../store/factory"
+import {
+    calculateExtraXPForHeroActionInput,
+    ProxySilo,
+    useFactoryStore,
+} from "../../store/factory"
 import SkillSelect from "../inputs/SkillSelect.vue"
 import ActionInputSelect from "../inputs/ActionInputSelect.vue"
 import ActionChoiceInputSelect from "../inputs/ActionChoiceInputSelect.vue"
@@ -162,17 +166,22 @@ const checkRequiredItems = async () => {
                 (_, i) => i + min
             )
 
-
             if (requiredItems.some((x) => x > 0)) {
                 for (const h of heroesToAssign.value) {
                     const userItemsResult = await getUserItemNFTs(h.address, [])
                     // filter out user items that are below minXP
-                    const extraXP = calculateExtraXPForHeroActionInput(h, skillId.value)
+                    const extraXP = calculateExtraXPForHeroActionInput(
+                        h,
+                        skillId.value
+                    )
                     const filteredItems = userItemsResult.userItemNFTs.filter(
                         (x) => {
-                            return allItems.find((y) => y.tokenId == x.tokenId)?.minXP <=
-                            // @ts-ignore
-                            Number(h.playerState[skillToXPMap[x.item.skill]]) + extraXP
+                            return (
+                                allItems.find((y) => y.tokenId == x.tokenId)
+                                    ?.minXP <=
+                                // @ts-ignore
+                                Number(h.playerState[skillToXPMap[x.item.skill]]) +extraXP
+                            )
                         }
                     )
 
@@ -220,12 +229,19 @@ const checkActionChoiceRequiredItems = async () => {
                 for (const h of heroesToAssign.value) {
                     const userItemsResult = await getUserItemNFTs(h.address, [])
                     // filter out user items that are below minXP
-                    const extraXP = calculateExtraXPForHeroActionInput(h, skillId.value)
+                    const extraXP = calculateExtraXPForHeroActionInput(
+                        h,
+                        skillId.value
+                    )
                     const filteredItems = userItemsResult.userItemNFTs.filter(
                         (x) => {
-                            return allItems.find((y) => y.tokenId == x.tokenId)?.minXP <=
-                            // @ts-ignore
-                            Number(h.playerState[skillToXPMap[x.item.skill]]) + extraXP
+                            return (
+                                allItems.find((y) => y.tokenId == x.tokenId)
+                                    ?.minXP <=
+                                // @ts-ignore
+                                Number(h.playerState[skillToXPMap[x.item.skill]]) +
+                                    extraXP
+                            )
                         }
                     )
                     if (

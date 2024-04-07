@@ -161,8 +161,7 @@ watch(() => broochStore.hasAccess(0), init)
                                 </details>
                             </li>
                             <li>
-                                <router-link
-                                    to="/factory"
+                                <router-link to="/factory"
                                     >Factory
                                 </router-link>
                             </li>
@@ -248,8 +247,7 @@ watch(() => broochStore.hasAccess(0), init)
                             </li>
 
                             <li>
-                                <router-link
-                                    to="/factory"
+                                <router-link to="/factory"
                                     >Factory
                                 </router-link>
                             </li>
