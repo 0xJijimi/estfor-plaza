@@ -1,6 +1,6 @@
 import {
-    BoostType,
     Clan,
+    CoreData,
     Donation,
     Lottery,
     Player,
@@ -35,15 +35,6 @@ export interface ClansResult {
 
 export interface PlayerResult {
     player: Player
-}
-
-export interface CoreData {
-    gamePaused: boolean
-    globalBoostStartTime: string
-    globalBoostDuration: number
-    globalBoostVal: number
-    globalBoostType: BoostType
-    globalBoostItemTokenId: number
 }
 
 export interface CoreDataResult {

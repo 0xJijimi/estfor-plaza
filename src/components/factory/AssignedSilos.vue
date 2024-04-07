@@ -154,6 +154,16 @@
                 </button>
                 <button
                     type="button"
+                    class="btn btn-primary mt-5 me-2"
+                    @click="evolveHeroes"
+                    :disabled="executing || !selectedSilos.length"
+                >
+                    Evolve {{ selectedSilos.length }} Hero{{
+                        selectedSilos.length !== 1 ? "es" : ""
+                    }}
+                </button>
+                <button
+                    type="button"
                     class="btn btn-primary mt-5 grow"
                     @click="openExecuteTransactions"
                     :disabled="!selectedSilos.length"
@@ -166,12 +176,13 @@
         </div>
     </div>
     <AssignHero ref="assignHeroRef" id="reassign_hero_modal" />
+    <EvolveHero ref="evolveHeroRef" id="evolve_hero_modal" />
     <ExecuteSiloActions ref="executeActionsRef" id="execute_actions_modal" />
 </template>
 
 <script setup lang="ts">
 import { SavedTransaction, useFactoryStore } from "../../store/factory"
-import { computed, onMounted, onUnmounted, ref, watch } from "vue"
+import { computed, ref, watch } from "vue"
 import AssignHero from "../dialogs/AssignHero.vue"
 import { QueuedAction } from "@paintswap/estfor-definitions/types"
 import estforPlayerAbi from "../../abi/estforPlayer.json"
@@ -179,10 +190,10 @@ import { actionChoiceNames, actionNames } from "../../store/skills"
 import { decode } from "../../utils/abi"
 import ExecuteSiloActions from "../dialogs/ExecuteSiloActions.vue"
 import AssignedHeroGroupSelect from "../inputs/AssignedHeroGroupSelect.vue"
+import EvolveHero from "../dialogs/EvolveHero.vue"
 
 const factoryStore = useFactoryStore()
 const executing = ref(false)
-const interval = ref<NodeJS.Timeout>()
 const pageSize = ref(20)
 const pageNumber = ref(0)
 const selectAll = ref(false)
@@ -191,6 +202,7 @@ const selectedHeroGroup = ref("")
 
 const assignHeroRef = ref<typeof AssignHero>()
 const executeActionsRef = ref<typeof ExecuteSiloActions>()
+const evolveHeroRef = ref<typeof EvolveHero>()
 
 const decodeTransaction = (savedTransactions: SavedTransaction[]) => {
     if (savedTransactions.length === 0) {
@@ -222,9 +234,14 @@ const assignedSilos = computed(() => {
                 ?.indexOf(searchValue.value?.toLowerCase()) > -1 ||
             decodeTransaction(s.savedTransactions)
                 ?.toLowerCase()
+                ?.indexOf(searchValue.value?.toLowerCase()) > -1 ||
+            s.queuedActions
+                ?.map((a) => actionNames[Number(a.actionId)] || actionChoiceNames[Number(a.choice?.id)] || "")
+                ?.join(" ")
+                ?.toLowerCase()
                 ?.indexOf(searchValue.value?.toLowerCase()) > -1
     ).filter(
-        (s) => selectedHeroGroup.value === "" || decodeTransaction(s.savedTransactions) === selectedHeroGroup.value
+        (s) => selectedHeroGroup.value === "" || decodeTransaction(s.savedTransactions) === selectedHeroGroup.value || s.queuedActions.map((a) => (actionNames[Number(a.actionId)] || actionChoiceNames[Number(a.choice?.id)] || "")).includes(selectedHeroGroup.value)
     )
     assignedProxys.sort((a, b) => {
         const aDecoded = decodeTransaction(a.savedTransactions)
@@ -296,6 +313,12 @@ const assignHeroes = () => {
     )
 }
 
+const evolveHeroes = () => {
+    evolveHeroRef.value?.openDialog(
+        assignedSilosRef.value.filter((x) => x.selected && !x.playerState.isFullMode)
+    )
+}
+
 const calculateTimeLeft = (queuedAction: QueuedAction) => {
     const startTime = parseInt(queuedAction.startTime)
     const endTime = startTime + queuedAction.timespan
@@ -303,24 +326,6 @@ const calculateTimeLeft = (queuedAction: QueuedAction) => {
     // return time left in hours only
     return timeLeft > 0 ? `${Math.round(timeLeft / 1000 / 60 / 60)}h` : "Ready"
 }
-
-onMounted(() => {
-    // doesn't actually update the store, just fetches the data so useless for now (also it should only do the current page probably)
-    // clearInterval(interval.value)
-    // interval.value = setInterval(async () => {
-    //     for (const silo of assignedSilos.value) {
-    //         const queuedActions = await searchQueuedActions(silo.playerId)
-    //         factoryStore.setQueuedActions(
-    //             silo.playerId,
-    //             queuedActions.queuedActions
-    //         )
-    //     }
-    // }, 1000 * 60) // every minute
-})
-
-onUnmounted(() => {
-    clearInterval(interval.value)
-})
 
 watch(
     () => assignedSilos.value,

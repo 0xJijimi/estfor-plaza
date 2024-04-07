@@ -4,7 +4,6 @@ import { readContract, getAccount } from "@wagmi/core"
 import estforPlayerAbi from "../abi/estforPlayer.json"
 import broochAbi from "../abi/brooch.json"
 import {
-    CoreData,
     getPlayerState,
     getGlobalData,
     getUserItemNFTs,
@@ -13,6 +12,7 @@ import {
 import {
     BoostType,
     Clan,
+    CoreData,
     Player,
     QueuedAction,
     Skill,
@@ -34,6 +34,7 @@ export enum Address {
     factoryRegistry,
     estforPlayerNFT,
     itemNFT,
+    brush,
 }
 
 export interface AddressMap {
@@ -196,6 +197,11 @@ export const useCoreStore = defineStore({
                             name: Address.itemNFT,
                             address:
                                 "0x4b9C90ebb1fA98d9724dB46C4689994b46706f5a",
+                        },
+                        {
+                            name: Address.brush,
+                            address:
+                                "0x85dec8c4B2680793661bCA91a8F129607571863d",
                         },
                     ],
                 },

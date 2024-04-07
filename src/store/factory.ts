@@ -27,6 +27,7 @@ import itemNFTAbi from "../abi/itemNFT.json"
 import estforPlayerNFTAbi from "../abi/estforPlayerNFT.json"
 import factoryAbi from "../abi/factoryRegistry.json"
 import epProxyAbi from "../abi/epProxy.json"
+import brushAbi from "../abi/brush.json"
 import {
     PlayerSearchResult,
     SearchQueuedActionsResult,
@@ -495,13 +496,25 @@ export const useFactoryStore = defineStore({
                 )
             )
 
+            await this.multicall(selectorArray)
+            await this.getAllProxyStates()
+        },
+        async multicall(data: any[], chunks = 10) {
+            const coreStore = useCoreStore()
+            const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
+
+            if (!factoryAddress) {
+                return
+            }
+
+            const factoryInterface = new Interface(factoryAbi)
             const actualChunks = await getChunksForMulticall(
-                selectorArray,
+                data,
                 factoryAddress,
                 factoryInterface,
-                10
+                chunks
             )
-            const splits = Math.ceil(heroes.length / actualChunks)
+            const splits = Math.ceil(data.length / actualChunks)
             this.totalTransactionNumber = splits
             try {
                 for (let i = 0; i < splits; i++) {
@@ -511,7 +524,7 @@ export const useFactoryStore = defineStore({
                         abi: factoryAbi,
                         functionName: "multicall",
                         args: [
-                            selectorArray.slice(
+                            data.slice(
                                 i * actualChunks,
                                 (i + 1) * actualChunks
                             ),
@@ -526,7 +539,108 @@ export const useFactoryStore = defineStore({
                 this.totalTransactionNumber = 0
                 this.currentTransactionNumber = 0
             }
-            await this.getAllProxyStates()
+        },
+        async approveBrush(proxys: ProxySilo[], amount: bigint) {
+            const coreStore = useCoreStore()
+            const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
+            const brushAddress = coreStore.getAddress(
+                Address.brush
+            )
+            const playerNFTAddress = coreStore.getAddress(
+                Address.estforPlayerNFT
+            )
+            const account = getAccount(config)
+            if (!factoryAddress || !brushAddress || !playerNFTAddress || !account.isConnected) {
+                return
+            }
+
+            const factoryInterface = new Interface(factoryAbi)
+            const brushInterface = new Interface(brushAbi)
+
+            const selectorArray = proxys.map((h) =>
+                solidityPacked(
+                    ["bytes"],
+                    [
+                        factoryInterface.encodeFunctionData("execute", [
+                            h.address,
+                            brushAddress,
+                            brushInterface.encodeFunctionData("approve", [
+                                playerNFTAddress,
+                                amount
+                            ]),
+                        ]),
+                    ]
+                )
+            )
+
+            await this.multicall(selectorArray)
+        },
+        async sendBrush(proxys: ProxySilo[], amount: bigint) {
+            const coreStore = useCoreStore()
+            const brushAddress = coreStore.getAddress(
+                Address.brush
+            )
+            const account = getAccount(config)
+            if (!brushAddress || !account.isConnected) {
+                return
+            }
+
+            try {
+                this.totalTransactionNumber = proxys.length
+                this.currentTransactionNumber = 0
+                for (const p of proxys) {
+                    this.currentTransactionNumber++
+                    const hash = await writeContract(config, {
+                            address: brushAddress as `0x${string}`,
+                            abi: brushAbi as any,
+                            functionName: "transfer",
+                            args: [p.address, amount]
+                        }
+                    )
+                    await waitForTransactionReceipt(config, { hash })
+                }
+            } catch (e) {
+                throw e
+            } finally {
+                this.totalTransactionNumber = 0
+                this.currentTransactionNumber = 0
+            }
+        },
+        async evolveHeroes(proxys: ProxySilo[]) {
+            const coreStore = useCoreStore()
+            const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
+            const playerNFTAddress = coreStore.getAddress(
+                Address.estforPlayerNFT
+            )
+            const account = getAccount(config)
+            if (!factoryAddress || !playerNFTAddress || !account.isConnected) {
+                return
+            }
+
+            const factoryInterface = new Interface(factoryAbi)
+            const playerNFTInterface = new Interface(estforPlayerNFTAbi)
+
+            const selectorArray = proxys.map((h) =>
+                solidityPacked(
+                    ["bytes"],
+                    [
+                        factoryInterface.encodeFunctionData("execute", [
+                            h.address,
+                            playerNFTAddress,
+                            playerNFTInterface.encodeFunctionData("editPlayer", [
+                                h.playerId,
+                                h.playerState.name,
+                                "",
+                                "",
+                                "",
+                                true,
+                            ]),
+                        ]),
+                    ]
+                )
+            )
+
+            await this.multicall(selectorArray)
         },
         async getAllProxyStates(proxys: ProxySilo[] = []) {
             const coreStore = useCoreStore()
@@ -888,37 +1002,7 @@ export const useFactoryStore = defineStore({
 
             const combined = [...pauseArray, ...selectorArray]
 
-            const actualChunks = await getChunksForMulticall(
-                combined,
-                factoryAddress,
-                factoryInterface,
-                40
-            )
-            const splits = Math.ceil(combined.length / actualChunks)
-            this.totalTransactionNumber = splits
-            try {
-                for (let i = 0; i < splits; i++) {
-                    this.currentTransactionNumber = i + 1
-                    const hash = await writeContract(config, {
-                        address: factoryAddress as `0x${string}`,
-                        abi: factoryAbi,
-                        functionName: "multicall",
-                        args: [
-                            combined.slice(
-                                i * actualChunks,
-                                (i + 1) * actualChunks
-                            ),
-                        ],
-                        type: 'legacy',
-                    })
-                    await waitForTransactionReceipt(config, { hash })
-                }
-            } catch (e) {
-                throw e
-            } finally {
-                this.totalTransactionNumber = 0
-                this.currentTransactionNumber = 0
-            }
+            await this.multicall(combined, 40)
 
             // update savedTransactions and isPaused in state
             let i = 0
@@ -982,37 +1066,7 @@ export const useFactoryStore = defineStore({
                     )
                 )
 
-                const actualChunks = await getChunksForMulticall(
-                    selectorArray,
-                    factoryAddress,
-                    factoryInterface,
-                    40
-                )
-                const splits = Math.ceil(selectorArray.length / actualChunks)
-                this.totalTransactionNumber = splits
-                try {
-                    for (let i = 0; i < splits; i++) {
-                        this.currentTransactionNumber = i + 1
-                        const hash = await writeContract(config, {
-                            address: factoryAddress as `0x${string}`,
-                            abi: factoryAbi,
-                            functionName: "multicall",
-                            args: [
-                                selectorArray.slice(
-                                    i * actualChunks,
-                                    (i + 1) * actualChunks
-                                ),
-                            ],
-                            type: 'legacy',
-                        })
-                        await waitForTransactionReceipt(config, { hash })
-                    }
-                } catch (e) {
-                    throw e
-                } finally {
-                    this.totalTransactionNumber = 0
-                    this.currentTransactionNumber = 0
-                }
+                await this.multicall(selectorArray, 40)
             }
             await this.getBankItems()
         },
@@ -1043,37 +1097,7 @@ export const useFactoryStore = defineStore({
                     )
                 )
 
-                const actualChunks = await getChunksForMulticall(
-                    selectorArray,
-                    factoryAddress,
-                    factoryInterface,
-                    20
-                )
-                const splits = Math.ceil(selectorArray.length / actualChunks)
-                this.totalTransactionNumber = splits
-                try {
-                    for (let i = 0; i < splits; i++) {
-                        this.currentTransactionNumber = i + 1
-                        const hash = await writeContract(config, {
-                            address: factoryAddress as `0x${string}`,
-                            abi: factoryAbi,
-                            functionName: "multicall",
-                            args: [
-                                selectorArray.slice(
-                                    i * actualChunks,
-                                    (i + 1) * actualChunks
-                                ),
-                            ],
-                            type: 'legacy',
-                        })
-                        await waitForTransactionReceipt(config, { hash })
-                    }
-                } catch (e) {
-                    throw e
-                } finally {
-                    this.totalTransactionNumber = 0
-                    this.currentTransactionNumber = 0
-                }
+                await this.multicall(selectorArray, 40)
             } else {
                 // execute one by one
                 this.totalTransactionNumber = proxys.length
@@ -1321,37 +1345,7 @@ export const useFactoryStore = defineStore({
             )
 
             if (selectorArray.length > 0) {
-                const actualChunks = await getChunksForMulticall(
-                    selectorArray,
-                    factoryAddress,
-                    factoryInterface,
-                    50
-                )
-                const splits = Math.ceil(selectorArray.length / actualChunks)
-                this.totalTransactionNumber = splits
-                try {
-                    for (let i = 0; i < splits; i++) {
-                        this.currentTransactionNumber = i + 1
-                        const hash = await writeContract(config, {
-                            address: factoryAddress as `0x${string}`,
-                            abi: factoryAbi,
-                            functionName: "multicall",
-                            args: [
-                                selectorArray.slice(
-                                    i * actualChunks,
-                                    (i + 1) * actualChunks
-                                ),
-                            ],
-                            type: 'legacy',
-                        })
-                        await waitForTransactionReceipt(config, { hash })
-                    }
-                } catch (e) {
-                    throw e
-                } finally {
-                    this.totalTransactionNumber = 0
-                    this.currentTransactionNumber = 0
-                }
+                this.multicall(selectorArray, 50)
             }
             await this.getBankItems()
         },

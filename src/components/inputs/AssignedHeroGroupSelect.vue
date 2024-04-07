@@ -47,10 +47,18 @@ const options = computed(() => {
             actionChoiceNames[Number(choiceId)] ||
             "Unknown"
         )
-    }).filter((value, index, self) => {
-                    return (
-                        self.findIndex((v) => v === value) === index
-                    )
-                })]
+    }),
+    ...props.heroes.map((h) => {
+        return h.queuedActions.map(q => 
+            actionNames[Number(q.actionId)] ||
+            actionChoiceNames[Number(q.choice?.id)] ||
+            "Unknown"
+        )
+    }).flat()]
+    .filter((value, index, self) => {
+        return (
+            self.findIndex((v) => v === value) === index
+        )
+    })
 })
 </script>
