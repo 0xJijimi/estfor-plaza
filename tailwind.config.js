@@ -32,7 +32,7 @@ export default {
         ".border-primary": {
           "border-color": "#44b3a8",
         },
-        ".card": {
+        ".card, .tooltip::before, .checkbox-primary:hover": {
           border: "2px solid #44b3a8",
         },
         ".select, .input": {

@@ -77,6 +77,9 @@
                 <div v-else-if="loading" class="mt-5">
                     Calculating transactions... Please wait
                 </div>
+                <div v-else-if="error" class="mt-5 text-error">
+                    {{ error }}
+                </div>
             </div>
 
             <div v-if="transferScreenSelected">
@@ -119,8 +122,13 @@
                                 :checked="token.selected"
                                 class="checkbox checkbox-primary card"
                             />
-                            <span class="label-text mt-1">
-                                {{ itemNames[token.tokenId] }}
+                            <span class="label-text mt-1 flex gap-2 items-center">
+                                {{ itemNames[token.tokenId] }} 
+                                <span v-if="isRequiredTool(token.tokenId)" class="tooltip tooltip-primary" data-tip="This is currently being used by a hero">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-warning">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                    </svg>
+                                </span>
                             </span>
                         </label>
                     </div>
@@ -157,6 +165,8 @@ import { getUserItemNFTs } from "../../utils/api"
 import { useAppStore } from "../../store/app"
 import { itemNames, starterItems } from "../../store/items"
 import { allItems } from "../../data/items"
+import { allActions } from "../../data/actions"
+import { getActionChoiceById } from "../../store/skills"
 
 const props = defineProps({
     id: {
@@ -175,6 +185,7 @@ const silosToExecute = ref<ProxySilo[]>([])
 const missingItems = ref<string[]>([])
 const transferScreenSelected = ref(false)
 const toggle = ref(true)
+const error = ref<string | null>(null);
 const relevantTokens = ref<{ selected: boolean; tokenId: number }[]>([])
 
 const silosWithEmptyQueuesOrActionInputOnly = computed(() => {
@@ -209,8 +220,54 @@ const openDialog = (heroes: ProxySilo[]) => {
     dialog.showModal()
 }
 
+const isRequiredTool = (tokenId: number): boolean => {
+    for (const p of factoryStore.assignedProxys) {
+        for (const a of p.queuedActions) {            
+            if (a.choice) {
+                const choice = getActionChoiceById(a.actionId, Number(a.choice.id))
+                const action = allActions.find((x) => x.info.skill == a.skill)
+                const max = action?.info.handItemTokenIdRangeMax
+                const min = action?.info.handItemTokenIdRangeMin
+
+                const requiredItems = Array.from(
+                    { length: max - min + 1 },
+                    (_, i) => i + min
+                )
+
+                const choiceMax = choice?.handItemTokenIdRangeMax
+                const choiceMin = choice?.handItemTokenIdRangeMin
+
+                const choiceRequiredItems = Array.from(
+                    { length: choiceMax - choiceMin + 1 },
+                    (_, i) => i + choiceMin
+                )
+
+                if (requiredItems.includes(tokenId) || choiceRequiredItems.includes(tokenId)) {
+                    return true
+                }
+            } else {
+                const action = allActions.find((x) => x.actionId == a.actionId)
+                const max = action?.info.handItemTokenIdRangeMax
+                const min = action?.info.handItemTokenIdRangeMin
+
+                const requiredItems = Array.from(
+                    { length: max - min + 1 },
+                    (_, i) => i + min
+                )
+
+                if (requiredItems.includes(tokenId)) {
+                    return true
+                }
+            }
+            
+        }
+    }
+    return false
+}
+
 const executeSavedTransactions = async () => {
     loading.value = true
+    error.value = null
     try {
         await factoryStore.executeSavedTransactions(
             silosWithEmptyQueuesOrActionInputOnly.value
@@ -225,9 +282,12 @@ const executeSavedTransactions = async () => {
             5000
         )
         actionInputsExecuted.value = true
-    } catch (e) {
+    } catch (e: any) {
         console.error(e)
-        // user declined tx
+        if (e.message?.indexOf('User rejected the request') > -1) {
+            return
+        }
+        error.value = "Could not create a transaction. Please check your heroes have the correct tools equipped."
     } finally {
         loading.value = false
     }
