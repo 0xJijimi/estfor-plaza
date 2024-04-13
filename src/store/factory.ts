@@ -38,7 +38,12 @@ import {
 import { decode } from "../utils/abi"
 import { allActions } from "../data/actions"
 import { calculateChance } from "../utils/player"
-import { getActionChoiceById, useSkillStore } from "./skills"
+import {
+    actionChoiceNames,
+    actionNames,
+    getActionChoiceById,
+    useSkillStore,
+} from "./skills"
 import { sleep } from "../utils/time"
 import { config } from "../config"
 import { useBroochStore } from "./brooch"
@@ -312,6 +317,28 @@ export const calculateExtraXPForHeroActionChoiceInput = (
     return extraXP
 }
 
+export const decodeTransaction = (savedTransactions: SavedTransaction[]) => {
+    if (savedTransactions.length === 0) {
+        return "No action"
+    }
+
+    // first transaction is the action queue
+    const decoded = decode(
+        savedTransactions[0].data,
+        "startActions",
+        estforPlayerAbi
+    )
+
+    // [playerId, actions[[attire, actionId, regenId, choiceId], [], []], action queue type]
+    const actionId = decoded?.[1]?.[0]?.[1] || BigInt(0)
+    const choiceId = decoded?.[1]?.[0]?.[3] || BigInt(0)
+    return (
+        actionNames[Number(actionId)] ||
+        actionChoiceNames[Number(choiceId)] ||
+        "Unknown"
+    )
+}
+
 const getChunksForMulticall = async (
     data: any[],
     to: string,
@@ -464,7 +491,7 @@ export const useFactoryStore = defineStore({
 
             const factoryInterface = new Interface(factoryAbi)
             const playerNFTInterface = new Interface(estforPlayerNFTAbi)
-            const emptyProxies = this.proxys.filter((p) => p.playerId === "")
+            const emptyProxies = this.emptyProxys
             if (emptyProxies.length < heroes.length) {
                 throw new Error("Not enough empty proxies")
             }
@@ -1383,6 +1410,50 @@ export const useFactoryStore = defineStore({
                 type: "legacy",
             })
             await waitForTransactionReceipt(config, { hash })
+            await this.getBankItems()
+        },
+        async distributeItems(
+            items: {
+                address: string
+                tokenId: number
+                amount: string
+            }[]
+        ) {
+            const coreStore = useCoreStore()
+            const itemAddress = coreStore.getAddress(Address.itemNFT)
+            const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
+            const account = getAccount(config)
+            if (!factoryAddress || !itemAddress || !account.isConnected) {
+                return
+            }
+
+            const factoryInterface = new Interface(factoryAbi)
+            const itemInterface = new Interface(itemNFTAbi)
+            const fromAddress = this.bank?.address
+
+            const selectorArray = items.map((i) =>
+                solidityPacked(
+                    ["bytes"],
+                    [
+                        factoryInterface.encodeFunctionData("execute", [
+                            fromAddress,
+                            itemAddress,
+                            itemInterface.encodeFunctionData(
+                                "safeBatchTransferFrom",
+                                [
+                                    fromAddress,
+                                    i.address,
+                                    [i.tokenId],
+                                    [i.amount],
+                                    solidityPacked(["bytes"], ["0x"]),
+                                ]
+                            ),
+                        ]),
+                    ]
+                )
+            )
+
+            await this.multicall(selectorArray, 40)
             await this.getBankItems()
         },
         async getBankItems() {

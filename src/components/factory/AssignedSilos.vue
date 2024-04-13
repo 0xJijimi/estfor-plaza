@@ -99,7 +99,7 @@
                                 </div>
                                 <div
                                     v-else
-                                    class="badge badge-primary text-white"
+                                    class="badge badge-primary text-white border-primary"
                                 >
                                     Active
                                 </div>
@@ -195,13 +195,11 @@
 </template>
 
 <script setup lang="ts">
-import { SavedTransaction, useFactoryStore } from "../../store/factory"
+import { decodeTransaction, useFactoryStore } from "../../store/factory"
 import { computed, ref, watch } from "vue"
 import AssignHero from "../dialogs/AssignHero.vue"
 import { QueuedAction } from "@paintswap/estfor-definitions/types"
-import estforPlayerAbi from "../../abi/estforPlayer.json"
 import { actionChoiceNames, actionNames } from "../../store/skills"
-import { decode } from "../../utils/abi"
 import ExecuteSiloActions from "../dialogs/ExecuteSiloActions.vue"
 import AssignedHeroGroupSelect from "../inputs/AssignedHeroGroupSelect.vue"
 import EvolveHero from "../dialogs/EvolveHero.vue"
@@ -217,28 +215,6 @@ const selectedHeroGroup = ref("")
 const assignHeroRef = ref<typeof AssignHero>()
 const executeActionsRef = ref<typeof ExecuteSiloActions>()
 const evolveHeroRef = ref<typeof EvolveHero>()
-
-const decodeTransaction = (savedTransactions: SavedTransaction[]) => {
-    if (savedTransactions.length === 0) {
-        return "No action"
-    }
-
-    // first transaction is the action queue
-    const decoded = decode(
-        savedTransactions[0].data,
-        "startActions",
-        estforPlayerAbi
-    )
-
-    // [playerId, actions[[attire, actionId, regenId, choiceId], [], []], action queue type]
-    const actionId = decoded?.[1]?.[0]?.[1] || BigInt(0)
-    const choiceId = decoded?.[1]?.[0]?.[3] || BigInt(0)
-    return (
-        actionNames[Number(actionId)] ||
-        actionChoiceNames[Number(choiceId)] ||
-        "Unknown"
-    )
-}
 
 const assignedSilos = computed(() => {
     const assignedProxys = factoryStore.assignedProxys

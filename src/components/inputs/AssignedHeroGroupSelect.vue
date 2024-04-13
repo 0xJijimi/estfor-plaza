@@ -1,6 +1,13 @@
 <template>
     <label class="form-control">
-        <select class="select select-bordered select-sm" v-model="value">
+        <div v-if="$props.label" class="label">
+            <span class="label-text">{{ props.label }}</span>
+        </div>
+        <select
+            class="select select-bordered"
+            :class="customClass"
+            v-model="value"
+        >
             <option v-for="o in options" :key="o" :value="o">
                 {{ o }}
             </option>
@@ -25,6 +32,14 @@ const props = defineProps({
     heroes: {
         type: Array as () => ProxySilo[],
         required: true,
+    },
+    customClass: {
+        type: String,
+        default: "select-sm",
+    },
+    label: {
+        type: String,
+        default: "",
     },
 })
 

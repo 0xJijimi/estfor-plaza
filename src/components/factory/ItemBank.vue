@@ -42,6 +42,13 @@
             <div class="flex">
                 <button
                     type="button"
+                    class="btn btn-primary mt-5 me-2"
+                    @click="distributeItems"
+                >
+                    Distribute Items
+                </button>
+                <button
+                    type="button"
                     class="btn btn-primary mt-5 grow"
                     @click="withdrawItems"
                 >
@@ -51,6 +58,10 @@
         </div>
     </div>
     <WithdrawFromBank ref="withdrawFromBankRef" id="withdraw_from_bank_modal" />
+    <DistributeItemsFromBank
+        ref="distributeItemsFromBank"
+        id="distribute_items_from_bank_modal"
+    />
 </template>
 
 <script setup lang="ts">
@@ -64,6 +75,7 @@ import { ComputedRef, computed, ref } from "vue"
 import { itemNames, starterItems } from "../../store/items"
 import { UserItemNFT } from "@paintswap/estfor-definitions/types"
 import WithdrawFromBank from "../dialogs/WithdrawFromBank.vue"
+import DistributeItemsFromBank from "../dialogs/DistributeItemsFromBank.vue"
 import { allItems } from "../../data/items"
 
 const factoryStore = useFactoryStore()
@@ -71,6 +83,7 @@ const period = ref(24)
 const bankItems = computed<UserItemNFT[]>(() => factoryStore.bankItems)
 
 const withdrawFromBankRef = ref<typeof WithdrawFromBank>()
+const distributeItemsFromBank = ref<typeof DistributeItemsFromBank>()
 
 const bank = computed(() => {
     return factoryStore.bank
@@ -149,5 +162,9 @@ const aggregatedItems: ComputedRef<AggregatedItem[]> = computed(() => {
 
 const withdrawItems = async () => {
     withdrawFromBankRef.value?.openDialog(aggregatedItems.value)
+}
+
+const distributeItems = async () => {
+    distributeItemsFromBank.value?.openDialog(aggregatedItems.value)
 }
 </script>

@@ -180,7 +180,8 @@ const checkRequiredItems = async () => {
                                 allItems.find((y) => y.tokenId == x.tokenId)
                                     ?.minXP <=
                                 // @ts-ignore
-                                Number(h.playerState[skillToXPMap[x.item.skill]]) +extraXP
+                                Number(h.playerState[skillToXPMap[x.item.skill]]) +
+                                    extraXP
                             )
                         }
                     )
