@@ -1,6 +1,6 @@
 <template>
     <div
-        class="card bg-base-100-50 shadow-xl rounded-lg mt-2 md:mt-10 mx-auto md:w-[760px]"
+        class="card bg-base-100-50 shadow-xl rounded-lg mt-10 w-full md:basis-3/4 xl:basis-1/2"
     >
         <div class="card-body">
             <div>

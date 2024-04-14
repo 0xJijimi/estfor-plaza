@@ -1,6 +1,6 @@
 <template>
     <div
-        class="card bg-base-100-50 shadow-xl rounded-lg mt-2 md:mt-10 mx-auto md:w-[760px]"
+        class="card bg-base-100-50 shadow-xl rounded-lg mt-10 w-full md:basis-3/4 xl:basis-1/2"
     >
         <div class="card-body">
             <h2 class="text-2xl font-bold text-center">Assigned Heroes</h2>
@@ -46,8 +46,8 @@
                                 />
                             </th>
                             <th>Name</th>
-                            <th>Saved Action</th>
                             <th>Queued Action</th>
+                            <th>Running Action</th>
                             <th class="w-[80px] text-center">Status</th>
                             <th></th>
                         </tr>
@@ -155,27 +155,24 @@
                     »
                 </button>
             </div>
-            <div class="flex">
-                <button
-                    type="button"
-                    class="btn btn-primary mt-5 me-2"
-                    @click="assignHeroes"
-                    :disabled="executing || !selectedSilos.length"
-                >
-                    Reassign {{ selectedSilos.length }} Hero{{
+            <div class="flex items-center">
+                <div class="dropdown dropdown-top">
+                    <div tabindex="0" role="button" class="btn btn-primary mt-5 me-2">Additional Actions</div>
+                    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 w-52 rounded-box shadow bg-base-100-50">
+                        <li>
+                            <button type="button" class="btn btn-primary btn-sm mb-2" @click="assignHeroes"
+                        :disabled="executing || !selectedSilos.length">Reassign {{ selectedSilos.length }} Hero{{
                         selectedSilos.length !== 1 ? "es" : ""
-                    }}
-                </button>
-                <button
-                    type="button"
-                    class="btn btn-primary mt-5 me-2"
-                    @click="evolveHeroes"
-                    :disabled="executing || !selectedSilos.length"
-                >
-                    Evolve {{ selectedSilos.length }} Hero{{
+                    }}</button>                   
+                        </li>
+                        <li>
+                    <button type="button"  class="btn btn-primary btn-sm" @click="evolveHeroes"
+                    :disabled="executing || !selectedSilos.length">                    Evolve {{ selectedSilos.length }} Hero{{
                         selectedSilos.length !== 1 ? "es" : ""
-                    }}
-                </button>
+                    }}</button></li>
+                    </ul>
+                </div>
+
                 <button
                     type="button"
                     class="btn btn-primary mt-5 grow"

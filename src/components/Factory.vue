@@ -1,6 +1,6 @@
 <template>
     <div
-        class="card bg-base-100-50 shadow-xl rounded-lg mt-2 md:mt-10 mx-auto md:w-[760px]"
+        class="card bg-base-100-50 shadow-xl rounded-lg my-10 mx-auto w-[760px]"
     >
         <div class="card-body">
             <p>
@@ -28,10 +28,9 @@
                     click the Ruby brooch to the left of this message.</span
                 >
             </p>
-            <span
-                v-if="loading"
-                class="loading loading-spinner text-primary loading-md mx-auto"
-            ></span>
+            <div
+                v-if="loading"                
+            >Loading heroes... <span class="loading loading-spinner text-white loading-md mx-2"></span></div>
             <div v-else>
                 <p>
                     You currently have
@@ -76,13 +75,18 @@
             </div>
         </div>
     </div>
-    <EmptySilos
-        v-if="factoryStore.emptyProxys.length > 0"
-        @create-heroes="onCreateHeroes"
-    />
-    <UnassignedSilos v-if="factoryStore.unassignedProxys.length > 0" />
-    <ItemBank v-if="factoryStore.proxys.length > 0" />
-    <AssignedSilos v-if="factoryStore.assignedProxys.length > 0" />
+    <div class="lg:flex flex-row justify-evenly items-center gap-10">
+        <EmptySilos
+            v-if="!loading && factoryStore.emptyProxys.length > 0"
+            @create-heroes="onCreateHeroes"
+            
+        />
+        <UnassignedSilos v-if="!loading && factoryStore.unassignedProxys.length > 0" />
+    </div>
+    <div class="lg:flex flex-row justify-evenly items-center gap-10">
+        <ItemBank v-if="!loading && factoryStore.proxys.length > 0" />
+        <AssignedSilos v-if="!loading && factoryStore.assignedProxys.length > 0" />
+    </div>
     <ViewSilos ref="viewSilosRef" />
     <RubyBroochPaywall
         ref="rubyBroochPaywallRef"
@@ -109,7 +113,7 @@ import RubyBroochPaywall from "./dialogs/RubyBroochPaywall.vue"
 const factoryStore = useFactoryStore()
 const app = useAppStore()
 const broochStore = useBroochStore()
-const loading = ref(false)
+const loading = ref(factoryStore.initialised === false)
 const creating = ref(false)
 const silosToCreate = ref(5)
 
@@ -158,10 +162,12 @@ watch(result, async (v) => {
             if (a?.data?.factoryRegistryCreateds?.length === 0) {
                 await factoryStore.setProxys(v.factoryRegistryCreateds)
                 await factoryStore.getAllProxyStates()
+                loading.value = false
             }
         } else {
             await factoryStore.setProxys(v.factoryRegistryCreateds)
             await factoryStore.getAllProxyStates()
+            loading.value = false
         }
     }
 })

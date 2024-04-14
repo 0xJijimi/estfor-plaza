@@ -49,6 +49,17 @@ const allItemNames = computed(() => {
     return Object.values(itemNames)
 })
 
+const removeFocus = () => {
+    const el = document.getElementById("md-plaza")
+    if (el) {
+        el.removeAttribute("open")
+    }
+    const smel = document.getElementById("sm-plaza")
+    if (smel) {
+        smel.removeAttribute("open")
+    }
+}
+
 const init = async () => {
     try {
         window.clearTimeout(broochTimeout.value)
@@ -61,7 +72,7 @@ const init = async () => {
             }
         }
     } catch (e) {
-        console.log(e)
+        console.error(e)
     }
 }
 
@@ -78,6 +89,7 @@ watch(() => broochStore.hasAccess(0), init)
                 @click.prevent="donateRef?.openDialog()"
             />
             <router-link
+                @click="removeFocus"
                 to="/hero-select"
                 class="max-md:hidden btn btn-ghost mr-2 ml-2"
                 >Hero Select</router-link
@@ -85,24 +97,24 @@ watch(() => broochStore.hasAccess(0), init)
             <span class="max-md:hidden">|</span>
             <ul class="menu menu-horizontal max-md:hidden">
                 <li>
-                    <details>
+                    <details id="md-plaza">
                         <summary>The Plaza</summary>
                         <ul class="bg-base-100 z-[1] w-56">
                             <li>
                                 <details>
                                     <summary>Hero Management</summary>
                                     <ul>
-                                        <li>
+                                        <li @click="removeFocus">
                                             <router-link to="/combat"
                                                 >Combat Calculator</router-link
                                             >
                                         </li>
-                                        <li>
+                                        <li @click="removeFocus">
                                             <router-link to="/skills"
                                                 >Skill Training</router-link
                                             >
                                         </li>
-                                        <li>
+                                        <li @click="removeFocus">
                                             <router-link to="/lotteries"
                                                 >Wishing Well
                                                 Ranking</router-link
@@ -122,14 +134,14 @@ watch(() => broochStore.hasAccess(0), init)
                                         />
                                     </summary>
                                     <ul>
-                                        <li>
+                                        <li @click="removeFocus">
                                             <router-link
                                                 to="/clan-battle"
                                                 @click="showBrooch(0)"
                                                 >Clan Battle
                                             </router-link>
                                         </li>
-                                        <li>
+                                        <li @click="removeFocus">
                                             <router-link
                                                 to="/territory-rankings"
                                                 @click="showBrooch(0)"
@@ -150,7 +162,7 @@ watch(() => broochStore.hasAccess(0), init)
                                         />
                                     </summary>
                                     <ul>
-                                        <li>
+                                        <li @click="removeFocus">
                                             <router-link
                                                 to="/clan-management/wishing-well"
                                                 @click="showBrooch(0)"
@@ -160,7 +172,7 @@ watch(() => broochStore.hasAccess(0), init)
                                     </ul>
                                 </details>
                             </li>
-                            <li>
+                            <li @click="removeFocus">
                                 <router-link to="/factory"
                                     >Factory
                                 </router-link>
@@ -171,7 +183,7 @@ watch(() => broochStore.hasAccess(0), init)
             </ul>
             <ul class="menu menu-horizontal md:hidden">
                 <li>
-                    <details>
+                    <details id="sm-plaza">
                         <summary>
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -192,27 +204,27 @@ watch(() => broochStore.hasAccess(0), init)
                             tabindex="0"
                             class="z-[1] menu dropdown-content p-2 shadow bg-base-100 rounded-box w-52"
                         >
-                            <li>
+                            <li @click="removeFocus">
                                 <router-link to="/hero-select"
                                     >Hero Select</router-link
                                 >
                             </li>
-                            <li>
+                            <li @click="removeFocus">
                                 <router-link to="/combat"
                                     >Combat Calculator</router-link
                                 >
                             </li>
-                            <li>
+                            <li @click="removeFocus">
                                 <router-link to="/skills"
                                     >Skill Training</router-link
                                 >
                             </li>
-                            <li>
+                            <li @click="removeFocus">
                                 <router-link to="/lotteries"
                                     >Wishing Well Ranking</router-link
                                 >
                             </li>
-                            <li>
+                            <li @click="removeFocus">
                                 <router-link
                                     to="/clan-battle"
                                     @click="showBrooch(0)"
@@ -223,7 +235,7 @@ watch(() => broochStore.hasAccess(0), init)
                                         alt="Emerald Brooch"
                                 /></router-link>
                             </li>
-                            <li>
+                            <li @click="removeFocus">
                                 <router-link
                                     to="/territory-rankings"
                                     @click="showBrooch(0)"
@@ -234,7 +246,7 @@ watch(() => broochStore.hasAccess(0), init)
                                         alt="Emerald Brooch"
                                 /></router-link>
                             </li>
-                            <li>
+                            <li @click="removeFocus">
                                 <router-link
                                     to="/clan-management/wishing-well"
                                     @click="showBrooch(0)"
@@ -246,7 +258,7 @@ watch(() => broochStore.hasAccess(0), init)
                                 /></router-link>
                             </li>
 
-                            <li>
+                            <li @click="removeFocus">
                                 <router-link to="/factory"
                                     >Factory
                                 </router-link>

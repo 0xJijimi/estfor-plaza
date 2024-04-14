@@ -776,7 +776,9 @@ export const useFactoryStore = defineStore({
             }
 
             await this.getBankItems()
-            await this.getTransactionCharge()
+            await this.getTransactionCharge()    
+            this.initialised = true
+            this.initialisedAt = new Date()
         },
         async getTransactionCharge() {
             const coreStore = useCoreStore()
@@ -962,9 +964,6 @@ export const useFactoryStore = defineStore({
                     }))
                     .filter((d: any) => d.address !== ZeroAddress)
             )
-
-            this.initialised = true
-            this.initialisedAt = new Date()
         },
         async assignActionToProxy(
             proxys: ProxySilo[],
