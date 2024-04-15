@@ -96,13 +96,12 @@ import { ref } from "vue"
 import AssignedHeroGroupSelect from "../inputs/AssignedHeroGroupSelect.vue"
 import { itemNames } from "../../store/items"
 import {
-    AggregatedItem,
     decodeTransaction,
-    ProxySilo,
     useFactoryStore,
 } from "../../store/factory"
 import { useAppStore } from "../../store/app"
 import { actionChoiceNames, actionNames } from "../../store/skills"
+import { AggregatedItem, ProxySilo } from "../../store/models/factory.models"
 
 const props = defineProps({
     id: {

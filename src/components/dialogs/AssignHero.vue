@@ -32,6 +32,118 @@
                 :skill-id="skillId"
                 :heroes="heroesToAssign"
             />
+
+            <ItemSelect
+                v-if="skillId === Skill.COMBAT"
+                :items="headItems"
+                label="Head"
+                @update:model-value="onUpdate"
+                v-model="equippedItems.head"
+                class="mt-5"
+                custom-class="select-md"
+            />
+            <ItemSelect
+                v-if="skillId === Skill.COMBAT"
+                :items="neckItems"
+                label="Neck"
+                @update:model-value="onUpdate"
+                v-model="equippedItems.neck"
+                class="mt-5"
+                custom-class="select-md"
+            />
+            <ItemSelect
+                v-if="skillId === Skill.COMBAT"
+                :items="bodyItems"
+                label="Body"
+                @update:model-value="onUpdate"
+                v-model="equippedItems.body"
+                class="mt-5"
+                custom-class="select-md"
+            />
+            <ItemSelect
+                v-if="skillId === Skill.COMBAT"
+                :items="armItems"
+                label="Arms"
+                @update:model-value="onUpdate"
+                v-model="equippedItems.arms"
+                class="mt-5"
+                custom-class="select-md"
+            />
+            <ItemSelect
+                v-if="skillId === Skill.COMBAT"
+                :items="legItems"
+                label="Legs"
+                @update:model-value="onUpdate"
+                v-model="equippedItems.legs"
+                class="mt-5"
+                custom-class="select-md"
+            />
+            <ItemSelect
+                v-if="skillId === Skill.COMBAT"
+                :items="feetItems"
+                label="Feet"
+                @update:model-value="onUpdate"
+                v-model="equippedItems.feet"
+                class="mt-5"
+                custom-class="select-md"
+            />
+            <ItemSelect
+                v-if="skillId === Skill.COMBAT"
+                :items="combatRightHandItems"
+                class="mt-5"
+                custom-class="select-md"
+                label="Right Hand"
+                @update:model-value="onUpdate"
+                v-model="equippedItems.rightHand"
+                :empty-equipment="false"
+            />
+            <ItemSelect
+                v-if="skillId === Skill.COMBAT && isMelee"
+                :items="leftHandItems"
+                class="mt-5"
+                custom-class="select-md"
+                label="Left Hand"
+                @update:model-value="onUpdate"
+                v-model="equippedItems.leftHand"
+            />
+            <ItemSelect
+                v-if="skillId === Skill.COMBAT && isMagic"
+                :items="magicBagItems"
+                class="mt-5"
+                custom-class="select-md"
+                label="Magic Bag"
+                @update:model-value="onUpdate"
+                v-model="equippedItems.magicBag"
+                :empty-equipment="false"
+            />
+            <ItemSelect
+                v-if="skillId === Skill.COMBAT && isRanged"
+                :items="quiverItems"
+                class="mt-5"
+                custom-class="select-md"
+                label="Quiver"
+                @update:model-value="onUpdate"
+                v-model="equippedItems.quiver"
+                disabled
+                :empty-equipment="false"
+            />
+            <ItemSelect
+                v-if="skillId === Skill.COMBAT"
+                :items="foodItems"
+                class="mt-5"
+                custom-class="select-md"
+                label="Food"
+                @update:model-value="onUpdate"
+                v-model="equippedItems.food"
+            />
+            <CombatStyleSelect
+                v-if="skillId === Skill.COMBAT"
+                class="mt-5"
+                custom-class="select-md"
+                :skill="isMelee ? Skill.MELEE : isRanged ? Skill.RANGED : isMagic ? Skill.MAGIC : Skill.NONE"
+                v-model="combatStyle" 
+            />
+
             <ActionQueueStatusSelect class="mt-5" v-model="queueStatus" />
 
             <label class="label cursor-pointer mt-5">
@@ -63,6 +175,16 @@
                     v-model="active"
                 />
             </label>
+            <label class="label cursor-pointer">
+                <span class="label-text text-xs mr-2 items-center flex">
+                    Check Heroes Have Items                  
+                </span>
+                <input
+                    type="checkbox"
+                    class="checkbox checkbox-primary"
+                    v-model="checkItems"
+                />
+            </label>
             <div
                 v-for="item in missingItems"
                 :key="item"
@@ -83,7 +205,6 @@
                 @click="assignHeroes"
                 :disabled="
                     loading ||
-                    missingItems.length > 0 ||
                     (actionId === 0 && actionChoiceOutputId === 0)
                 "
             >
@@ -101,14 +222,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue"
+import { computed, nextTick, ref } from "vue"
 import { actionNames, skillNames, useSkillStore } from "../../store/skills"
-import { itemNames } from "../../store/items"
+import { itemNames, rangedItemToActionChoice, useItemStore } from "../../store/items"
 import { allActions } from "../../data/actions"
-import { ActionQueueStatus, Skill } from "@paintswap/estfor-definitions/types"
+import { ActionQueueStatus, CombatStyle, EquipPosition, Skill } from "@paintswap/estfor-definitions/types"
 import {
     calculateExtraXPForHeroActionInput,
-    ProxySilo,
     useFactoryStore,
 } from "../../store/factory"
 import SkillSelect from "../inputs/SkillSelect.vue"
@@ -119,6 +239,12 @@ import { useAppStore } from "../../store/app"
 import ActionQueueStatusSelect from "../inputs/ActionQueueStatusSelect.vue"
 import { allItems } from "../../data/items"
 import { skillToXPMap } from "../../store/core"
+import CombatStyleSelect from "../inputs/CombatStyleSelect.vue"
+import ItemSelect from "../inputs/ItemSelect.vue"
+import { EstforConstants } from "@paintswap/estfor-definitions"
+import { ProxySilo } from "../../store/models/factory.models"
+import { allActionChoicesMagic } from "../../data/actionChoices"
+import { allActionChoiceIdsMagic } from "../../data/actionChoiceIds"
 
 const props = defineProps({
     id: {
@@ -133,6 +259,7 @@ const actionId = ref(0)
 const actionChoiceOutputId = ref(0)
 const skillStore = useSkillStore()
 const factoryStore = useFactoryStore()
+const itemStore = useItemStore()
 const app = useAppStore()
 
 const loading = ref(false)
@@ -141,17 +268,131 @@ const active = ref(true)
 const heroesToAssign = ref<ProxySilo[]>([])
 const missingItems = ref<string[]>([])
 const rightHandItems = ref<number[]>([])
+const combatStyle = ref(Skill.NONE)
+const equippedItems = ref({
+    head: undefined,
+    body: undefined,
+    arms: undefined,
+    legs: undefined,
+    feet: undefined,
+    neck: undefined,
+    rightHand: undefined,
+    leftHand: undefined,
+    quiver: undefined,
+    magicBag: undefined,
+    food: undefined,
+})
+const checkItems = ref(true)
 
 const openDialog = (heroes: ProxySilo[]) => {
     heroesToAssign.value = heroes
     missingItems.value = []
     rightHandItems.value = []
+    combatStyle.value = Skill.NONE
+    equippedItems.value = {
+        head: undefined,
+        body: undefined,
+        arms: undefined,
+        legs: undefined,
+        feet: undefined,
+        neck: undefined,
+        rightHand: undefined,
+        leftHand: undefined,
+        quiver: undefined,
+        magicBag: undefined,
+        food: undefined,
+    }
+    checkItems.value = true
     const dialog = document.getElementById(props.id) as HTMLDialogElement
     dialog.showModal()
 }
 
+const combatRightHandItems = computed(() => [
+    ...itemStore.getItemsForSlotAndHeroes(EquipPosition.RIGHT_HAND, heroesToAssign.value),
+    ...itemStore.getItemsForSlotAndHeroes(EquipPosition.BOTH_HANDS, heroesToAssign.value),
+])
+const headItems = computed(() =>
+    itemStore.getItemsForSlotAndHeroes(EquipPosition.HEAD, heroesToAssign.value)
+)
+const neckItems = computed(() =>
+    itemStore.getItemsForSlotAndHeroes(EquipPosition.NECK, heroesToAssign.value)
+)
+const leftHandItems = computed(() =>
+    itemStore.getItemsForSlotAndHeroes(EquipPosition.LEFT_HAND, heroesToAssign.value)
+)
+const bodyItems = computed(() =>
+    itemStore.getItemsForSlotAndHeroes(EquipPosition.BODY, heroesToAssign.value)
+)
+const legItems = computed(() =>
+    itemStore.getItemsForSlotAndHeroes(EquipPosition.LEGS, heroesToAssign.value)
+)
+const feetItems = computed(() =>
+    itemStore.getItemsForSlotAndHeroes(EquipPosition.FEET, heroesToAssign.value)
+)
+const armItems = computed(() =>
+    itemStore.getItemsForSlotAndHeroes(EquipPosition.ARMS, heroesToAssign.value)
+)
+const quiverItems = computed(() =>
+    itemStore.getItemsForSlotAndHeroes(EquipPosition.QUIVER, heroesToAssign.value)
+)
+const magicBagItems = computed(() => itemStore.getMagicActionChoicesForHeroes(heroesToAssign.value))
+const foodItems = computed(() =>
+    itemStore.getItemsForSlotAndHeroes(EquipPosition.FOOD, heroesToAssign.value)
+)
+
+const isMelee = computed(() => {
+    return combatRightHandItems.value.find(
+        (x) =>
+            x.tokenId === equippedItems.value.rightHand &&
+            x.skill === Skill.MELEE
+    )
+})
+
+const isRanged = computed(() => {
+    return combatRightHandItems.value.find(
+        (x) =>
+            x.tokenId === equippedItems.value.rightHand &&
+            x.skill === Skill.RANGED
+    )
+})
+
+const isMagic = computed(() => {
+    return combatRightHandItems.value.find(
+        (x) =>
+            x.tokenId === equippedItems.value.rightHand &&
+            x.skill === Skill.MAGIC
+    )
+})
+
+const onUpdate = async () => {
+    await nextTick() // wait for the model to update
+    if (isRanged.value) {
+        equippedItems.value.quiver = itemStore.rangedActionChoices.find(
+            (x) => x.handItemTokenIdRangeMin === equippedItems.value.rightHand
+        )?.inputTokenIds[0]
+        equippedItems.value.magicBag = undefined
+        equippedItems.value.leftHand = undefined
+        if (combatStyle.value !== Skill.DEFENCE) {
+            combatStyle.value = Skill.RANGED
+        }
+    }
+    if (isMagic.value) {
+        equippedItems.value.quiver = undefined
+        equippedItems.value.leftHand = undefined
+        if (combatStyle.value !== Skill.DEFENCE) {
+            combatStyle.value = Skill.MAGIC
+        }
+    }
+    if (isMelee.value) {
+        equippedItems.value.quiver = undefined
+        equippedItems.value.magicBag = undefined
+        if (combatStyle.value !== Skill.DEFENCE) {
+            combatStyle.value = Skill.MELEE
+        }
+    }
+}
+
 const checkRequiredItems = async () => {
-    missingItems.value = []
     rightHandItems.value = []
     checking.value = true
     try {
@@ -210,8 +451,50 @@ const checkRequiredItems = async () => {
     }
 }
 
+const checkCombatItems = async () => {
+    checking.value = true
+    try {
+        if (actionId.value > 0) {
+            const requiredItems = [equippedItems.value.head, equippedItems.value.neck, equippedItems.value.body, equippedItems.value.arms, equippedItems.value.legs, equippedItems.value.feet, equippedItems.value.rightHand, equippedItems.value.leftHand].filter(x => x !== undefined)
+
+            for (const h of heroesToAssign.value) {
+                const userItemsResult = await getUserItemNFTs(h.address, [])
+                // filter out user items that are below minXP
+                const extraXP = calculateExtraXPForHeroActionInput(
+                    h,
+                    skillId.value
+                )
+
+                const filteredItems = userItemsResult.userItemNFTs.filter(
+                    (x) => {
+                        return (
+                            allItems.find((y) => y.tokenId == x.tokenId)
+                                ?.minXP <=
+                            // @ts-ignore
+                            Number(h.playerState[skillToXPMap[x.item.skill]] || 0) +
+                                extraXP
+                        )
+                    }
+                )
+
+                for (const item of requiredItems) {
+                    if (item) {
+                        if (!filteredItems.some((x) => x.tokenId === item)) {
+                            missingItems.value.push(
+                                `${h.playerState.name} is missing ${itemNames[item]}`
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    } catch {
+    } finally {
+        checking.value = false
+    }
+}
+
 const checkActionChoiceRequiredItems = async () => {
-    missingItems.value = []
     rightHandItems.value = []
     checking.value = true
     try {
@@ -271,20 +554,49 @@ const checkActionChoiceRequiredItems = async () => {
 
 const assignHeroes = async () => {
     loading.value = true
+    missingItems.value = []
     try {
         if (
             skillId.value > 0 &&
             skillStore.getActionInputsForSkill(skillId.value).length > 0
         ) {
-            await checkRequiredItems()
-            if (missingItems.value.length > 0) {
-                return
+            if (checkItems.value) {
+                if (skillId.value === Skill.COMBAT) {
+                    if (equippedItems.value.rightHand === undefined) {
+                        missingItems.value.push("Right Hand is required")
+                        return
+                    }
+                    if (isMagic.value && equippedItems.value.magicBag === undefined) {
+                        missingItems.value.push("Magic Bag is required")
+                        return
+                    }
+                    await checkCombatItems()
+                } else {
+                    await checkRequiredItems()
+                }                
+                if (missingItems.value.length > 0) {
+                    return
+                }
             }
             await factoryStore.assignActionToProxy(
                 heroesToAssign.value,
                 actionId.value,
-                0,
-                rightHandItems.value,
+                skillId.value === Skill.COMBAT ? 
+                    combatStyle.value === Skill.MELEE ? 
+                        EstforConstants.ACTIONCHOICE_MELEE_MONSTER : 
+                    combatStyle.value === Skill.RANGED ? 
+                        rangedItemToActionChoice[equippedItems.value.rightHand || 0] : 
+                        allActionChoiceIdsMagic[allActionChoicesMagic.findIndex(x => x.skillDiff === equippedItems.value.magicBag)] || 0 : 0,
+                equippedItems.value.head,
+                equippedItems.value.neck,
+                equippedItems.value.body,
+                equippedItems.value.arms,
+                equippedItems.value.legs,
+                equippedItems.value.feet,
+                skillId.value === Skill.COMBAT ? equippedItems.value.rightHand : rightHandItems.value[0],
+                equippedItems.value.leftHand,
+                equippedItems.value.food,
+                skillId.value === Skill.COMBAT ? combatStyle.value === Skill.DEFENCE ? CombatStyle.DEFENCE : CombatStyle.ATTACK : CombatStyle.NONE,
                 queueStatus.value,
                 active.value
             )
@@ -292,16 +604,27 @@ const assignHeroes = async () => {
             skillId.value > 0 &&
             skillStore.getActionChoiceInputsForSkill(skillId.value).length > 0
         ) {
-            await checkActionChoiceRequiredItems()
-            if (missingItems.value.length > 0) {
-                return
+            if (checkItems.value) {
+                await checkActionChoiceRequiredItems()
+                if (missingItems.value.length > 0) {
+                    return
+                }
             }
             await factoryStore.assignActionToProxy(
                 heroesToAssign.value,
                 allActions.find((x) => x.info.skill == skillId.value)
                     ?.actionId || 0,
                 actionChoiceOutputId.value,
-                rightHandItems.value,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                rightHandItems.value[0],
+                0,
+                0,
+                CombatStyle.NONE,
                 queueStatus.value,
                 active.value
             )

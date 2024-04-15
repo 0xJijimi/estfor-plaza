@@ -14,6 +14,9 @@ import {
 } from "../data/actionChoices"
 import { getLevel, useCoreStore } from "./core"
 import { EstforConstants } from "@paintswap/estfor-definitions"
+import { calculateExtraXPForHeroActionInput } from "./factory"
+import { ProxySilo } from "./models/factory.models"
+import { allActionChoiceIdsMagic, allActionChoiceIdsRanged } from "../data/actionChoiceIds"
 
 const magicSpellNames = [
     "SHADOW BLAST",
@@ -410,6 +413,53 @@ export const starterItems = [
     allItems.find((x) => x.tokenId === EstforConstants.TOTEM_STAFF)?.tokenId,
 ]
 
+export const rangedItemToActionChoice = {
+    [EstforConstants.BASIC_BOW]: EstforConstants.ACTIONCHOICE_RANGED_BASIC_BOW,
+    [EstforConstants.BONE_BOW]: EstforConstants.ACTIONCHOICE_RANGED_BONE_BOW,
+    [EstforConstants.EXPERT_BOW]: EstforConstants.ACTIONCHOICE_RANGED_EXPERT_BOW,
+    [EstforConstants.SPECTRAL_BOW]: EstforConstants.ACTIONCHOICE_RANGED_SPECTRAL_BOW,
+    [EstforConstants.ICY_BOW]: EstforConstants.ACTIONCHOICE_RANGED_ICY_BOW,
+    [EstforConstants.GLITTERING_BOW]: EstforConstants.ACTIONCHOICE_RANGED_GLITTERING_BOW,
+    [EstforConstants.GODLY_BOW]: EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW,
+    [EstforConstants.GODLY_BOW_1]: EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW,
+    [EstforConstants.GODLY_BOW_2]: EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW,
+    [EstforConstants.GODLY_BOW_3]: EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW,
+    [EstforConstants.GODLY_BOW_4]: EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW,
+    [EstforConstants.GODLY_BOW_5]: EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW,
+}
+
+export const magicItemToActionChoice = {
+    [EstforConstants.BASIC_BOW]: EstforConstants.ACTIONCHOICE_RANGED_BASIC_BOW,
+    [EstforConstants.BONE_BOW]: EstforConstants.ACTIONCHOICE_RANGED_BONE_BOW,
+    [EstforConstants.EXPERT_BOW]: EstforConstants.ACTIONCHOICE_RANGED_EXPERT_BOW,
+    [EstforConstants.SPECTRAL_BOW]: EstforConstants.ACTIONCHOICE_RANGED_SPECTRAL_BOW,
+    [EstforConstants.ICY_BOW]: EstforConstants.ACTIONCHOICE_RANGED_ICY_BOW,
+    [EstforConstants.GLITTERING_BOW]: EstforConstants.ACTIONCHOICE_RANGED_GLITTERING_BOW,
+    [EstforConstants.GODLY_BOW]: EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW,
+    [EstforConstants.GODLY_BOW_1]: EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW,
+    [EstforConstants.GODLY_BOW_2]: EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW,
+    [EstforConstants.GODLY_BOW_3]: EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW,
+    [EstforConstants.GODLY_BOW_4]: EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW,
+    [EstforConstants.GODLY_BOW_5]: EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW,
+}
+
+const getMagicBag = (state: ItemState, magicXp: number) => {
+    return state.magicActionChoices
+                .filter((x) => x.minXPs.every((y) => y <= magicXp))
+                .map((x, i) => ({
+                    ...x,
+                    tokenId: x.skillDiff,
+                    name: magicSpellNames[i]
+                        .split(" ")
+                        .map(
+                            (w) =>
+                                w[0].toUpperCase() +
+                                w.substring(1).toLowerCase()
+                        )
+                        .join(" "),
+                }))
+}
+
 export interface EquippedItems {
     head: number | undefined
     neck: number | undefined
@@ -479,24 +529,73 @@ export const useItemStore = defineStore({
                 )
             }
         },
+        getItemsForSlotAndHeroes: (state: ItemState) => {
+            return (position: EquipPosition, heroes: ProxySilo[]) => {
+
+                let minDefenceXp = 0
+                let minMeleeXp = 0
+                let minRangedXp = 0
+                let minMagicXp = 0
+                let minFullMode = true
+                for (const h of heroes) {
+                    const extraDefenceXp = calculateExtraXPForHeroActionInput(h, Skill.DEFENCE)
+                    if (Number(h.playerState.defenceXP) + extraDefenceXp > minDefenceXp) {
+                        minDefenceXp = Number(h.playerState.defenceXP) + extraDefenceXp
+                    }
+                    const extraMeleeXp = calculateExtraXPForHeroActionInput(h, Skill.MELEE)
+                    if (Number(h.playerState.meleeXP) + extraMeleeXp > minMeleeXp) {
+                        minMeleeXp = Number(h.playerState.meleeXP) + extraMeleeXp
+                    }
+                    const extraRangedXp = calculateExtraXPForHeroActionInput(h, Skill.RANGED)
+                    if (Number(h.playerState.rangedXP) + extraRangedXp > minRangedXp) {
+                        minRangedXp = Number(h.playerState.rangedXP) + extraRangedXp
+                    }
+                    const extraMagicXp = calculateExtraXPForHeroActionInput(h, Skill.MAGIC)
+                    if (Number(h.playerState.magicXP) + extraMagicXp > minMagicXp) {
+                        minMagicXp = Number(h.playerState.magicXP) + extraMagicXp
+                    }
+                    if (h.playerState.isFullMode === false) {
+                        minFullMode = false
+                    }
+                }
+
+                return state.items.filter(
+                    (x) =>
+                        x.equipPosition === position &&
+                        ((x.skill == Skill.DEFENCE &&
+                            x.minXP <= minDefenceXp) ||
+                            (x.skill == Skill.MELEE &&
+                                x.minXP <= minMeleeXp) ||
+                            (x.skill == Skill.RANGED &&
+                                x.minXP <= minRangedXp) ||
+                            (x.skill == Skill.MAGIC &&
+                                x.minXP <= minMagicXp) ||
+                            (x.skill == Skill.NONE &&
+                                (minFullMode
+                                    ? true
+                                    : !x.isFullModeOnly)))
+                )
+            }
+        },
+        getMagicActionChoicesForHeroes(state: ItemState) {
+            return (heroes: ProxySilo[]) => {
+
+                let minMagicXp = 0
+                for (const h of heroes) {
+                    const extraMagicXp = calculateExtraXPForHeroActionInput(h, Skill.MAGIC)
+                    if (Number(h.playerState.magicXP) + extraMagicXp > minMagicXp) {
+                        minMagicXp = Number(h.playerState.magicXP) + extraMagicXp
+                    }
+                }
+
+                return getMagicBag(state, minMagicXp)
+            }
+        },
         getMagicActionChoicesForXP(state: ItemState) {
             const coreStore = useCoreStore()
             const playerState = coreStore.playerState
 
-            return state.magicActionChoices
-                .filter((x) => x.minXPs.every((y) => y <= playerState.magicXP))
-                .map((x, i) => ({
-                    ...x,
-                    tokenId: x.skillDiff,
-                    name: magicSpellNames[i]
-                        .split(" ")
-                        .map(
-                            (w) =>
-                                w[0].toUpperCase() +
-                                w.substring(1).toLowerCase()
-                        )
-                        .join(" "),
-                }))
+            return getMagicBag(state, Number(playerState.magicXP))
         },
         getAggregatedCombatStats(state: ItemState) {
             const coreStore = useCoreStore()
@@ -571,6 +670,47 @@ export const useItemStore = defineStore({
             stats.health += getLevel(playerState.healthXP)
 
             return stats
+        },
+        getTotalCombatStatsForHero(state: ItemState) {
+            return (hero: ProxySilo, equippedItems: EquippedItems) => {
+                const stats = new CombatStats()
+
+                Object.keys(equippedItems).forEach((key) => {
+                    if (key !== "magicBag" && key !== "playerId") {
+                        // skip magic bag as they require special calculations
+                        const item = state.items.find(
+                            // @ts-ignore
+                            (x) => x.tokenId === Number(equippedItems[key])
+                        )
+                        if (item) {
+                            stats.melee += item.combatStats.melee
+                            stats.magic += item.combatStats.magic
+                            stats.ranged += item.combatStats.ranged
+                            stats.meleeDefence += item.combatStats.meleeDefence
+                            stats.magicDefence += item.combatStats.magicDefence
+                            stats.rangedDefence += item.combatStats.rangedDefence
+                            stats.health += item.combatStats.health
+                        }
+                    }
+                })
+
+                if (equippedItems.magicBag) {
+                    stats.magic += allActionChoicesMagic[allActionChoiceIdsMagic.findIndex(x => x === Number(equippedItems.magicBag))]?.skillDiff || 0
+                }
+                if (equippedItems.quiver) {
+                    stats.ranged += allActionChoicesRanged[allActionChoiceIdsRanged.findIndex(x => x === Number(equippedItems.quiver))]?.skillDiff || 0
+                }
+ 
+                stats.melee += getLevel(hero.playerState.meleeXP)
+                stats.magic += getLevel(hero.playerState.magicXP)
+                stats.ranged += getLevel(hero.playerState.rangedXP)
+                stats.meleeDefence += getLevel(hero.playerState.defenceXP)
+                stats.magicDefence += getLevel(hero.playerState.defenceXP)
+                stats.rangedDefence += getLevel(hero.playerState.defenceXP)
+                stats.health += getLevel(hero.playerState.healthXP)
+
+                return stats
+            }
         },
     },
     actions: {

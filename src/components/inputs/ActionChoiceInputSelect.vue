@@ -22,9 +22,9 @@ import { computed } from "vue"
 import { actionChoiceNames, useSkillStore } from "../../store/skills"
 import {
     calculateExtraXPForHeroActionChoiceInput,
-    ProxySilo,
 } from "../../store/factory"
 import { getLevel, skillToXPMap } from "../../store/core"
+import { ProxySilo } from "../../store/models/factory.models";
 
 const skillStore = useSkillStore()
 

@@ -42,60 +42,23 @@ import {
     actionChoiceNames,
     actionNames,
     getActionChoiceById,
+    getCombatActionChoiceById,
     useSkillStore,
 } from "./skills"
 import { sleep } from "../utils/time"
 import { config } from "../config"
 import { useBroochStore } from "./brooch"
-
-export interface SavedTransaction {
-    to: string
-    data: any
-}
-
-export interface ProxySilo {
-    address: string
-    owner: string
-    index: number
-    allPlayers: Player[]
-    playerId: string
-    playerState: Player
-    isPaused: boolean
-    savedTransactions: SavedTransaction[]
-    queuedActions: QueuedAction[]
-}
-
-export interface FactoryState {
-    proxys: ProxySilo[]
-    bankItems: UserItemNFT[]
-    initialised: boolean
-    initialisedAt: Date | null
-    totalTransactionNumber: number
-    currentTransactionNumber: number
-    transactionCharge: bigint
-}
-
-export interface AggregatedItem {
-    rate: number
-    outgoingRate: number
-    amount: string
-    tokenId: number
-}
-
-export interface NeededItem {
-    address: string
-    items: { tokenId: number; amount: number }[]
-}
-
-export interface TransferUserItemNFT extends UserItemNFT {
-    transferAmount: number
-}
+import { useMonsterStore } from "./monsters"
+import { FactoryState, NeededItem, ProxySilo, SavedTransaction, TransferUserItemNFT } from "./models/factory.models"
 
 export const calculateActionChoiceSuccessPercent = (
     a: ActionChoiceInput,
     playerXP: string,
     skillId: Skill
 ): number => {
+    if (a.successPercent === 100) {
+        return 1
+    }
     return (
         Math.min(
             90,
@@ -115,6 +78,7 @@ export const calculateActionChoiceSuccessPercent = (
 
 export const getIncomingItems = (proxys: ProxySilo[]) => {
     const items: GuaranteedReward[] = []
+    const monsterStore = useMonsterStore()
     for (const s of proxys) {
         const decoded = decode(
             s.savedTransactions[0].data,
@@ -129,14 +93,21 @@ export const getIncomingItems = (proxys: ProxySilo[]) => {
             Number(actionChoiceId)
         )
         if (action) {
+            const isCombat = action.info.skill === Skill.COMBAT
+            let amountMultiplier = 1
+            if (isCombat) {
+                const { numKilled } = monsterStore.getKillsPerHour(24, s, action)
+                amountMultiplier = numKilled / 24
+            }
+
             for (const i of action.guaranteedRewards) {
                 const existing = items.find(
                     (x) => x.itemTokenId === i.itemTokenId
                 )
                 if (existing) {
-                    existing.rate += i.rate / 10
+                    existing.rate += i.rate / 10 * amountMultiplier
                 } else {
-                    items.push({ ...i, rate: i.rate / 10 })
+                    items.push({ ...i, rate: i.rate / 10 * amountMultiplier })
                 }
             }
             for (const i of action.randomRewards) {
@@ -152,7 +123,7 @@ export const getIncomingItems = (proxys: ProxySilo[]) => {
                             s.playerState[skillToXPMap[action.info.skill]]
                         ) /
                             100) *
-                        i.amount
+                        i.amount * amountMultiplier
                 } else {
                     items.push({
                         ...i,
@@ -164,7 +135,7 @@ export const getIncomingItems = (proxys: ProxySilo[]) => {
                                 s.playerState[skillToXPMap[action.info.skill]]
                             ) /
                                 100) *
-                            i.amount,
+                            i.amount * amountMultiplier,
                     })
                 }
             }
@@ -204,6 +175,7 @@ export const getIncomingItems = (proxys: ProxySilo[]) => {
 
 export const getOutgoingItems = (proxys: ProxySilo[]) => {
     const items: GuaranteedReward[] = []
+    const monsterStore = useMonsterStore()
     for (const s of proxys) {
         const decoded = decode(
             s.savedTransactions[0].data,
@@ -211,13 +183,48 @@ export const getOutgoingItems = (proxys: ProxySilo[]) => {
             estforPlayerAbi
         )
         const actionId = decoded?.[1]?.[0]?.[1] || BigInt(0)
+        const food = decoded?.[1]?.[0]?.[2] || BigInt(0)
         const actionChoiceId = decoded?.[1]?.[0]?.[3] || BigInt(0)
+        const action = allActions.find((a) => a.actionId === Number(actionId))
         const actionChoice = getActionChoiceById(
             Number(actionId),
             Number(actionChoiceId)
         )
+        if (action) {
+            const isCombat = action.info.skill === Skill.COMBAT
+            if (isCombat) {
+                const { totalFoodRequired, itemsConsumed } = monsterStore.getKillsPerHour(24, s, action)
+                const existing = items.find(
+                    (x) => x.itemTokenId === Number(food)
+                )                
+                if (existing) {
+                    existing.rate += totalFoodRequired
+                } else {
+                    items.push({ itemTokenId: Number(food), rate: totalFoodRequired / 24 })
+                }
+
+                if (itemsConsumed > 0) {
+                    const actionChoice = getCombatActionChoiceById(Number(actionChoiceId))            
+                    if (actionChoice) {
+                        let i = 0
+                        for (const input of actionChoice.inputTokenIds) {
+                            const existing = items.find((x) => x.itemTokenId === input)
+                            if (existing) {
+                                existing.rate += itemsConsumed / 24
+                            } else {
+                                items.push({
+                                    itemTokenId: input,
+                                    rate: itemsConsumed / 24,
+                                })
+                            }
+                            i++
+                        }
+                    }
+                }
+            }
+        }
         if (actionChoice) {
-            let i = 0
+            let i = 0            
             for (const input of actionChoice.inputTokenIds) {
                 const existing = items.find((x) => x.itemTokenId === input)
                 if (existing) {
@@ -242,27 +249,36 @@ export const getOutgoingItems = (proxys: ProxySilo[]) => {
 const constructQueuedActions = (
     actionId: number,
     choiceId: number,
-    rightHand: number | undefined
+    head: number | undefined,
+    neck: number | undefined,
+    body: number | undefined,
+    arms: number | undefined,
+    legs: number | undefined,
+    feet: number | undefined,
+    food: number | undefined,
+    leftHand: number | undefined,
+    rightHand: number | undefined,
+    combatStyle: CombatStyle
 ): any[] => {
     return [
         [
             [
-                0, // head
-                0, // neck
-                0, // body
-                0, // arms
-                0, // legs
-                0, // feet
+                head || 0, // head
+                neck || 0, // neck
+                body || 0, // body
+                arms || 0, // arms
+                legs || 0, // legs
+                feet || 0, // feet
                 0, // ring
                 0, // reserved1
             ],
             actionId,
-            0, // food
+            food || 0, // food
             choiceId, // choice id
             rightHand || 0, // weapon or tool
-            0, // shield
+            leftHand || 0, // shield
             60 * 60 * 24, // 24 hours
-            CombatStyle.NONE, // NONE / ATTACK / DEFENCE
+            combatStyle, // NONE / ATTACK / DEFENCE
         ],
     ]
 }
@@ -272,6 +288,7 @@ export const calculateExtraXPForHeroActionInput = (
     skillId: Skill
 ): number => {
     const skillStore = useSkillStore()
+    const monsterStore = useMonsterStore()
     const relevantActions = h.queuedActions.filter((x) => x.skill == skillId)
     let extraXP = 0
     const timenow = Date.now() / 1000
@@ -283,10 +300,20 @@ export const calculateExtraXPForHeroActionInput = (
             continue
         }
         if (parseInt(action.startTime) + action.timespan < timenow) {
-            extraXP += a.info.xpPerHour * (action.timespan / 60 / 60)
+            if (action.skill === Skill.COMBAT) {
+                const { xpPerHour } = monsterStore.getKillsPerHour((action.timespan / 60 / 60), h, a)
+                extraXP += xpPerHour * (action.timespan / 60 / 60)
+            } else {
+                extraXP += a.info.xpPerHour * (action.timespan / 60 / 60)
+            }
         } else if (parseInt(action.startTime) < timenow) {
             const timeInAction = timenow - parseInt(action.startTime)
-            extraXP += a.info.xpPerHour * (timeInAction / 60 / 60)
+            if (action.skill === Skill.COMBAT) {
+                const { xpPerHour } = monsterStore.getKillsPerHour((timeInAction / 60 / 60), h, a)
+                extraXP += xpPerHour * (timeInAction / 60 / 60)
+            } else {
+                extraXP += a.info.xpPerHour * (timeInAction / 60 / 60)
+            }
         }
     }
     return extraXP
@@ -969,7 +996,16 @@ export const useFactoryStore = defineStore({
             proxys: ProxySilo[],
             actionId: number,
             choiceId: number,
-            rightHand: number[],
+            head: number | undefined,
+            neck: number | undefined,
+            body: number | undefined,
+            arms: number | undefined,
+            legs: number | undefined,
+            feet: number | undefined,            
+            rightHand: number | undefined,
+            leftHand: number | undefined,            
+            food: number | undefined,
+            combatStyle: CombatStyle,
             actionQueueStatus: ActionQueueStatus,
             activate: boolean
         ) {
@@ -984,7 +1020,7 @@ export const useFactoryStore = defineStore({
             const factoryInterface = new Interface(factoryAbi)
             const playersInterface = new Interface(estforPlayerAbi)
 
-            const selectorArray = proxys.map((h, i) =>
+            const selectorArray = proxys.map((h) =>
                 solidityPacked(
                     ["bytes"],
                     [
@@ -999,7 +1035,16 @@ export const useFactoryStore = defineStore({
                                     constructQueuedActions(
                                         actionId,
                                         choiceId,
-                                        rightHand[i]
+                                        head,
+                                        neck,
+                                        body,
+                                        arms,
+                                        legs,
+                                        feet,
+                                        food,
+                                        leftHand,
+                                        rightHand,
+                                        combatStyle
                                     ), // solidity QueuedAction[] (different from api type)
                                     actionQueueStatus, // action queue status - NONE / APPEND / KEEP_LAST_IN_PROGRESS
                                 ]
@@ -1042,7 +1087,16 @@ export const useFactoryStore = defineStore({
                                     constructQueuedActions(
                                         actionId,
                                         choiceId,
-                                        rightHand[i]
+                                        head,
+                                        neck,
+                                        body,
+                                        arms,
+                                        legs,
+                                        feet,
+                                        food,
+                                        leftHand,
+                                        rightHand,
+                                        combatStyle
                                     ),
                                     actionQueueStatus,
                                 ]

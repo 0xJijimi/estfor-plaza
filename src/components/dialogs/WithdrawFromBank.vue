@@ -68,8 +68,9 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
 import { itemNames } from "../../store/items"
-import { AggregatedItem, useFactoryStore } from "../../store/factory"
+import { useFactoryStore } from "../../store/factory"
 import { useAppStore } from "../../store/app"
+import { AggregatedItem } from "../../store/models/factory.models";
 
 const props = defineProps({
     id: {

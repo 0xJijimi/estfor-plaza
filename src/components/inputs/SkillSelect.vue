@@ -30,7 +30,7 @@ const options = [
     Skill.FORGING,
     Skill.FLETCHING,
     Skill.THIEVING,
-    // Skill.COMBAT,
+    Skill.COMBAT,
 ]
 
 const props = defineProps({

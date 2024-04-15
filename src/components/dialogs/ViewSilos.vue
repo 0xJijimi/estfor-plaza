@@ -280,14 +280,13 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
 import {
-    ProxySilo,
     useFactoryStore,
-    TransferUserItemNFT,
 } from "../../store/factory"
 import { getUserItemNFTs } from "../../utils/api"
 import { getAccount } from "@wagmi/core"
 import { itemNames } from "../../store/items"
 import { config } from "../../config"
+import { ProxySilo, TransferUserItemNFT } from "../../store/models/factory.models"
 
 const factoryStore = useFactoryStore()
 const allSilos = computed(() =>

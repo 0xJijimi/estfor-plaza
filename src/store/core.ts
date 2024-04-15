@@ -113,6 +113,10 @@ export const skillToXPMap = {
     [Skill.ALCHEMY]: "alchemyXP",
     [Skill.FORGING]: "forgingXP",
     [Skill.THIEVING]: "thievingXP",
+    [Skill.MAGIC]: "magicXP",
+    [Skill.RANGED]: "rangedXP",
+    [Skill.MELEE]: "meleeXP",
+    [Skill.DEFENCE]: "defenceXP",
 }
 
 export const xpBoundaries = [

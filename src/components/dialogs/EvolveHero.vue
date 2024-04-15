@@ -61,9 +61,10 @@
 
 <script setup lang="ts">
 import { ref } from "vue"
-import { ProxySilo, useFactoryStore } from "../../store/factory"
+import { useFactoryStore } from "../../store/factory"
 import { useAppStore } from "../../store/app"
 import { useCoreStore } from "../../store/core"
+import { ProxySilo } from "../../store/models/factory.models";
 
 const props = defineProps({
     id: {
@@ -110,7 +111,6 @@ const approveBrush = async () => {
 const sendBrush = async () => {
     loading.value = true
     try {
-        console.log("hello")
         await factoryStore.sendBrush(heroesToEvolve.value, BigInt(cost.value))
         sentBrush.value = true
     } catch {

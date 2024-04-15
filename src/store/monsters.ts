@@ -8,9 +8,14 @@ import {
 import { defineStore } from "pinia"
 
 import { allActions } from "../data/actions"
-import { useItemStore } from "./items"
+import { EquippedItems, ItemState, useItemStore } from "./items"
 import { EstforConstants } from "@paintswap/estfor-definitions"
 import { MEDIA_URL, useCoreStore } from "./core"
+import { decode } from "../utils/abi"
+import estforPlayerAbi from "../abi/estforPlayer.json"
+import { ProxySilo } from "./models/factory.models"
+import { allActionChoicesMagic, allActionChoicesMelee, allActionChoicesRanged } from "../data/actionChoices"
+import { allActionChoiceIdsMagic, allActionChoiceIdsMelee, allActionChoiceIdsRanged } from "../data/actionChoiceIds"
 
 export interface MonsterState {
     monsters: ActionInput[]
@@ -31,11 +36,101 @@ export interface MonsterRank {
     randomRewards: RandomReward[]
 }
 
-const calculateDamage = (atk: number, def: number) => {
+export const calculateDamage = (atk: number, def: number) => {
     if (atk === 0) return 0
     def = Math.max(atk * -1, def)
     let damage = atk * 3 - def
     return Math.max(1, damage)
+}
+
+export const calculateMonsterDamage = (attackSkill: number, isMelee: boolean, isRanged: boolean, isMagic: boolean, m: ActionInput, combatStats: { meleeDefence: number, rangedDefence: number, magicDefence: number, health: number }, hours: number, itemStore: ItemState, equippedItems: EquippedItems | undefined, elapsedTime: number, choiceId: number) => {
+    const actionChoice = isMelee ? allActionChoicesMelee[allActionChoiceIdsMelee.findIndex(x => x === choiceId)] : isRanged ? allActionChoicesRanged[allActionChoiceIdsRanged.findIndex(x => x === choiceId)] : allActionChoicesMagic[allActionChoiceIdsMagic.findIndex(x => x === choiceId)]
+    const damagePerMinute = calculateDamage(
+        attackSkill,
+        isMelee
+            ? m.combatStats.meleeDefence
+            : isRanged
+              ? m.combatStats.rangedDefence
+              : isMagic
+                ? m.combatStats.magicDefence
+                : 0
+    )
+    const meleeDamagePerMinute = calculateDamage(
+        m.combatStats.melee,
+        combatStats.meleeDefence
+    )
+    const rangedDamagePerMinute = calculateDamage(
+        m.combatStats.ranged,
+        combatStats.rangedDefence
+    )
+    const magicDamagePerMinute = calculateDamage(
+        m.combatStats.magic,
+        combatStats.magicDefence
+    )
+    const damageTakenPerMinute =
+        meleeDamagePerMinute +
+        rangedDamagePerMinute +
+        magicDamagePerMinute
+
+    // Step 1, 2, and 3 from https://github.com/PaintSwap/estfor-contracts/blob/main/contracts/Players/PlayersLibrary.sol getCombatAdjustedElapsedTimes
+    const totalMonstersSpawned = m.info.numSpawned * hours
+    const respawnTime =
+        (elapsedTime * 1000) / totalMonstersSpawned
+    const damageDealt = (damagePerMinute * respawnTime) / 60
+    const combatTimePerKill = Math.ceil(
+        (m.combatStats.health * 60) / damagePerMinute
+    )
+    const canKillAll = damageDealt > m.combatStats.health
+    let numKilled = 0
+    let combatElapsedTime = 0
+    if (canKillAll) {
+        numKilled =
+            (elapsedTime * totalMonstersSpawned) /
+            (elapsedTime * 1000)
+        const combatTimePerEnemy = Math.ceil(
+            (m.combatStats.health * respawnTime) / damageDealt
+        )
+        combatElapsedTime = combatTimePerEnemy * numKilled
+        combatElapsedTime += Math.min(
+            combatTimePerEnemy,
+            (elapsedTime - respawnTime) * numKilled
+        )
+    } else {
+        numKilled = elapsedTime / combatTimePerKill
+        combatElapsedTime = elapsedTime
+    }
+
+    const xpElapsedTime = respawnTime * numKilled
+
+    // Step 2 - Consumables
+    let itemsConsumed = 0 
+    if (actionChoice) {
+        itemsConsumed = Math.ceil((combatElapsedTime * actionChoice.rate) / (3600 * 1000))
+        if (actionChoice.rate !== 0) {
+            itemsConsumed = Math.max(numKilled, itemsConsumed)
+        }
+    }
+
+    // Step 3 - Health
+    let totalHealthLost =
+        (damageTakenPerMinute * combatElapsedTime) / 60
+    if (totalHealthLost > combatStats.health) {
+        totalHealthLost -= Math.max(0, combatStats.health)
+    } else {
+        totalHealthLost = 0
+    }
+
+    const fishHealthRestored =
+        itemStore.items.find(
+            (x) => x.tokenId === equippedItems?.food
+        )?.healthRestored || 0
+    const totalFoodRequired = Math.ceil(
+        totalHealthLost / fishHealthRestored
+    )
+    const xpPerHour =
+        (m.info.xpPerHour * xpElapsedTime) / elapsedTime
+
+    return { totalFoodRequired, xpPerHour, totalHealthLost, damagePerMinute, meleeDamagePerMinute, rangedDamagePerMinute, magicDamagePerMinute, numKilled, itemsConsumed }
 }
 
 export const monsterNames = {
@@ -95,6 +190,56 @@ export const useMonsterStore = defineStore({
             ) as ActionInput[],
         }) as MonsterState,
     getters: {
+        getKillsPerHour: () => {
+            return (hours: number, hero: ProxySilo, monster: ActionInput) => {
+                const itemStore = useItemStore()
+                const decoded = decode(
+                    hero.savedTransactions[0].data,
+                    "startActions",
+                    estforPlayerAbi
+                )
+
+                const equippedItems: EquippedItems = {
+                    rightHand: Number(decoded?.[1]?.[0]?.[4]),
+                    leftHand: Number(decoded?.[1]?.[0]?.[5]),
+                    food: Number(decoded?.[1]?.[0]?.[2]),
+                    head: Number(decoded?.[1]?.[0]?.[0]?.[0]),
+                    neck: Number(decoded?.[1]?.[0]?.[0]?.[1]),
+                    body: Number(decoded?.[1]?.[0]?.[0]?.[2]),
+                    arms: Number(decoded?.[1]?.[0]?.[0]?.[3]),
+                    legs: Number(decoded?.[1]?.[0]?.[0]?.[4]),
+                    feet: Number(decoded?.[1]?.[0]?.[0]?.[5]),
+                    magicBag: Number(decoded?.[1]?.[0]?.[3]),
+                    quiver: Number(decoded?.[1]?.[0]?.[3]),
+                    playerId: 0,
+                }
+
+                let isMelee =
+                    itemStore.items.find(
+                        (x) => x.tokenId === equippedItems?.rightHand
+                    )?.skill === Skill.MELEE || false
+                let isRanged =
+                    itemStore.items.find(
+                        (x) => x.tokenId === equippedItems?.rightHand
+                    )?.skill === Skill.RANGED || false
+                let isMagic =
+                    itemStore.items.find(
+                        (x) => x.tokenId === equippedItems?.rightHand
+                    )?.skill === Skill.MAGIC || false
+
+                const combatStats = itemStore.getTotalCombatStatsForHero(hero, equippedItems)
+
+                const attackSkill = isMelee
+                    ? combatStats.melee
+                    : isRanged
+                      ? combatStats.ranged
+                      : isMagic
+                        ? combatStats.magic
+                        : 0 
+                const elapsedTime = hours * 3600
+                return calculateMonsterDamage(attackSkill, isMelee, isRanged, isMagic, monster, combatStats, hours, itemStore, equippedItems, elapsedTime, Number(decoded?.[1]?.[0]?.[3]))
+            }
+        },
         getMonsterRankings: (state: MonsterState) => {
             return (hours: number) => {
                 const coreStore = useCoreStore()
@@ -130,80 +275,7 @@ export const useMonsterStore = defineStore({
                 const elapsedTime = hours * 3600
 
                 for (const m of state.monsters) {
-                    const damagePerMinute = calculateDamage(
-                        attackSkill,
-                        isMelee
-                            ? m.combatStats.meleeDefence
-                            : isRanged
-                              ? m.combatStats.rangedDefence
-                              : isMagic
-                                ? m.combatStats.magicDefence
-                                : 0
-                    )
-                    const meleeDamagePerMinute = calculateDamage(
-                        m.combatStats.melee,
-                        combatStats.meleeDefence
-                    )
-                    const rangedDamagePerMinute = calculateDamage(
-                        m.combatStats.ranged,
-                        combatStats.rangedDefence
-                    )
-                    const magicDamagePerMinute = calculateDamage(
-                        m.combatStats.magic,
-                        combatStats.magicDefence
-                    )
-                    const damageTakenPerMinute =
-                        meleeDamagePerMinute +
-                        rangedDamagePerMinute +
-                        magicDamagePerMinute
-
-                    // Step 1 and 3 from https://github.com/PaintSwap/estfor-contracts/blob/main/contracts/Players/PlayersLibrary.sol getCombatAdjustedElapsedTimes
-                    const totalMonstersSpawned = m.info.numSpawned * hours
-                    const respawnTime =
-                        (elapsedTime * 1000) / totalMonstersSpawned
-                    const damageDealt = (damagePerMinute * respawnTime) / 60
-                    const combatTimePerKill = Math.ceil(
-                        (m.combatStats.health * 60) / damagePerMinute
-                    )
-                    const canKillAll = damageDealt > m.combatStats.health
-                    let numKilled = 0
-                    let combatElapsedTime = 0
-                    if (canKillAll) {
-                        numKilled =
-                            (elapsedTime * totalMonstersSpawned) /
-                            (elapsedTime * 1000)
-                        const combatTimePerEnemy = Math.ceil(
-                            (m.combatStats.health * respawnTime) / damageDealt
-                        )
-                        combatElapsedTime = combatTimePerEnemy * numKilled
-                        combatElapsedTime += Math.min(
-                            combatTimePerEnemy,
-                            (elapsedTime - respawnTime) * numKilled
-                        )
-                    } else {
-                        numKilled = elapsedTime / combatTimePerKill
-                        combatElapsedTime = elapsedTime
-                    }
-
-                    const xpElapsedTime = respawnTime * numKilled
-
-                    let totalHealthLost =
-                        (damageTakenPerMinute * combatElapsedTime) / 60
-                    if (totalHealthLost > combatStats.health) {
-                        totalHealthLost -= Math.max(0, combatStats.health)
-                    } else {
-                        totalHealthLost = 0
-                    }
-
-                    const fishHealthRestored =
-                        itemStore.items.find(
-                            (x) => x.tokenId === equippedItems?.food
-                        )?.healthRestored || 0
-                    const totalFoodRequired = Math.ceil(
-                        totalHealthLost / fishHealthRestored
-                    )
-                    const xpPerHour =
-                        (m.info.xpPerHour * xpElapsedTime) / elapsedTime
+                    const { totalFoodRequired, totalHealthLost, xpPerHour, damagePerMinute, magicDamagePerMinute, meleeDamagePerMinute, rangedDamagePerMinute } = calculateMonsterDamage(attackSkill, isMelee, isRanged, isMagic, m, combatStats, hours, itemStore, equippedItems, elapsedTime, 0)
 
                     monsterRankings.push({
                         actionId: m.actionId,

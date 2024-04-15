@@ -15,6 +15,9 @@ import {
     allActionChoicesFiremaking,
     allActionChoicesFletching,
     allActionChoicesForging,
+    allActionChoicesMagic,
+    allActionChoicesMelee,
+    allActionChoicesRanged,
     allActionChoicesSmithing,
 } from "../data/actionChoices"
 import { itemNames, useItemStore } from "./items"
@@ -25,6 +28,9 @@ import {
     allActionChoiceIdsFiremaking,
     allActionChoiceIdsFletching,
     allActionChoiceIdsForging,
+    allActionChoiceIdsMagic,
+    allActionChoiceIdsMelee,
+    allActionChoiceIdsRanged,
     allActionChoiceIdsSmithing,
 } from "../data/actionChoiceIds"
 
@@ -40,6 +46,7 @@ export interface SkillState {
     forging: ActionChoiceInput[]
     fletching: ActionChoiceInput[]
     thieving: ActionInput[]
+    combat: ActionInput[]
 }
 
 export const skillNames = {
@@ -149,6 +156,28 @@ export const actionNames = {
     [EstforConstants.ACTION_THIEVING_GEM_MERCHANT]: "Gem Merchant",
     [EstforConstants.ACTION_THIEVING_BANK]: "Bank",
     [EstforConstants.ACTION_THIEVING_MASTER_THIEF]: "Master Thief",
+
+    [EstforConstants.ACTION_COMBAT_ANCIENT_ENT]: "Ancient Ent",
+    [EstforConstants.ACTION_COMBAT_ARCANE_DRAGON]: "Arcane Dragon",
+    [EstforConstants.ACTION_COMBAT_BANOXNID]: "Banoxnid",
+    [EstforConstants.ACTION_COMBAT_DRAGON_FROG]: "Dragon Frog",
+    [EstforConstants.ACTION_COMBAT_DWELLER_BAT]: "Dweller Bat",
+    [EstforConstants.ACTION_COMBAT_ELDER_BURGOF]: "Elder Burgof",
+    [EstforConstants.ACTION_COMBAT_ELEMENTAL_DRAGON]: "Elemental Dragon",
+    [EstforConstants.ACTION_COMBAT_ERKAD]: "Erkad",
+    [EstforConstants.ACTION_COMBAT_GRAND_TREE_IMP]: "Grand Tree Imp",
+    [EstforConstants.ACTION_COMBAT_GROG_TOAD]: "Grog Toad",
+    [EstforConstants.ACTION_COMBAT_LOSSUTH]: "Lossuth",
+    [EstforConstants.ACTION_COMBAT_NATUOW]: "Natuow",
+    [EstforConstants.ACTION_COMBAT_NATURARACNID]: "Naturaracnid",
+    [EstforConstants.ACTION_COMBAT_OBGORA]: "Obgora",
+    [EstforConstants.ACTION_COMBAT_QRAKUR]: "Qrakur",
+    [EstforConstants.ACTION_COMBAT_QUARTZ_EAGLE]: "Quartz Eagle",
+    [EstforConstants.ACTION_COMBAT_ROCKHAWK]: "Rockhawk",
+    [EstforConstants.ACTION_COMBAT_SNAPPER_BUG]: "Snapper Bug",
+    [EstforConstants.ACTION_COMBAT_SNUFFLEQUARG]: "Snufflequarg",
+    [EstforConstants.ACTION_COMBAT_SQUIGGLE_EGG]: "Squiggle Egg",
+    [EstforConstants.ACTION_COMBAT_UFFINCH]: "Uffinch",
 }
 
 export const actionChoiceNames = {
@@ -538,6 +567,18 @@ export const getActionChoiceById = (
     }
 }
 
+export const getCombatActionChoiceById = (
+    choiceId: number
+): ActionChoiceInput | undefined => {
+    if (allActionChoiceIdsRanged.findIndex(x => x === choiceId) > -1) {
+        return allActionChoicesRanged[allActionChoiceIdsRanged.indexOf(choiceId)]
+    } else if (allActionChoiceIdsMagic.findIndex(x => x === choiceId) > -1) {
+        return allActionChoicesMagic[allActionChoiceIdsMagic.indexOf(choiceId)]
+    } else if (allActionChoiceIdsMelee.findIndex(x => x === choiceId) > -1) {
+        return allActionChoicesMelee[allActionChoiceIdsMelee.indexOf(choiceId)]
+    }
+}
+
 export const useSkillStore = defineStore({
     id: "skills",
     state: () =>
@@ -558,6 +599,9 @@ export const useSkillStore = defineStore({
             alchemy: allActionChoicesAlchemy,
             forging: allActionChoicesForging,
             fletching: allActionChoicesFletching,
+            combat: allActions.filter(
+                (x) => x.info.skill === Skill.COMBAT
+            ) as ActionInput[],
             thieving: allActions.filter(
                 (x) => x.info.skill === Skill.THIEVING
             ) as ActionInput[],
@@ -574,6 +618,8 @@ export const useSkillStore = defineStore({
                         return state.fishing
                     case Skill.THIEVING:
                         return state.thieving
+                    case Skill.COMBAT:
+                        return state.combat
                     default:
                         return []
                 }

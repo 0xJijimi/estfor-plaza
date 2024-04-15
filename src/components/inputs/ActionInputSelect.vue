@@ -8,7 +8,7 @@
                 {{ actionNames[o.actionId] || "" }}
             </option>
         </select>
-        <div class="label">
+        <div v-if="minHeroXPForSkill > 0" class="label">
             <span class="label-text"
                 >Minimum level of selected heroes:
                 {{ getLevel(minHeroXPForSkill.toString()) }}
@@ -22,9 +22,10 @@ import { computed } from "vue"
 import { actionNames, useSkillStore } from "../../store/skills"
 import {
     calculateExtraXPForHeroActionInput,
-    ProxySilo,
 } from "../../store/factory"
 import { getLevel, skillToXPMap } from "../../store/core"
+import { Skill } from "@paintswap/estfor-definitions/types";
+import { ProxySilo } from "../../store/models/factory.models";
 
 const skillStore = useSkillStore()
 
@@ -55,6 +56,7 @@ const value = computed({
 })
 
 const minHeroXPForSkill = computed(() => {
+    if (props.skillId === Skill.COMBAT) return 0
     return Math.min(
         ...props.heroes.map((h) => {
             const extraXP = calculateExtraXPForHeroActionInput(h, props.skillId)

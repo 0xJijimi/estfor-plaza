@@ -66,7 +66,6 @@
 
 <script setup lang="ts">
 import {
-    AggregatedItem,
     getIncomingItems,
     getOutgoingItems,
     useFactoryStore,
@@ -77,6 +76,7 @@ import { UserItemNFT } from "@paintswap/estfor-definitions/types"
 import WithdrawFromBank from "../dialogs/WithdrawFromBank.vue"
 import DistributeItemsFromBank from "../dialogs/DistributeItemsFromBank.vue"
 import { allItems } from "../../data/items"
+import { AggregatedItem } from "../../store/models/factory.models"
 
 const factoryStore = useFactoryStore()
 const period = ref(24)

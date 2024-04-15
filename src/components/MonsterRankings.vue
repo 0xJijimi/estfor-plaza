@@ -399,7 +399,6 @@ const monsterRankings = computed(() => {
                             .includes(itemStore.itemSearch.toLowerCase())
                 )
         )
-        .slice(0, 10)
 })
 
 const equippedFishName = computed(

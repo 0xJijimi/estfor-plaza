@@ -177,13 +177,16 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue"
-import { ProxySilo, NeededItem, useFactoryStore } from "../../store/factory"
+import { useFactoryStore } from "../../store/factory"
 import { getUserItemNFTs } from "../../utils/api"
 import { useAppStore } from "../../store/app"
 import { itemNames, starterItems } from "../../store/items"
 import { allItems } from "../../data/items"
 import { allActions } from "../../data/actions"
 import { getActionChoiceById } from "../../store/skills"
+import { NeededItem, ProxySilo } from "../../store/models/factory.models"
+import { Skill } from "@paintswap/estfor-definitions/types"
+import { useMonsterStore } from "../../store/monsters"
 
 const props = defineProps({
     id: {
@@ -193,6 +196,7 @@ const props = defineProps({
 })
 
 const factoryStore = useFactoryStore()
+const monsterStore = useMonsterStore()
 const app = useAppStore()
 
 const loading = ref(false)
@@ -376,60 +380,147 @@ const executeActionChoiceSavedTransactions = async () => {
             )
             for (const action of proxy.queuedActions.filter(
                 (x) => x.choice !== null
-            )) {
-                let i = 0
-                for (const input of action.choice.inputTokenIds) {
-                    const ownedItem = userItemNFTResult?.userItemNFTs.find(
-                        (t) => t.tokenId === input
-                    )
-
-                    const now = Date.now() / 1000
-                    let amountRequired = 0
+            )) {                
+                const now = Date.now() / 1000
+                if (action.skill === Skill.COMBAT) {
+                    // work out the food needed
+                    let elapsedHours = 0
                     if (Number(action.startTime) + action.timespan < now) {
-                        amountRequired =
-                            (action.choice.inputAmounts[i] *
-                                (action.choice.rate / 1000) *
-                                action.timespan) /
-                            60 /
-                            60
+                        elapsedHours = action.timespan / 60 / 60
                     } else if (Number(action.startTime) < now) {
-                        amountRequired =
-                            action.choice.inputAmounts[i] *
-                            (action.choice.rate / 1000) *
-                            Math.ceil(
-                                (now - Number(action.startTime)) / 60 / 60
-                            )
+                        elapsedHours = Math.ceil(
+                            (now - Number(action.startTime)) / 60 / 60
+                        )
                     }
 
-                    if (
-                        !ownedItem ||
-                        Number(ownedItem.amount) < amountRequired
-                    ) {
-                        const proxyItemsNeeded = itemsNeeded.find(
-                            (i) => i.address === proxy.address
-                        )
-                        const totalAmountRequired = Math.ceil(
-                            amountRequired -
-                                (ownedItem ? Number(ownedItem.amount) : 0)
-                        )
-                        if (!proxyItemsNeeded) {
-                            itemsNeeded.push({
-                                address: proxy.address,
-                                items: [
-                                    {
+                    const monster = allActions.find(x => x.actionId === action.actionId)
+                    if (monster) {
+                        const { totalFoodRequired, itemsConsumed } = monsterStore.getKillsPerHour(elapsedHours, proxy, monster)
+                        
+                        // food
+                        {
+                            const ownedItem = userItemNFTResult?.userItemNFTs.find(
+                                (t) => t.tokenId === action.regenerateId
+                            )
+                            if (
+                                !ownedItem ||
+                                Number(ownedItem.amount) < totalFoodRequired
+                            ) {
+                                const proxyItemsNeeded = itemsNeeded.find(
+                                    (i) => i.address === proxy.address
+                                )
+                                const totalAmountRequired = Math.ceil(
+                                    totalFoodRequired -
+                                        (ownedItem ? Number(ownedItem.amount) : 0)
+                                )
+                                if (!proxyItemsNeeded) {
+                                    itemsNeeded.push({
+                                        address: proxy.address,
+                                        items: [
+                                            {
+                                                tokenId: action.regenerateId,
+                                                amount: totalAmountRequired,
+                                            },
+                                        ],
+                                    })
+                                } else {
+                                    proxyItemsNeeded.items.push({
+                                        tokenId: action.regenerateId,
+                                        amount: totalAmountRequired,
+                                    })
+                                }
+                            }
+                        }
+
+                        // consumables
+                        for (const input of action.choice.inputTokenIds) {
+                            const ownedItem = userItemNFTResult?.userItemNFTs.find(
+                                (t) => t.tokenId === input
+                            )
+                            if (
+                                !ownedItem ||
+                                Number(ownedItem.amount) < itemsConsumed
+                            ) {
+                                const proxyItemsNeeded = itemsNeeded.find(
+                                    (i) => i.address === proxy.address
+                                )
+                                const totalAmountRequired = Math.ceil(
+                                    itemsConsumed -
+                                        (ownedItem ? Number(ownedItem.amount) : 0)
+                                )
+                                if (!proxyItemsNeeded) {
+                                    itemsNeeded.push({
+                                        address: proxy.address,
+                                        items: [
+                                            {
+                                                tokenId: input,
+                                                amount: totalAmountRequired,
+                                            },
+                                        ],
+                                    })
+                                } else {
+                                    proxyItemsNeeded.items.push({
                                         tokenId: input,
                                         amount: totalAmountRequired,
-                                    },
-                                ],
-                            })
-                        } else {
-                            proxyItemsNeeded.items.push({
-                                tokenId: input,
-                                amount: totalAmountRequired,
-                            })
+                                    })
+                                }
+                            }
                         }
                     }
-                    i++
+                } else {
+                    let i = 0
+                    for (const input of action.choice.inputTokenIds) {
+                        const ownedItem = userItemNFTResult?.userItemNFTs.find(
+                            (t) => t.tokenId === input
+                        )
+                        
+                        let amountRequired = 0
+                        if (Number(action.startTime) + action.timespan < now) {
+                            amountRequired =
+                                (action.choice.inputAmounts[i] *
+                                    (action.choice.rate / 1000) *
+                                    action.timespan) /
+                                60 /
+                                60
+                        } else if (Number(action.startTime) < now) {
+                            amountRequired =
+                                action.choice.inputAmounts[i] *
+                                (action.choice.rate / 1000) *
+                                Math.ceil(
+                                    (now - Number(action.startTime)) / 60 / 60
+                                )
+                        }
+
+                        if (
+                            !ownedItem ||
+                            Number(ownedItem.amount) < amountRequired
+                        ) {
+                            const proxyItemsNeeded = itemsNeeded.find(
+                                (i) => i.address === proxy.address
+                            )
+                            const totalAmountRequired = Math.ceil(
+                                amountRequired -
+                                    (ownedItem ? Number(ownedItem.amount) : 0)
+                            )
+                            if (!proxyItemsNeeded) {
+                                itemsNeeded.push({
+                                    address: proxy.address,
+                                    items: [
+                                        {
+                                            tokenId: input,
+                                            amount: totalAmountRequired,
+                                        },
+                                    ],
+                                })
+                            } else {
+                                proxyItemsNeeded.items.push({
+                                    tokenId: input,
+                                    amount: totalAmountRequired,
+                                })
+                            }
+                        }
+                        i++
+                    }
                 }
             }
         }

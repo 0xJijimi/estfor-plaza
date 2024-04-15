@@ -1,6 +1,7 @@
 <template>
     <select
-        class="select select-bordered w-full md:select-sm select-xs"
+        class="select select-bordered w-full"
+        :class="props.customClass"
         v-model="value"
         :disabled="props.disabled"
     >
@@ -45,6 +46,10 @@ const props = defineProps({
     emptyEquipment: {
         type: Boolean,
         default: true,
+    },
+    customClass: {
+        type: String,
+        default: "md:select-sm select-xs",
     },
 })
 

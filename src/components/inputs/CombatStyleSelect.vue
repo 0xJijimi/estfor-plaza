@@ -1,5 +1,5 @@
 <template>
-    <select class="select select-bordered w-full select-xs" v-model="value">
+    <select class="select select-bordered w-full" :class="props.customClass" v-model="value">
         <option v-for="o in options" :key="o.value" :value="o.value">
             {{ o.text }}
         </option>
@@ -21,10 +21,14 @@ const props = defineProps({
         type: Number,
         default: Skill.MELEE,
     },
+    customClass: {
+        type: String,
+        default: "select-xs",
+    },
 })
 
 const options = computed(() => [
-    { text: "Attack", value: props.skill },
+    { text: `Attack (${props.skill === Skill.MELEE ? 'Melee' : props.skill === Skill.RANGED ? 'Ranged' : props.skill === Skill.MAGIC ? 'Magic' : 'None'})`, value: props.skill },
     { text: "Defence", value: Skill.DEFENCE },
 ])
 

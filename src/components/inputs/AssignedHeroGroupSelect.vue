@@ -18,9 +18,9 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import { actionChoiceNames, actionNames } from "../../store/skills"
-import { ProxySilo } from "../../store/factory"
 import { decode } from "../../utils/abi"
 import estforPlayerAbi from "../../abi/estforPlayer.json"
+import { ProxySilo } from "../../store/models/factory.models";
 
 const emit = defineEmits(["update:modelValue"])
 
