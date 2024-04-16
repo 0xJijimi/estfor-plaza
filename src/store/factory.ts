@@ -801,7 +801,7 @@ export const useFactoryStore = defineStore({
                     isPaused: proxyPauseData[i].result as boolean,
                 }))
             } else {
-                this.proxys = proxysWithPlayerId.map((p, i) => ({
+                this.proxys = proxysWithPlayerId.map((p) => ({
                     ...p,
                     queuedActions: [],
                     savedTransactions: [],
