@@ -194,13 +194,15 @@ export const getOutgoingItems = (proxys: ProxySilo[]) => {
             const isCombat = action.info.skill === Skill.COMBAT
             if (isCombat) {
                 const { totalFoodRequired, itemsConsumed } = monsterStore.getKillsPerHour(24, s, action)
-                const existing = items.find(
-                    (x) => x.itemTokenId === Number(food)
-                )                
-                if (existing) {
-                    existing.rate += totalFoodRequired
-                } else {
-                    items.push({ itemTokenId: Number(food), rate: totalFoodRequired / 24 })
+                {
+                    const existing = items.find(
+                        (x) => x.itemTokenId === Number(food)
+                    )                                
+                    if (existing) {
+                        existing.rate += totalFoodRequired / 24
+                    } else {
+                        items.push({ itemTokenId: Number(food), rate: totalFoodRequired / 24 })
+                    }
                 }
 
                 if (itemsConsumed > 0) {
