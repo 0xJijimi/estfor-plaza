@@ -800,6 +800,13 @@ export const useFactoryStore = defineStore({
                         .result as SavedTransaction[],
                     isPaused: proxyPauseData[i].result as boolean,
                 }))
+            } else {
+                this.proxys = proxysWithPlayerId.map((p, i) => ({
+                    ...p,
+                    queuedActions: [],
+                    savedTransactions: [],
+                    isPaused: true,
+                }))
             }
 
             await this.getBankItems()

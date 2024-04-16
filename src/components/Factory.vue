@@ -75,7 +75,7 @@
             </div>
         </div>
     </div>
-    <div class="lg:flex flex-row justify-evenly items-center gap-10">
+    <div class="lg:flex flex-row justify-evenly items-start gap-10">
         <EmptySilos
             v-if="!loading && factoryStore.emptyProxys.length > 0"
             @create-heroes="onCreateHeroes"
@@ -83,7 +83,7 @@
         />
         <UnassignedSilos v-if="!loading && factoryStore.unassignedProxys.length > 0" />
     </div>
-    <div class="lg:flex flex-row justify-evenly items-center gap-10">
+    <div class="lg:flex flex-row justify-evenly items-start gap-10">
         <ItemBank v-if="!loading && factoryStore.proxys.length > 0" />
         <AssignedSilos v-if="!loading && factoryStore.assignedProxys.length > 0" />
     </div>
