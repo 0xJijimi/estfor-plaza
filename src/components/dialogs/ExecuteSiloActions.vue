@@ -237,6 +237,7 @@ const openDialog = (heroes: ProxySilo[]) => {
     actionInputsExecuted.value = false
     silosToExecute.value = heroes
     missingItems.value = []
+    error.value = null
     const dialog = document.getElementById(props.id) as HTMLDialogElement
     dialog.showModal()
 }
@@ -582,9 +583,13 @@ const executeActionChoiceSavedTransactions = async () => {
                 dialog.close()
             }
         }
-    } catch (e) {
-        console.error(e)
-        // user declined tx
+    } catch (e: any) {
+        // console.error(e)
+        if (e.message?.indexOf("User rejected the request") > -1) {
+            return
+        }
+        error.value =
+            "Could not create a transaction. Please check your heroes have the correct tools equipped."
     } finally {
         loading.value = false
     }
