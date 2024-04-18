@@ -12,7 +12,7 @@
                 them.
             </div>
 
-            <div v-if="aggregatedItems.length > 0" class="overflow-x-auto mt-5">
+            <div v-if="aggregatedItems?.filter(x => !starterItems.includes(x.tokenId)).length > 0" class="overflow-x-auto mt-5">
                 <table class="table md:table-md table-xs">
                     <thead>
                         <tr>
@@ -23,7 +23,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="item in aggregatedItems" :key="item.tokenId">
+                        <tr v-for="item in aggregatedItems.filter(x => !starterItems.includes(x.tokenId))" :key="item.tokenId">
                             <td>
                                 {{ itemNames[item.tokenId] || item.tokenId }}
                             </td>
@@ -155,8 +155,7 @@ const aggregatedItems: ComputedRef<AggregatedItem[]> = computed(() => {
 
     return mergedItems.filter(
         (i) =>
-            allItems.find((t) => t.tokenId === i.tokenId)?.isTransferable &&
-            !starterItems.includes(i.tokenId)
+            allItems.find((t) => t.tokenId === i.tokenId)?.isTransferable
     )
 })
 

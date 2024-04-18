@@ -76,19 +76,19 @@
                     disabled
                     :empty-equipment="false"
                 />
-                <PetSelect 
+                <!-- <PetSelect 
                     :items="pets"
                     label="Pet"
                     v-model="equippedItems.pet"
                     @update:model-value="onUpdate"
-                />
+                /> -->
                 <ItemSelect
                     :items="foodItems"
                     label="Food"
                     @update:model-value="onUpdate"
                     v-model="equippedItems.food"
                 />
-                <label class="label cursor-pointer">
+                <!-- <label class="label cursor-pointer">
                     <span class="label-text text-xs mr-2 items-center flex">
                         Show Owned Pets Only                 
                     </span>
@@ -97,7 +97,7 @@
                         class="checkbox checkbox-primary"
                         v-model="ownedPetsOnly"
                     />
-                </label>
+                </label> -->
                 <div
                     class="md:flex-row xl:flex-col flex-col flex justify-stretch w-full gap-2"
                 >
@@ -140,7 +140,7 @@
 import {
     EquipPosition,
     ItemInput,
-    PetEnhancementType,
+    // PetEnhancementType,
     Skill,
 } from "@paintswap/estfor-definitions/types"
 import { useItemStore } from "../store/items"
@@ -149,7 +149,7 @@ import HeroStats from "./HeroStats.vue"
 import BoostPanel from "./BoostPanel.vue"
 import ItemSearch from "./ItemSearch.vue"
 import ItemSelect from "./inputs/ItemSelect.vue"
-import PetSelect from "./inputs/PetSelect.vue"
+// import PetSelect from "./inputs/PetSelect.vue"
 import { computed, nextTick, ref } from "vue"
 import MonsterRankings from "./MonsterRankings.vue"
 import { useCoreStore } from "../store/core"
@@ -157,7 +157,7 @@ import { useCoreStore } from "../store/core"
 const itemStore = useItemStore()
 const coreStore = useCoreStore()
 const equippedItems = ref({ ...itemStore.getCurrentEquippedItems })
-const ownedPetsOnly = ref(true)
+// const ownedPetsOnly = ref(true)
 
 const headItems = computed(() =>
     itemStore.getItemsForSlotAndXP(EquipPosition.HEAD)
@@ -191,7 +191,7 @@ const magicBagItems = computed(() => itemStore.getMagicActionChoicesForXP)
 const foodItems = computed(() =>
     itemStore.getItemsForSlotAndXP(EquipPosition.FOOD)
 )
-const pets = computed(() => itemStore.getOwnedAndBasicPets(ownedPetsOnly.value).filter(x => (isMelee.value ? x.basePet.enhancementType === PetEnhancementType.MELEE || x.basePet.enhancementType === PetEnhancementType.MELEE_AND_DEFENCE : isRanged.value ? x.basePet.enhancementType === PetEnhancementType.RANGED || x.basePet.enhancementType === PetEnhancementType.RANGED_AND_DEFENCE : isMagic.value ? x.basePet.enhancementType === PetEnhancementType.MAGIC || x.basePet.enhancementType === PetEnhancementType.MAGIC_AND_DEFENCE : false) || x.basePet.enhancementType === PetEnhancementType.DEFENCE || x.basePet.enhancementType === PetEnhancementType.HEALTH))
+// const pets = computed(() => itemStore.getOwnedAndBasicPets(ownedPetsOnly.value).filter(x => (isMelee.value ? x.basePet.enhancementType === PetEnhancementType.MELEE || x.basePet.enhancementType === PetEnhancementType.MELEE_AND_DEFENCE : isRanged.value ? x.basePet.enhancementType === PetEnhancementType.RANGED || x.basePet.enhancementType === PetEnhancementType.RANGED_AND_DEFENCE : isMagic.value ? x.basePet.enhancementType === PetEnhancementType.MAGIC || x.basePet.enhancementType === PetEnhancementType.MAGIC_AND_DEFENCE : false) || x.basePet.enhancementType === PetEnhancementType.DEFENCE || x.basePet.enhancementType === PetEnhancementType.HEALTH))
 
 const findLast = (arr: any[], criteria: any) => {
     for (let i = arr.length - 1; i >= 0; i--) {
