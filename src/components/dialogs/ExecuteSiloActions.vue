@@ -60,6 +60,9 @@
                         {{ item }}
                     </div>
                 </div>
+                <div v-if="loading && stage" class="mt-5">
+                    {{ stage }}
+                </div>
                 <div
                     v-if="loading && factoryStore.currentTransactionNumber > 0"
                     class="mt-5"
@@ -126,33 +129,13 @@
                                 class="label-text mt-1 flex gap-2 items-center"
                             >
                                 {{ itemNames[token.tokenId] }}
-                                <span
-                                    v-if="isRequiredTool(token.tokenId)"
-                                    class="tooltip tooltip-primary"
-                                    data-tip="This is currently being used by a hero"
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="1.5"
-                                        stroke="currentColor"
-                                        class="w-6 h-6 text-warning"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"
-                                        />
-                                    </svg>
-                                </span>
                             </span>
                         </label>
                     </div>
                 </div>
 
                 <div class="mt-5 text-sm">
-                    Don't transfer the tools your heroes are currently using!
+                    Transfer will automatically ignore equipped items.
                 </div>
 
                 <button
@@ -183,7 +166,6 @@ import { useAppStore } from "../../store/app"
 import { itemNames, starterItems } from "../../store/items"
 import { allItems } from "../../data/items"
 import { allActions } from "../../data/actions"
-import { getActionChoiceById } from "../../store/skills"
 import { NeededItem, ProxySilo } from "../../store/models/factory.models"
 import { Skill } from "@paintswap/estfor-definitions/types"
 import { useMonsterStore } from "../../store/monsters"
@@ -208,6 +190,7 @@ const transferScreenSelected = ref(false)
 const toggle = ref(true)
 const error = ref<string | null>(null)
 const relevantTokens = ref<{ selected: boolean; tokenId: number }[]>([])
+const stage = ref<string | null>(null)
 
 const silosWithEmptyQueuesOrActionInputOnly = computed(() => {
     return silosToExecute.value.filter(
@@ -242,56 +225,6 @@ const openDialog = (heroes: ProxySilo[]) => {
     dialog.showModal()
 }
 
-const isRequiredTool = (tokenId: number): boolean => {
-    for (const p of factoryStore.assignedProxys) {
-        for (const a of p.queuedActions) {
-            if (a.choice) {
-                const choice = getActionChoiceById(
-                    a.actionId,
-                    Number(a.choice.id)
-                )
-                const action = allActions.find((x) => x.info.skill == a.skill)
-                const max = action?.info.handItemTokenIdRangeMax
-                const min = action?.info.handItemTokenIdRangeMin
-
-                const requiredItems = Array.from(
-                    { length: max - min + 1 },
-                    (_, i) => i + min
-                )
-
-                const choiceMax = choice?.handItemTokenIdRangeMax
-                const choiceMin = choice?.handItemTokenIdRangeMin
-
-                const choiceRequiredItems = Array.from(
-                    { length: choiceMax - choiceMin + 1 },
-                    (_, i) => i + choiceMin
-                )
-
-                if (
-                    requiredItems.includes(tokenId) ||
-                    choiceRequiredItems.includes(tokenId)
-                ) {
-                    return true
-                }
-            } else {
-                const action = allActions.find((x) => x.actionId == a.actionId)
-                const max = action?.info.handItemTokenIdRangeMax
-                const min = action?.info.handItemTokenIdRangeMin
-
-                const requiredItems = Array.from(
-                    { length: max - min + 1 },
-                    (_, i) => i + min
-                )
-
-                if (requiredItems.includes(tokenId)) {
-                    return true
-                }
-            }
-        }
-    }
-    return false
-}
-
 const executeSavedTransactions = async () => {
     loading.value = true
     error.value = null
@@ -324,6 +257,7 @@ const executeSavedTransactions = async () => {
 const goToTransferScreen = async () => {
     transferScreenSelected.value = true
     loading.value = true
+    toggle.value = true
     try {
         const result = await factoryStore.getRelevantItemsForProxies(
             silosToExecute.value
@@ -367,6 +301,8 @@ const transferItemsToBank = async () => {
 const executeActionChoiceSavedTransactions = async () => {
     loading.value = true
     missingItems.value = []
+    error.value = null
+    stage.value = null
     try {
         const userItemNFTPromises = await Promise.all(
             silosWithActionChoicesOnly.value.map((s) =>
@@ -563,10 +499,13 @@ const executeActionChoiceSavedTransactions = async () => {
             }
 
             if (missingItems.value.length === 0) {
+                stage.value = "Transferring items to heroes (Part 1 of 2)"
                 await factoryStore.transferItemsFromBankToProxys(itemsNeeded)
+                stage.value = "Executing actions (Part 2 of 2)"
                 await factoryStore.executeSavedTransactions(
                     silosWithActionChoicesOnly.value
                 )
+                stage.value = null
                 app.addToast(
                     `${silosWithActionChoicesOnly.value.length} hero${
                         silosWithActionChoicesOnly.value.length !== 1
@@ -592,6 +531,7 @@ const executeActionChoiceSavedTransactions = async () => {
             "Could not create a transaction. Please check your heroes have the correct tools equipped."
     } finally {
         loading.value = false
+        stage.value = null
     }
 }
 

@@ -8,12 +8,12 @@ import {
 import { defineStore } from "pinia"
 
 import { allActions } from "../data/actions"
-import { EquippedItems, ItemState, useItemStore } from "./items"
+import { ItemState, useItemStore } from "./items"
 import { EstforConstants } from "@paintswap/estfor-definitions"
 import { MEDIA_URL, useCoreStore } from "./core"
 import { decode } from "../utils/abi"
 import estforPlayerAbi from "../abi/estforPlayer.json"
-import { ProxySilo } from "./models/factory.models"
+import { EquippedItems, ProxySilo } from "./models/factory.models"
 import { allActionChoicesMagic, allActionChoicesMelee, allActionChoicesRanged } from "../data/actionChoices"
 import { allActionChoiceIdsMagic, allActionChoiceIdsMelee, allActionChoiceIdsRanged } from "../data/actionChoiceIds"
 

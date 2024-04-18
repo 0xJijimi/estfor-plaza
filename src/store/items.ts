@@ -15,7 +15,7 @@ import {
 import { getLevel, useCoreStore } from "./core"
 import { EstforConstants } from "@paintswap/estfor-definitions"
 import { calculateExtraXPForHeroActionInput } from "./factory"
-import { ProxySilo } from "./models/factory.models"
+import { EquippedItems, ProxySilo } from "./models/factory.models"
 import { allActionChoiceIdsMagic, allActionChoiceIdsRanged } from "../data/actionChoiceIds"
 
 const magicSpellNames = [
@@ -460,20 +460,7 @@ const getMagicBag = (state: ItemState, magicXp: number) => {
                 }))
 }
 
-export interface EquippedItems {
-    head: number | undefined
-    neck: number | undefined
-    body: number | undefined
-    arms: number | undefined
-    legs: number | undefined
-    feet: number | undefined
-    rightHand: number | undefined
-    leftHand: number | undefined
-    magicBag: number | undefined
-    quiver: number | undefined
-    food: number | undefined
-    playerId: number | undefined
-}
+
 
 export interface ItemState {
     items: ItemInput[]

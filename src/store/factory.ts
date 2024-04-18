@@ -49,8 +49,82 @@ import { sleep } from "../utils/time"
 import { config } from "../config"
 import { useBroochStore } from "./brooch"
 import { useMonsterStore } from "./monsters"
-import { FactoryState, NeededItem, ProxySilo, SavedTransaction, TransferUserItemNFT } from "./models/factory.models"
+import { EquippedItems, FactoryState, NeededItem, ProxySilo, SavedTransaction, TransferUserItemNFT } from "./models/factory.models"
 import { allItems } from "../data/items"
+
+export const proxyNeedsItem = (item: UserItemNFT, p: ProxySilo): boolean => {
+    for (const a of p.queuedActions) {
+        if (a.feetEquipped === item.tokenId) {
+            return true
+        }
+        if (a.armsEquipped === item.tokenId) {
+            return true
+        }
+        if (a.bodyEquipped === item.tokenId) {
+            return true
+        }
+        if (a.headEquipped === item.tokenId) {
+            return true
+        }
+        if (a.leftHandEquipmentTokenId === item.tokenId) {
+            return true
+        }
+        if (a.rightHandEquipmentTokenId === item.tokenId) {
+            return true
+        }
+        if (a.legsEquipped === item.tokenId) {
+            return true
+        }
+        if (a.neckEquipped === item.tokenId) {
+            return true
+        }
+        if (a.ringEquipped === item.tokenId) {
+            return true
+        }
+    }
+    for (const a of p.savedTransactions) {
+        const decoded = decode(a.data, "startActions", estforPlayerAbi)
+        const equippedItems: EquippedItems = {
+            rightHand: Number(decoded?.[1]?.[0]?.[4]),
+            leftHand: Number(decoded?.[1]?.[0]?.[5]),
+            food: Number(decoded?.[1]?.[0]?.[2]),
+            head: Number(decoded?.[1]?.[0]?.[0]?.[0]),
+            neck: Number(decoded?.[1]?.[0]?.[0]?.[1]),
+            body: Number(decoded?.[1]?.[0]?.[0]?.[2]),
+            arms: Number(decoded?.[1]?.[0]?.[0]?.[3]),
+            legs: Number(decoded?.[1]?.[0]?.[0]?.[4]),
+            feet: Number(decoded?.[1]?.[0]?.[0]?.[5]),
+            magicBag: 0,
+            quiver: 0,
+            playerId: 0,
+        }
+        if (equippedItems.feet === item.tokenId) {
+            return true
+        }
+        if (equippedItems.arms === item.tokenId) {
+            return true
+        }
+        if (equippedItems.body === item.tokenId) {
+            return true
+        }
+        if (equippedItems.head === item.tokenId) {
+            return true
+        }
+        if (equippedItems.leftHand === item.tokenId) {
+            return true
+        }
+        if (equippedItems.rightHand === item.tokenId) {
+            return true
+        }
+        if (equippedItems.legs === item.tokenId) {
+            return true
+        }
+        if (equippedItems.neck === item.tokenId) {
+            return true
+        }
+    }
+    return false
+}
 
 export const calculateActionChoiceSuccessPercent = (
     a: ActionChoiceInput,
@@ -1240,6 +1314,7 @@ export const useFactoryStore = defineStore({
                     this.currentTransactionNumber = 0
                 }
             }
+            await sleep(2000)
             await this.getBankItems()
             await this.updateQueuedActions()
         },
@@ -1426,7 +1501,7 @@ export const useFactoryStore = defineStore({
 
                 for (const item of result.userItemNFTs.filter((i) =>
                     relevantTokenIds.includes(i.tokenId)
-                )) {
+                ).filter((i) => !proxyNeedsItem(i, proxy))) {
                     let d = deposits.find((d) => d.proxy === proxy.address)
                     if (!d) {
                         d = {
@@ -1467,6 +1542,7 @@ export const useFactoryStore = defineStore({
             if (selectorArray.length > 0) {
                 this.multicall(selectorArray, 50)
             }
+            await sleep(2000)
             await this.getBankItems()
         },
         async transferItemsToAddress(
@@ -1547,6 +1623,7 @@ export const useFactoryStore = defineStore({
             )
 
             await this.multicall(selectorArray, 40)
+            await sleep(2000)
             await this.getBankItems()
         },
         async getBankItems() {

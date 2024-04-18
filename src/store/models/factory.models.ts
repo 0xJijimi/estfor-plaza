@@ -42,3 +42,18 @@ export interface NeededItem {
 export interface TransferUserItemNFT extends UserItemNFT {
     transferAmount: number
 }
+
+export interface EquippedItems {
+    head: number | undefined
+    neck: number | undefined
+    body: number | undefined
+    arms: number | undefined
+    legs: number | undefined
+    feet: number | undefined
+    rightHand: number | undefined
+    leftHand: number | undefined
+    magicBag: number | undefined
+    quiver: number | undefined
+    food: number | undefined
+    playerId: number | undefined
+}
