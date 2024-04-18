@@ -169,6 +169,8 @@ watch(result, async (v) => {
             await factoryStore.getAllProxyStates()
             loading.value = false
         }
+    } else {
+        loading.value = false
     }
 })
 
