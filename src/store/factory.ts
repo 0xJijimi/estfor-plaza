@@ -97,6 +97,7 @@ export const proxyNeedsItem = (item: UserItemNFT, p: ProxySilo): boolean => {
             magicBag: 0,
             quiver: 0,
             playerId: 0,
+            pet: undefined,
         }
         if (equippedItems.feet === item.tokenId) {
             return true

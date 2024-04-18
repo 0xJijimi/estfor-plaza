@@ -3,6 +3,7 @@ import {
     CoreData,
     Donation,
     Lottery,
+    Pet,
     Player,
     QueuedAction,
     RaffleEntry,
@@ -31,6 +32,10 @@ export interface ClanMembersResult {
 
 export interface ClansResult {
     clans: Clan[]
+}
+
+export interface PetsResult {
+    pets: Pet[]
 }
 
 export interface PlayerResult {
@@ -190,4 +195,8 @@ export const getDonations = async (
 
 export const getAvatars = async (): Promise<AvatarSearchResult> => {
     return fetchRetry(`${baseUrl}/avatars`)
+}
+
+export const getOwnedPets = async (address: string): Promise<PetsResult> => {
+    return fetchRetry(`${baseUrl}/pets?owner=${address}`)
 }

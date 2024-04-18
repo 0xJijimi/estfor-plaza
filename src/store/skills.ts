@@ -90,6 +90,7 @@ export const skillNames = {
     [Skill.RESERVED18]: "Reserved 18",
     [Skill.RESERVED19]: "Reserved 19",
     [Skill.RESERVED20]: "Reserved 20",
+    [Skill.INCUBATION]: "Incubation",
 }
 
 export const actionNames = {

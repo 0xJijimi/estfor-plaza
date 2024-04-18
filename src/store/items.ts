@@ -1,8 +1,12 @@
 import {
     ActionChoiceInput,
+    BasePet,
     CombatStats,
     EquipPosition,
     ItemInput,
+    Pet,
+    PetEnhancementType,
+    PetSkin,
     Skill,
 } from "@paintswap/estfor-definitions/types"
 import { defineStore } from "pinia"
@@ -17,6 +21,7 @@ import { EstforConstants } from "@paintswap/estfor-definitions"
 import { calculateExtraXPForHeroActionInput } from "./factory"
 import { EquippedItems, ProxySilo } from "./models/factory.models"
 import { allActionChoiceIdsMagic, allActionChoiceIdsRanged } from "../data/actionChoiceIds"
+import { allBasePets } from "../data/pets"
 
 const magicSpellNames = [
     "SHADOW BLAST",
@@ -443,6 +448,17 @@ export const magicItemToActionChoice = {
     [EstforConstants.GODLY_BOW_5]: EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW,
 }
 
+export const petEnhancementTypeToName = {
+    [PetEnhancementType.DEFENCE]: "Defence",
+    [PetEnhancementType.MELEE]: "Melee",
+    [PetEnhancementType.RANGED]: "Ranged",
+    [PetEnhancementType.MAGIC]: "Magic",
+    [PetEnhancementType.HEALTH]: "Health",
+    [PetEnhancementType.MAGIC_AND_DEFENCE]: "Magic and Defence",
+    [PetEnhancementType.MELEE_AND_DEFENCE]: "Melee and Defence",
+    [PetEnhancementType.RANGED_AND_DEFENCE]: "Ranged and Defence",
+}
+
 const getMagicBag = (state: ItemState, magicXp: number) => {
     return state.magicActionChoices
                 .filter((x) => x.minXPs.every((y) => y <= magicXp))
@@ -492,6 +508,72 @@ export const useItemStore = defineStore({
             return state.equippedItems.find(
                 (x) => x.playerId === Number(playerState.id)
             )
+        },
+        getOwnedAndBasicPets: () => {
+            return (ownedOnly: boolean) => {
+                const coreStore = useCoreStore()
+                const playerState = coreStore.playerState
+                const pets = [...coreStore.pets]
+
+                if (!ownedOnly) {
+                    for (const p of allBasePets.filter(x => x.skin === PetSkin.DEFAULT)) {
+                        let i = 0
+                        let hasLevel = true
+                        for (const m of p.skillMinLevels) {
+                            switch (p.skillEnhancements[i]) {
+                                case Skill.DEFENCE:
+                                    if (m > getLevel(playerState.defenceXP)) {
+                                        hasLevel = false
+                                    }
+                                    break
+                                case Skill.MAGIC:
+                                    if (m > getLevel(playerState.magicXP)) {
+                                        hasLevel = false
+                                    }
+                                    break
+                                case Skill.MELEE:
+                                    if (m > getLevel(playerState.meleeXP)) {
+                                        hasLevel = false
+                                    }
+                                    break
+                                case Skill.RANGED:
+                                    if (m > getLevel(playerState.rangedXP)) {
+                                        hasLevel = false
+                                    }
+                                    break
+                            }
+                            i++
+                        }
+                        if (!hasLevel) continue
+
+                        pets.push({
+                            // @ts-ignore
+                            name: `Min T${p.tier} ${petEnhancementTypeToName[p.enhancementType]}`,
+                            owner: coreStore.playerState.owner,
+                            skillFixedEnhancements: p.skillFixedMins,
+                            skillPercentageEnhancements: p.skillPercentageMins,
+                            basePet: {
+                                tier: p.tier,
+                                enhancementType: p.enhancementType,
+                                skillEnhancements: p.skillEnhancements,
+                            } as BasePet
+                        } as Pet)
+                        pets.push({
+                            // @ts-ignore
+                            name: `Max T${p.tier} ${petEnhancementTypeToName[p.enhancementType]}`,
+                            owner: coreStore.playerState.owner,
+                            skillFixedEnhancements: p.skillFixedMaxs,
+                            skillPercentageEnhancements: p.skillPercentageMaxs,
+                            basePet: {
+                                tier: p.tier,
+                                enhancementType: p.enhancementType,
+                                skillEnhancements: p.skillEnhancements,
+                            } as BasePet
+                        } as Pet)
+                    }
+                }
+                return pets
+            }
         },
         getItemsForSlotAndXP: (state: ItemState) => {
             return (position: EquipPosition) => {
@@ -591,7 +673,7 @@ export const useItemStore = defineStore({
                     (x) => x.playerId === Number(playerState.id)
                 ) as any) || {}
             Object.keys(localEquippedItems).forEach((key) => {
-                if (key !== "magicBag" && key !== "playerId") {
+                if (key !== "magicBag" && key !== "playerId" && key !== "pet") {
                     // skip magic bag as they require special calculations
                     const item = state.items.find(
                         (x) => x.tokenId === localEquippedItems[key]
@@ -612,6 +694,46 @@ export const useItemStore = defineStore({
                 stats.magic += localEquippedItems.magicBag
             }
 
+            if (localEquippedItems.pet) {
+                switch (localEquippedItems.pet.basePet.enhancementType) {
+                    case PetEnhancementType.DEFENCE:
+                        stats.meleeDefence += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
+                        stats.magicDefence += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
+                        stats.rangedDefence += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
+                        break
+                    case PetEnhancementType.MELEE:
+                        stats.melee += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.meleeXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
+                        break
+                    case PetEnhancementType.RANGED:
+                        stats.ranged += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.rangedXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
+                        break
+                    case PetEnhancementType.MAGIC:
+                        stats.magic += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.magicXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
+                        break
+                    case PetEnhancementType.HEALTH:
+                        stats.health += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.healthXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
+                        break
+                    case PetEnhancementType.MAGIC_AND_DEFENCE:
+                        stats.magic += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.magicXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
+                        stats.meleeDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
+                        stats.magicDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
+                        stats.rangedDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
+                        break
+                    case PetEnhancementType.MELEE_AND_DEFENCE:
+                        stats.melee += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.meleeXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
+                        stats.meleeDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
+                        stats.magicDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
+                        stats.rangedDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
+                        break
+                    case PetEnhancementType.RANGED_AND_DEFENCE:
+                        stats.ranged += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.rangedXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
+                        stats.meleeDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
+                        stats.magicDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
+                        stats.rangedDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
+                        break
+                }
+            }
+
             return stats
         },
         getTotalCombatStats(state: ItemState) {
@@ -624,7 +746,7 @@ export const useItemStore = defineStore({
                     (x) => x.playerId === Number(playerState.id)
                 ) as any) || {}
             Object.keys(localEquippedItems).forEach((key) => {
-                if (key !== "magicBag" && key !== "playerId") {
+                if (key !== "magicBag" && key !== "playerId" && key !== "pet") {
                     // skip magic bag as they require special calculations
                     const item = state.items.find(
                         (x) => x.tokenId === localEquippedItems[key]
@@ -643,6 +765,46 @@ export const useItemStore = defineStore({
 
             if (localEquippedItems.magicBag) {
                 stats.magic += localEquippedItems.magicBag
+            }
+
+            if (localEquippedItems.pet) {
+                switch (localEquippedItems.pet.basePet.enhancementType) {
+                    case PetEnhancementType.DEFENCE:
+                        stats.meleeDefence += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
+                        stats.magicDefence += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
+                        stats.rangedDefence += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
+                        break
+                    case PetEnhancementType.MELEE:
+                        stats.melee += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.meleeXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
+                        break
+                    case PetEnhancementType.RANGED:
+                        stats.ranged += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.rangedXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
+                        break
+                    case PetEnhancementType.MAGIC:
+                        stats.magic += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.magicXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
+                        break
+                    case PetEnhancementType.HEALTH:
+                        stats.health += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.healthXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
+                        break
+                    case PetEnhancementType.MAGIC_AND_DEFENCE:
+                        stats.magic += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.magicXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
+                        stats.meleeDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
+                        stats.magicDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
+                        stats.rangedDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
+                        break
+                    case PetEnhancementType.MELEE_AND_DEFENCE:
+                        stats.melee += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.meleeXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
+                        stats.meleeDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
+                        stats.magicDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
+                        stats.rangedDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
+                        break
+                    case PetEnhancementType.RANGED_AND_DEFENCE:
+                        stats.ranged += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.rangedXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
+                        stats.meleeDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
+                        stats.magicDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
+                        stats.rangedDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
+                        break
+                }
             }
 
             stats.melee += getLevel(playerState.meleeXP)
@@ -660,7 +822,7 @@ export const useItemStore = defineStore({
                 const stats = new CombatStats()
 
                 Object.keys(equippedItems).forEach((key) => {
-                    if (key !== "magicBag" && key !== "playerId") {
+                    if (key !== "magicBag" && key !== "playerId" && key !== "pet") {
                         // skip magic bag as they require special calculations
                         const item = state.items.find(
                             // @ts-ignore
@@ -715,6 +877,7 @@ export const useItemStore = defineStore({
                 e.magicBag = equippedItems.magicBag
                 e.quiver = equippedItems.quiver
                 e.food = equippedItems.food
+                e.pet = equippedItems.pet
             } else {
                 equippedItems.playerId = Number(coreStore.playerId)
                 this.equippedItems.push(equippedItems)

@@ -16,6 +16,10 @@ async function main() {
     await copyFile(join(__dirname, '../estfor-contracts/scripts/data/fullAttireBonuses.ts'), join(__dirname, '../src/data/fullAttireBonuses.ts'))
 
     await copyFile(join(__dirname, '../estfor-contracts/scripts/data/actionChoiceIds.ts'), join(__dirname, '../src/data/actionChoiceIds.ts'))
+
+    await copyFile(join(__dirname, '../estfor-contracts/scripts/data/pets.ts'), join(__dirname, '../src/data/pets.ts'))
+
+    await copyFile(join(__dirname, '../estfor-contracts/scripts/data/passiveActions.ts'), join(__dirname, '../src/data/passiveActions.ts'))
 }
 
 main().catch((e) => {

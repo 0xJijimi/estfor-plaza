@@ -212,6 +212,7 @@ export const useMonsterStore = defineStore({
                     magicBag: Number(decoded?.[1]?.[0]?.[3]),
                     quiver: Number(decoded?.[1]?.[0]?.[3]),
                     playerId: 0,
+                    pet: undefined,
                 }
 
                 let isMelee =

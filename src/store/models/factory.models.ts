@@ -1,4 +1,4 @@
-import { Player, QueuedAction, UserItemNFT } from "@paintswap/estfor-definitions/types"
+import { Pet, Player, QueuedAction, UserItemNFT } from "@paintswap/estfor-definitions/types"
 
 export interface SavedTransaction {
     to: string
@@ -56,4 +56,5 @@ export interface EquippedItems {
     quiver: number | undefined
     food: number | undefined
     playerId: number | undefined
+    pet: Pet | undefined
 }

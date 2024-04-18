@@ -8,11 +8,13 @@ import {
     getGlobalData,
     getUserItemNFTs,
     getSoloPlayerState,
+    getOwnedPets,
 } from "../utils/api"
 import {
     BoostType,
     Clan,
     CoreData,
+    Pet,
     Player,
     QueuedAction,
     Skill,
@@ -60,6 +62,7 @@ export interface CoreState {
     inventory: UserItemNFT[]
     heroRoster: Player[]
     queuedActions: QueuedAction[]
+    pets: Pet[]
 }
 
 export const boostVialNames = {
@@ -213,6 +216,7 @@ export const useCoreStore = defineStore({
             playerId: "0",
             playerState: {} as Player,
             originalState: {} as Player,
+            pets: [] as Pet[],
             clanState: null,
             coreData: {} as CoreData,
             applyBoost: true,
@@ -397,6 +401,7 @@ export const useCoreStore = defineStore({
             this.playerId = "0"
             this.playerState = {} as Player
             this.originalState = {} as Player
+            this.pets = [] as Pet[]
             this.clanState = null
             this.inventory = []
             this.queuedActions = []
@@ -428,7 +433,12 @@ export const useCoreStore = defineStore({
                     this.playerState.owner,
                     allFullAttireBonuses.flatMap((x) => x.itemTokenIds)
                 )
-                this.inventory = inventory.userItemNFTs
+                try {
+                    const pets = await getOwnedPets(this.playerState.owner)
+                    this.pets = pets.pets
+                } catch {}
+                
+                this.inventory = inventory.userItemNFTs                
                 this.originalState = JSON.parse(
                     JSON.stringify(this.playerState)
                 )
