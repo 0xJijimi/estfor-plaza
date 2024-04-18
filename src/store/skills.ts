@@ -592,13 +592,13 @@ export const useSkillStore = defineStore({
             fishing: allActions.filter(
                 (x) => x.info.skill === Skill.FISHING
             ) as ActionInput[],
-            cooking: allActionChoicesCooking,
-            crafting: allActionChoicesCrafting,
-            smithing: allActionChoicesSmithing,
-            firemaking: allActionChoicesFiremaking,
-            alchemy: allActionChoicesAlchemy,
-            forging: allActionChoicesForging,
-            fletching: allActionChoicesFletching,
+            cooking: [...allActionChoicesCooking],
+            crafting: [...allActionChoicesCrafting],
+            smithing: [...allActionChoicesSmithing],
+            firemaking: [...allActionChoicesFiremaking],
+            alchemy: [...allActionChoicesAlchemy],
+            forging: [...allActionChoicesForging],
+            fletching: [...allActionChoicesFletching],
             combat: allActions.filter(
                 (x) => x.info.skill === Skill.COMBAT
             ) as ActionInput[],
