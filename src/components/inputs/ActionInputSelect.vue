@@ -59,7 +59,7 @@ const minHeroXPForSkill = computed(() => {
     if (props.skillId === Skill.COMBAT) return 0
     return Math.min(
         ...props.heroes.map((h) => {
-            const extraXP = calculateExtraXPForHeroActionInput(h, props.skillId)
+            const { extraXP } = calculateExtraXPForHeroActionInput(h, props.skillId)
 
             // @ts-ignore
             return Number(h.playerState[skillToXPMap[props.skillId]]) + extraXP

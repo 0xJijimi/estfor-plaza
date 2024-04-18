@@ -31,6 +31,7 @@
                     class="ms-2"
                     v-model="selectedHeroGroup"
                     :heroes="factoryStore.assignedProxys"
+                    @update:modelValue="pageNumber = 0"
                 />
             </div>
             <div class="overflow-x-auto">

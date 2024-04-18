@@ -411,7 +411,7 @@ const checkRequiredItems = async () => {
                 for (const h of heroesToAssign.value) {
                     const userItemsResult = await getUserItemNFTs(h.address, [])
                     // filter out user items that are below minXP
-                    const extraXP = calculateExtraXPForHeroActionInput(
+                    const { extraXP } = calculateExtraXPForHeroActionInput(
                         h,
                         skillId.value
                     )
@@ -451,6 +451,15 @@ const checkRequiredItems = async () => {
     }
 }
 
+const assignRightHandItemsForActionInput = () => {
+    rightHandItems.value = []
+    if (actionId.value > 0) {
+        const action = allActions.find((x) => x.actionId == actionId.value)
+        const min = action?.info.handItemTokenIdRangeMin
+        rightHandItems.value.push(min)
+    }
+}
+
 const checkCombatItems = async () => {
     checking.value = true
     try {
@@ -460,7 +469,7 @@ const checkCombatItems = async () => {
             for (const h of heroesToAssign.value) {
                 const userItemsResult = await getUserItemNFTs(h.address, [])
                 // filter out user items that are below minXP
-                const extraXP = calculateExtraXPForHeroActionInput(
+                const { meleeXP, magicXP, rangedXP, defenceXP } = calculateExtraXPForHeroActionInput(
                     h,
                     skillId.value
                 )
@@ -472,7 +481,7 @@ const checkCombatItems = async () => {
                                 ?.minXP <=
                             // @ts-ignore
                             Number(h.playerState[skillToXPMap[x.item.skill]] || 0) +
-                                extraXP
+                                (x.item.skill === Skill.MELEE ? meleeXP : x.item.skill === Skill.MAGIC ? magicXP : x.item.skill === Skill.RANGED ? rangedXP : x.item.skill === Skill.DEFENCE ? defenceXP : 0)
                         )
                     }
                 )
@@ -513,7 +522,7 @@ const checkActionChoiceRequiredItems = async () => {
                 for (const h of heroesToAssign.value) {
                     const userItemsResult = await getUserItemNFTs(h.address, [])
                     // filter out user items that are below minXP
-                    const extraXP = calculateExtraXPForHeroActionInput(
+                    const { extraXP } = calculateExtraXPForHeroActionInput(
                         h,
                         skillId.value
                     )
@@ -552,6 +561,15 @@ const checkActionChoiceRequiredItems = async () => {
     }
 }
 
+const assignRightHandItemsForActionChoiceInput = async () => {
+    rightHandItems.value = []
+    if (actionChoiceOutputId.value > 0) {
+        const action = allActions.find((x) => x.info.skill == skillId.value) // only 1 for action choice
+        const min = action?.info.handItemTokenIdRangeMin
+        rightHandItems.value.push(min)
+    }
+}
+
 const assignHeroes = async () => {
     loading.value = true
     missingItems.value = []
@@ -560,16 +578,18 @@ const assignHeroes = async () => {
             skillId.value > 0 &&
             skillStore.getActionInputsForSkill(skillId.value).length > 0
         ) {
-            if (checkItems.value) {
+            if (skillId.value === Skill.COMBAT) {
+                if (equippedItems.value.rightHand === undefined) {
+                    missingItems.value.push("Right Hand is required")
+                    return
+                }
+                if (isMagic.value && equippedItems.value.magicBag === undefined) {
+                    missingItems.value.push("Magic Bag is required")
+                    return
+                }
+            }
+            if (checkItems.value) { 
                 if (skillId.value === Skill.COMBAT) {
-                    if (equippedItems.value.rightHand === undefined) {
-                        missingItems.value.push("Right Hand is required")
-                        return
-                    }
-                    if (isMagic.value && equippedItems.value.magicBag === undefined) {
-                        missingItems.value.push("Magic Bag is required")
-                        return
-                    }
                     await checkCombatItems()
                 } else {
                     await checkRequiredItems()
@@ -577,14 +597,16 @@ const assignHeroes = async () => {
                 if (missingItems.value.length > 0) {
                     return
                 }
+            } else if (skillId.value !== Skill.COMBAT) {
+                await assignRightHandItemsForActionInput()
             }
             await factoryStore.assignActionToProxy(
                 heroesToAssign.value,
                 actionId.value,
                 skillId.value === Skill.COMBAT ? 
-                    combatStyle.value === Skill.MELEE ? 
+                    isMelee.value ? 
                         EstforConstants.ACTIONCHOICE_MELEE_MONSTER : 
-                    combatStyle.value === Skill.RANGED ? 
+                    isRanged.value ? 
                         rangedItemToActionChoice[equippedItems.value.rightHand || 0] : 
                         allActionChoiceIdsMagic[allActionChoicesMagic.findIndex(x => x.skillDiff === equippedItems.value.magicBag)] || 0 : 0,
                 equippedItems.value.head,
@@ -609,6 +631,8 @@ const assignHeroes = async () => {
                 if (missingItems.value.length > 0) {
                     return
                 }
+            } else {
+                await assignRightHandItemsForActionChoiceInput()
             }
             await factoryStore.assignActionToProxy(
                 heroesToAssign.value,

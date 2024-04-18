@@ -50,6 +50,7 @@ import { config } from "../config"
 import { useBroochStore } from "./brooch"
 import { useMonsterStore } from "./monsters"
 import { FactoryState, NeededItem, ProxySilo, SavedTransaction, TransferUserItemNFT } from "./models/factory.models"
+import { allItems } from "../data/items"
 
 export const calculateActionChoiceSuccessPercent = (
     a: ActionChoiceInput,
@@ -288,11 +289,15 @@ const constructQueuedActions = (
 export const calculateExtraXPForHeroActionInput = (
     h: ProxySilo,
     skillId: Skill
-): number => {
+): { extraXP: number, defenceXP: number, magicXP: number, meleeXP: number, rangedXP: number } => {
     const skillStore = useSkillStore()
     const monsterStore = useMonsterStore()
     const relevantActions = h.queuedActions.filter((x) => x.skill == skillId)
     let extraXP = 0
+    let defenceXP = 0
+    let magicXP = 0
+    let meleeXP = 0
+    let rangedXP = 0
     const timenow = Date.now() / 1000
     for (const action of relevantActions) {
         const a = skillStore
@@ -304,7 +309,20 @@ export const calculateExtraXPForHeroActionInput = (
         if (parseInt(action.startTime) + action.timespan < timenow) {
             if (action.skill === Skill.COMBAT) {
                 const { xpPerHour } = monsterStore.getKillsPerHour((action.timespan / 60 / 60), h, a)
-                extraXP += xpPerHour * (action.timespan / 60 / 60)
+                if (action.combatStyle === CombatStyle.DEFENCE) {
+                    defenceXP += xpPerHour * (action.timespan / 60 / 60)
+                } else {
+                    const rightHand = allItems.find(x => x.tokenId === action.rightHandEquipmentTokenId)
+                    if (rightHand) {
+                        if (rightHand.skill === Skill.MAGIC) {
+                            magicXP += xpPerHour * (action.timespan / 60 / 60)
+                        } else if (rightHand.skill === Skill.MELEE) {
+                            meleeXP += xpPerHour * (action.timespan / 60 / 60)
+                        } else if (rightHand.skill === Skill.RANGED) {
+                            rangedXP += xpPerHour * (action.timespan / 60 / 60)
+                        }
+                    }
+                }
             } else {
                 extraXP += a.info.xpPerHour * (action.timespan / 60 / 60)
             }
@@ -312,13 +330,26 @@ export const calculateExtraXPForHeroActionInput = (
             const timeInAction = timenow - parseInt(action.startTime)
             if (action.skill === Skill.COMBAT) {
                 const { xpPerHour } = monsterStore.getKillsPerHour((timeInAction / 60 / 60), h, a)
-                extraXP += xpPerHour * (timeInAction / 60 / 60)
+                if (action.combatStyle === CombatStyle.DEFENCE) {
+                    defenceXP += xpPerHour * (timeInAction / 60 / 60)
+                } else {
+                    const rightHand = allItems.find(x => x.tokenId === action.rightHandEquipmentTokenId)
+                    if (rightHand) {
+                        if (rightHand.skill === Skill.MAGIC) {
+                            magicXP += xpPerHour * (timeInAction / 60 / 60)
+                        } else if (rightHand.skill === Skill.MELEE) {
+                            meleeXP += xpPerHour * (timeInAction / 60 / 60)
+                        } else if (rightHand.skill === Skill.RANGED) {
+                            rangedXP += xpPerHour * (timeInAction / 60 / 60)
+                        }
+                    }
+                }
             } else {
                 extraXP += a.info.xpPerHour * (timeInAction / 60 / 60)
             }
         }
     }
-    return extraXP
+    return { extraXP, defenceXP, magicXP, meleeXP, rangedXP }
 }
 
 export const calculateExtraXPForHeroActionChoiceInput = (

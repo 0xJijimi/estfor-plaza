@@ -538,21 +538,18 @@ export const useItemStore = defineStore({
                 let minMagicXp = 0
                 let minFullMode = true
                 for (const h of heroes) {
-                    const extraDefenceXp = calculateExtraXPForHeroActionInput(h, Skill.DEFENCE)
-                    if (Number(h.playerState.defenceXP) + extraDefenceXp > minDefenceXp) {
-                        minDefenceXp = Number(h.playerState.defenceXP) + extraDefenceXp
+                    const { defenceXP, meleeXP, magicXP, rangedXP } = calculateExtraXPForHeroActionInput(h, Skill.COMBAT)
+                    if (Number(h.playerState.defenceXP) + defenceXP > minDefenceXp) {
+                        minDefenceXp = Number(h.playerState.defenceXP) + defenceXP
                     }
-                    const extraMeleeXp = calculateExtraXPForHeroActionInput(h, Skill.MELEE)
-                    if (Number(h.playerState.meleeXP) + extraMeleeXp > minMeleeXp) {
-                        minMeleeXp = Number(h.playerState.meleeXP) + extraMeleeXp
+                    if (Number(h.playerState.meleeXP) + meleeXP > minMeleeXp) {
+                        minMeleeXp = Number(h.playerState.meleeXP) + meleeXP
                     }
-                    const extraRangedXp = calculateExtraXPForHeroActionInput(h, Skill.RANGED)
-                    if (Number(h.playerState.rangedXP) + extraRangedXp > minRangedXp) {
-                        minRangedXp = Number(h.playerState.rangedXP) + extraRangedXp
+                    if (Number(h.playerState.rangedXP) + rangedXP > minRangedXp) {
+                        minRangedXp = Number(h.playerState.rangedXP) + rangedXP
                     }
-                    const extraMagicXp = calculateExtraXPForHeroActionInput(h, Skill.MAGIC)
-                    if (Number(h.playerState.magicXP) + extraMagicXp > minMagicXp) {
-                        minMagicXp = Number(h.playerState.magicXP) + extraMagicXp
+                    if (Number(h.playerState.magicXP) + magicXP > minMagicXp) {
+                        minMagicXp = Number(h.playerState.magicXP) + magicXP
                     }
                     if (h.playerState.isFullMode === false) {
                         minFullMode = false
@@ -582,9 +579,9 @@ export const useItemStore = defineStore({
 
                 let minMagicXp = 0
                 for (const h of heroes) {
-                    const extraMagicXp = calculateExtraXPForHeroActionInput(h, Skill.MAGIC)
-                    if (Number(h.playerState.magicXP) + extraMagicXp > minMagicXp) {
-                        minMagicXp = Number(h.playerState.magicXP) + extraMagicXp
+                    const { magicXP } = calculateExtraXPForHeroActionInput(h, Skill.COMBAT)
+                    if (Number(h.playerState.magicXP) + magicXP > minMagicXp) {
+                        minMagicXp = Number(h.playerState.magicXP) + magicXP
                     }
                 }
 
