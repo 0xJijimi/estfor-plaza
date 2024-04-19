@@ -51,6 +51,17 @@
                         silosWithActionChoicesOnly.length === 1 ? "" : "s"
                     }}
                 </button>
+                <label class="label cursor-pointer">
+                    <span class="label-text text-xs mr-2 items-center flex">
+                        Override missing items and execute anyway                
+                    </span>
+                    <input
+                        type="checkbox"
+                        class="checkbox checkbox-primary"
+                        v-model="executeComplexOverride"
+                        @change="missingItems = []"
+                    />
+                </label>
                 <div class="mt-5">
                     <div
                         v-for="item in missingItems"
@@ -191,6 +202,7 @@ const toggle = ref(true)
 const error = ref<string | null>(null)
 const relevantTokens = ref<{ selected: boolean; tokenId: number }[]>([])
 const stage = ref<string | null>(null)
+const executeComplexOverride = ref(false)
 
 const silosWithEmptyQueuesOrActionInputOnly = computed(() => {
     return silosToExecute.value.filter(
@@ -220,6 +232,7 @@ const openDialog = (heroes: ProxySilo[]) => {
     actionInputsExecuted.value = false
     silosToExecute.value = heroes
     missingItems.value = []
+    executeComplexOverride.value = false
     error.value = null
     const dialog = document.getElementById(props.id) as HTMLDialogElement
     dialog.showModal()
@@ -488,13 +501,25 @@ const executeActionChoiceSavedTransactions = async () => {
                     !ownedItem ||
                     itemTotals[tokenId] > Number(ownedItem.amount)
                 ) {
-                    missingItems.value.push(
-                        `${
-                            itemTotals[tokenId] - Number(ownedItem?.amount || 0)
-                        } ${
-                            itemNames[Number(tokenId)]
-                        } is missing from the Bank`
-                    )
+                    if (executeComplexOverride.value) {
+                        // get percentage of ownedItems vs itemTotals
+                        const percentage = Number(ownedItem?.amount || 0) / itemTotals[tokenId]
+                        
+                        // balance the item totals with the percentage
+                        for (const item of itemsNeeded.filter(x => x.items.some(y => y.tokenId === Number(tokenId)))) {
+                            for (const i of item.items.filter(x => x.tokenId === Number(tokenId))) {
+                                i.amount = Math.floor(i.amount * percentage)
+                            }                      
+                        }
+                    } else {
+                        missingItems.value.push(
+                            `${
+                                itemTotals[tokenId] - Number(ownedItem?.amount || 0)
+                            } ${
+                                itemNames[Number(tokenId)]
+                            } is missing from the Bank`
+                        )
+                    }
                 }
             }
 

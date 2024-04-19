@@ -183,14 +183,26 @@
                     type="checkbox"
                     class="checkbox checkbox-primary"
                     v-model="checkItems"
+                    @change="missingItems = []"
                 />
             </label>
-            <div
-                v-for="item in missingItems"
-                :key="item"
-                class="text-error text-sm"
-            >
-                {{ item }}
+            <ItemSelect
+                v-if="!checkItems && skillId !== Skill.COMBAT && rightHandOptions.length > 0"
+                :items="rightHandOptions"
+                class="mt-5"
+                custom-class="select-md"
+                label="Tool"
+                v-model="manualRightHand"
+                :empty-equipment="false"
+            />
+            <div v-if="missingItems.length > 0" class="mt-5">
+                <div
+                    v-for="item in missingItems"
+                    :key="item"
+                    class="text-error text-sm"
+                >
+                    {{ item }}
+                </div>
             </div>
             <div v-if="checking" class="flex justify-between items-center mt-5">
                 <span
@@ -283,12 +295,14 @@ const equippedItems = ref({
     food: undefined,
 })
 const checkItems = ref(true)
+const manualRightHand = ref(undefined)
 
 const openDialog = (heroes: ProxySilo[]) => {
     heroesToAssign.value = heroes
     missingItems.value = []
     rightHandItems.value = []
     combatStyle.value = Skill.NONE
+    manualRightHand.value = undefined
     equippedItems.value = {
         head: undefined,
         body: undefined,
@@ -339,6 +353,46 @@ const magicBagItems = computed(() => itemStore.getMagicActionChoicesForHeroes(he
 const foodItems = computed(() =>
     itemStore.getItemsForSlotAndHeroes(EquipPosition.FOOD, heroesToAssign.value)
 )
+const rightHandOptions = computed(() => {
+    if (
+        skillId.value > 0 &&
+        skillStore.getActionInputsForSkill(skillId.value).length > 0
+    ) {
+        if (actionId.value > 0 && skillId.value !== Skill.COMBAT) {
+            const action = allActions.find((x) => x.actionId == actionId.value)
+            const max = action?.info.handItemTokenIdRangeMax
+            const min = action?.info.handItemTokenIdRangeMin
+
+            // get an array of numbers between min and max (inclusive)
+            const requiredItems = Array.from(
+                { length: max - min + 1 },
+                (_, i) => i + min
+            )
+            return itemStore.items.filter((x) =>
+                requiredItems.includes(x.tokenId)
+            )
+        }
+    } else if (
+        skillId.value > 0 &&
+        skillStore.getActionChoiceInputsForSkill(skillId.value).length > 0
+    ) {
+        if (actionChoiceOutputId.value > 0) {
+            const action = allActions.find((x) => x.info.skill == skillId.value) // only 1 for action choice
+            const max = action?.info.handItemTokenIdRangeMax
+            const min = action?.info.handItemTokenIdRangeMin
+
+            // get an array of numbers between min and max (inclusive)
+            const requiredItems = Array.from(
+                { length: max - min + 1 },
+                (_, i) => i + min
+            )
+            return itemStore.items.filter((x) =>
+                requiredItems.includes(x.tokenId)
+            )
+        }
+    }
+    return []
+})
 
 const isMelee = computed(() => {
     return combatRightHandItems.value.find(
@@ -451,15 +505,6 @@ const checkRequiredItems = async () => {
     }
 }
 
-const assignRightHandItemsForActionInput = () => {
-    rightHandItems.value = []
-    if (actionId.value > 0) {
-        const action = allActions.find((x) => x.actionId == actionId.value)
-        const min = action?.info.handItemTokenIdRangeMin
-        rightHandItems.value.push(min)
-    }
-}
-
 const checkCombatItems = async () => {
     checking.value = true
     try {
@@ -561,18 +606,10 @@ const checkActionChoiceRequiredItems = async () => {
     }
 }
 
-const assignRightHandItemsForActionChoiceInput = async () => {
-    rightHandItems.value = []
-    if (actionChoiceOutputId.value > 0) {
-        const action = allActions.find((x) => x.info.skill == skillId.value) // only 1 for action choice
-        const min = action?.info.handItemTokenIdRangeMin
-        rightHandItems.value.push(min)
-    }
-}
-
 const assignHeroes = async () => {
     loading.value = true
     missingItems.value = []
+    rightHandItems.value = []
     try {
         if (
             skillId.value > 0 &&
@@ -598,7 +635,15 @@ const assignHeroes = async () => {
                     return
                 }
             } else if (skillId.value !== Skill.COMBAT) {
-                await assignRightHandItemsForActionInput()
+                if (!manualRightHand.value && rightHandOptions.value.length > 0) {
+                    missingItems.value.push("Tool is required")
+                    return
+                }
+                if (manualRightHand.value) {
+                    rightHandItems.value.push(manualRightHand.value)
+                } else {
+                    rightHandItems.value.push(0)
+                }
             }
             await factoryStore.assignActionToProxy(
                 heroesToAssign.value,
@@ -632,7 +677,15 @@ const assignHeroes = async () => {
                     return
                 }
             } else {
-                await assignRightHandItemsForActionChoiceInput()
+                if (!manualRightHand.value && rightHandOptions.value.length > 0) {
+                    missingItems.value.push("Tool is required")
+                    return
+                }
+                if (manualRightHand.value) {
+                    rightHandItems.value.push(manualRightHand.value)
+                } else {
+                    rightHandItems.value.push(0)
+                }
             }
             await factoryStore.assignActionToProxy(
                 heroesToAssign.value,
