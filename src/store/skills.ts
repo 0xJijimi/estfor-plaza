@@ -183,15 +183,15 @@ export const actionNames = {
 
 export const actionChoiceNames = {
     // taken from the choices in ../data/actionChoiceId.ts
-    [EstforConstants.ACTIONCHOICE_FIREMAKING_LOG]: "Log",
-    [EstforConstants.ACTIONCHOICE_FIREMAKING_OAK]: "Oak",
-    [EstforConstants.ACTIONCHOICE_FIREMAKING_WILLOW]: "Willow",
-    [EstforConstants.ACTIONCHOICE_FIREMAKING_MAPLE]: "Maple",
-    [EstforConstants.ACTIONCHOICE_FIREMAKING_REDWOOD]: "Redwood",
-    [EstforConstants.ACTIONCHOICE_FIREMAKING_MAGICAL]: "Magical",
-    [EstforConstants.ACTIONCHOICE_FIREMAKING_ASH]: "Ash",
-    [EstforConstants.ACTIONCHOICE_FIREMAKING_ENCHANTED]: "Enchanted",
-    [EstforConstants.ACTIONCHOICE_FIREMAKING_LIVING]: "Living",
+    [EstforConstants.ACTIONCHOICE_FIREMAKING_LOG]: "Ash from Log",
+    [EstforConstants.ACTIONCHOICE_FIREMAKING_OAK]: "Ash from Oak",
+    [EstforConstants.ACTIONCHOICE_FIREMAKING_WILLOW]: "Ash from Willow",
+    [EstforConstants.ACTIONCHOICE_FIREMAKING_MAPLE]: "Ash from Maple",
+    [EstforConstants.ACTIONCHOICE_FIREMAKING_REDWOOD]: "Ash from Redwood",
+    [EstforConstants.ACTIONCHOICE_FIREMAKING_MAGICAL]: "Ash from Magical",
+    [EstforConstants.ACTIONCHOICE_FIREMAKING_ASH]: "Ash from Ash",
+    [EstforConstants.ACTIONCHOICE_FIREMAKING_ENCHANTED]: "Ash from Enchanted",
+    [EstforConstants.ACTIONCHOICE_FIREMAKING_LIVING]: "Ash from Living",
 
     [EstforConstants.ACTIONCHOICE_SMITHING_BRONZE_BAR]: "Bronze Bar",
     [EstforConstants.ACTIONCHOICE_SMITHING_IRON_BAR]: "Iron Bar",
