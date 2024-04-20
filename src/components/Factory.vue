@@ -95,7 +95,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from "vue"
+import { computed, ref } from "vue"
 import { useFactoryStore } from "../store/factory"
 import { useAppStore } from "../store/app"
 import { useQuery } from "@vue/apollo-composable"
@@ -103,7 +103,7 @@ import gql from "graphql-tag"
 import EmptySilos from "./factory/EmptySilos.vue"
 import UnassignedSilos from "./factory/UnassignedSilos.vue"
 import AssignedSilos from "./factory/AssignedSilos.vue"
-import { getAccount } from "@wagmi/core"
+import { getAccount, watchAccount } from "@wagmi/core"
 import ItemBank from "./factory/ItemBank.vue"
 import ViewSilos from "./dialogs/ViewSilos.vue"
 import { config } from "../config"
@@ -119,15 +119,15 @@ const silosToCreate = ref(5)
 
 const viewSilosRef = ref<typeof ViewSilos>()
 
-const account = getAccount(config)
 const hasRubyBrooch = computed(() => broochStore.hasAccess(1))
+const factoryAccount = ref(getAccount(config))
 
 const rubyBroochPaywallRef = ref<typeof RubyBroochPaywall>()
 
-const { result, onError, refetch, fetchMore } = useQuery(
+const { onError, refetch, fetchMore, onResult } = useQuery(
     gql`
-    query getProxys($offset: Int) {
-        factoryRegistryCreateds(skip: $offset, where: { owner: "${account.address}" }) {
+    query getProxys($offset: Int, $acc: String!) {
+        factoryRegistryCreateds(skip: $offset, where: { owner: $acc }) {
             sender
             owner
             proxy
@@ -137,46 +137,52 @@ const { result, onError, refetch, fetchMore } = useQuery(
 `,
     () => ({
         offset: 0,
+        acc: factoryAccount.value.address,
     })
 )
 
-watch(result, async (v) => {
-    if (v?.factoryRegistryCreateds?.length > 0) {
-        if (v.factoryRegistryCreateds.length % 100 === 0) {
-            const a = await fetchMore({
-                variables: {
-                    offset: v?.factoryRegistryCreateds?.length,
-                },
-                updateQuery: (previousResult, { fetchMoreResult }) => {
-                    if (!fetchMoreResult) {
-                        return previousResult
-                    }
-                    return {
-                        factoryRegistryCreateds: [
-                            ...previousResult.factoryRegistryCreateds,
-                            ...fetchMoreResult.factoryRegistryCreateds,
-                        ],
-                    }
-                },
-            })
-            if (a?.data?.factoryRegistryCreateds?.length === 0) {
-                await factoryStore.setProxys(v.factoryRegistryCreateds)
+onResult(async (v) => {
+    if (v.data) {
+        if (v?.data?.factoryRegistryCreateds?.length > 0) {
+            if (v.data?.factoryRegistryCreateds.length % 100 === 0) {
+                const a = await fetchMore({
+                    variables: {
+                        offset: v?.data?.factoryRegistryCreateds?.length,
+                    },
+                    updateQuery: (previousResult, { fetchMoreResult }) => {
+                        if (!fetchMoreResult) {
+                            return previousResult
+                        }
+                        return {
+                            factoryRegistryCreateds: [
+                                ...previousResult.factoryRegistryCreateds,
+                                ...fetchMoreResult.factoryRegistryCreateds,
+                            ],
+                        }
+                    },
+                })
+                if (a?.data?.factoryRegistryCreateds?.length === 0) {
+                    await factoryStore.setProxys(v.data?.factoryRegistryCreateds)
+                    await factoryStore.getAllProxyStates()
+                    loading.value = false
+                }
+            } else {
+                await factoryStore.setProxys(v.data?.factoryRegistryCreateds)
                 await factoryStore.getAllProxyStates()
                 loading.value = false
             }
         } else {
-            await factoryStore.setProxys(v.factoryRegistryCreateds)
-            await factoryStore.getAllProxyStates()
             loading.value = false
         }
-    } else {
-        loading.value = false
     }
 })
 
 const onCreateHeroes = async () => {
     await new Promise((resolve) => setTimeout(resolve, 2000))
-    await refetch()
+    await refetch({
+        offset: 0,
+        acc: factoryAccount.value.address,
+    })
 }
 
 const createSilos = async () => {
@@ -193,7 +199,10 @@ const createSilos = async () => {
         )
 
         while (factoryStore.proxys.length === originalProxyCount) {
-            await refetch()
+            await refetch({
+                offset: 0,
+                acc: factoryAccount.value.address,
+            })
             await new Promise((resolve) => setTimeout(resolve, 2000))
         }
     } catch {
@@ -207,6 +216,16 @@ const createSilos = async () => {
 const viewSilos = () => {
     viewSilosRef.value?.openDialog()
 }
+
+watchAccount(config, {
+    onChange(account) {
+        factoryAccount.value = getAccount(config)
+        refetch({
+            offset: 0,
+            acc: account.address,
+        })
+    },
+})
 
 onError(async () => {
     loading.value = true

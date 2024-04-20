@@ -123,6 +123,7 @@ import { useCoreStore } from "../store/core"
 import { useAppStore } from "../store/app"
 import { useBroochStore } from "../store/brooch"
 import { config } from "../config"
+import { useFactoryStore } from "../store/factory"
 
 const coreStore = useCoreStore()
 const broochStore = useBroochStore()
@@ -138,12 +139,14 @@ const init = async () => {
         const account = getAccount(config)
         if (account.isConnected) {
             loading.value = true
+            useFactoryStore().reset()
             await coreStore.getActivePlayer()
             await broochStore.getBroochData(0, false)
             await broochStore.getBroochData(1, true)
             isConnected.value = true
         } else if (account.isDisconnected) {
             coreStore.disconnect()
+            useFactoryStore().reset()
             isConnected.value = false
         }
     } catch (e) {

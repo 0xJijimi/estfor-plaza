@@ -1,7 +1,6 @@
 import { injected, walletConnect } from "@wagmi/connectors"
 import { http, createConfig, fallback } from "@wagmi/core"
 import { fantom } from "@wagmi/core/chains"
-import { webSocket } from "viem"
 
 const metadata = {
     name: "Deif's Estfor Plaza",
@@ -16,7 +15,6 @@ export const config = createConfig({
     chains: [fantom],
     transports: {
         [fantom.id]: fallback([
-            http('https://rpc.ftm.tools'),
             http('https://rpcapi.fantom.network'),
             http('https://fantom-rpc.publicnode.com'),
             http('https://rpc.fantom.network'),
@@ -35,7 +33,7 @@ export const config = createConfig({
 export const estimateConfig = createConfig({
     chains: [fantom],
     transports: {
-        [fantom.id]: webSocket('wss://fantom-rpc.publicnode.com'),
+        [fantom.id]: http('https://rpc.ftm.tools'),
     },
     connectors: [
         walletConnect({ projectId, metadata, showQrModal: false }),

@@ -568,6 +568,14 @@ export const useFactoryStore = defineStore({
         },
     },
     actions: {
+        reset() {
+            this.initialised = false
+            this.proxys = []
+            this.bankItems = []
+            this.totalTransactionNumber = 0
+            this.currentTransactionNumber = 0
+            this.initialisedAt = null
+        },
         async setActive(siloAddress: string, playerId: string) {
             const coreStore = useCoreStore()
             const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
