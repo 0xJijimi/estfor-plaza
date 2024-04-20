@@ -27,6 +27,12 @@
                         v-model="searchValue"
                     />
                 </div>
+                <AssignedHeroSkillSelect
+                    class="ms-2"
+                    v-model="selectedSkillGroup"
+                    :heroes="factoryStore.assignedProxys"
+                    @update:modelValue="pageNumber = 0"
+                />
                 <AssignedHeroGroupSelect
                     class="ms-2"
                     v-model="selectedHeroGroup"
@@ -193,13 +199,14 @@
 </template>
 
 <script setup lang="ts">
-import { decodeTransaction, useFactoryStore } from "../../store/factory"
+import { decodeSkillFromTransaction, decodeTransaction, useFactoryStore } from "../../store/factory"
 import { computed, ref, watch } from "vue"
 import AssignHero from "../dialogs/AssignHero.vue"
-import { QueuedAction } from "@paintswap/estfor-definitions/types"
+import { QueuedAction, Skill } from "@paintswap/estfor-definitions/types"
 import { actionChoiceNames, actionNames } from "../../store/skills"
 import ExecuteSiloActions from "../dialogs/ExecuteSiloActions.vue"
 import AssignedHeroGroupSelect from "../inputs/AssignedHeroGroupSelect.vue"
+import AssignedHeroSkillSelect from "../inputs/AssignedHeroSkillSelect.vue"
 import EvolveHero from "../dialogs/EvolveHero.vue"
 
 const factoryStore = useFactoryStore()
@@ -209,6 +216,7 @@ const pageNumber = ref(0)
 const selectAll = ref(false)
 const searchValue = ref("")
 const selectedHeroGroup = ref("")
+const selectedSkillGroup = ref(Skill.NONE)
 
 const assignHeroRef = ref<typeof AssignHero>()
 const executeActionsRef = ref<typeof ExecuteSiloActions>()
@@ -248,6 +256,18 @@ const assignedSilos = computed(() => {
                             ""
                     )
                     .includes(selectedHeroGroup.value)
+        )
+        .filter(
+            (s) =>
+                selectedSkillGroup.value === Skill.NONE ||
+                decodeSkillFromTransaction(s.savedTransactions) ===
+                selectedSkillGroup.value ||
+                s.queuedActions
+                    .map(
+                        (a) =>
+                            a.skill
+                    )
+                    .includes(selectedSkillGroup.value)
         )
     assignedProxys.sort((a, b) => {
         const aDecoded = decodeTransaction(a.savedTransactions)

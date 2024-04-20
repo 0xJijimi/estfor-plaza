@@ -1,6 +1,7 @@
 import { injected, walletConnect } from "@wagmi/connectors"
-import { http, createConfig } from "@wagmi/core"
+import { http, createConfig, fallback } from "@wagmi/core"
 import { fantom } from "@wagmi/core/chains"
+import { webSocket } from "viem"
 
 const metadata = {
     name: "Deif's Estfor Plaza",
@@ -14,7 +15,27 @@ const projectId = import.meta.env.VITE_PROJECT_ID
 export const config = createConfig({
     chains: [fantom],
     transports: {
-        [fantom.id]: http(),
+        [fantom.id]: fallback([
+            http('https://rpc.ftm.tools'),
+            http('https://rpcapi.fantom.network'),
+            http('https://fantom-rpc.publicnode.com'),
+            http('https://rpc.fantom.network'),
+            http('https://fantom.drpc.org'),
+            http('https://fantom-pokt.nodies.app'),
+            http('https://fantom.blockpi.network/v1/rpc/public'),
+            http('https://rpc.ankr.com/fantom'),
+        ], { rank: { interval: 20_000 } }),
+    },
+    connectors: [
+        walletConnect({ projectId, metadata, showQrModal: false }),
+        injected({ shimDisconnect: true }),
+    ],
+})
+
+export const estimateConfig = createConfig({
+    chains: [fantom],
+    transports: {
+        [fantom.id]: webSocket('wss://fantom-rpc.publicnode.com'),
     },
     connectors: [
         walletConnect({ projectId, metadata, showQrModal: false }),

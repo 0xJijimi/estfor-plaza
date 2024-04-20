@@ -46,7 +46,7 @@ import {
     useSkillStore,
 } from "./skills"
 import { sleep } from "../utils/time"
-import { config } from "../config"
+import { config, estimateConfig } from "../config"
 import { useBroochStore } from "./brooch"
 import { useMonsterStore } from "./monsters"
 import { EquippedItems, FactoryState, NeededItem, ProxySilo, SavedTransaction, TransferUserItemNFT } from "./models/factory.models"
@@ -474,6 +474,25 @@ export const decodeTransaction = (savedTransactions: SavedTransaction[]) => {
     )
 }
 
+export const decodeSkillFromTransaction = (savedTransactions: SavedTransaction[]) => {
+    if (savedTransactions.length === 0) {
+        return "No action"
+    }
+
+    // first transaction is the action queue
+    const decoded = decode(
+        savedTransactions[0].data,
+        "startActions",
+        estforPlayerAbi
+    )
+
+    // [playerId, actions[[attire, actionId, regenId, choiceId], [], []], action queue type]
+    
+    const actionId = decoded?.[1]?.[0]?.[1] || BigInt(0)
+    const action = allActions.find((a) => a.actionId === Number(actionId))
+    return action?.info.skill || Skill.NONE
+}
+
 const getChunksForMulticall = async (
     data: any[],
     to: string,
@@ -487,7 +506,7 @@ const getChunksForMulticall = async (
         try {
             const splits = Math.ceil(data.length / actualChunks)
             for (let i = 0; i < splits; i++) {
-                const result = await estimateGas(config, {
+                const result = await estimateGas(estimateConfig, {
                     account: getAccount(config).address,
                     to: to as `0x${string}`,
                     data: contract.encodeFunctionData("multicall", [
