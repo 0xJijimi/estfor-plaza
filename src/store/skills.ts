@@ -630,19 +630,19 @@ export const useSkillStore = defineStore({
             return (skill: Skill): number[] => {
                 switch (skill) {
                     case Skill.COOKING:
-                        return allActionChoiceIdsCooking
+                        return [...allActionChoiceIdsCooking]
                     case Skill.CRAFTING:
-                        return allActionChoiceIdsCrafting
+                        return [...allActionChoiceIdsCrafting]
                     case Skill.SMITHING:
-                        return allActionChoiceIdsSmithing
+                        return [...allActionChoiceIdsSmithing]
                     case Skill.FIREMAKING:
-                        return allActionChoiceIdsFiremaking
+                        return [...allActionChoiceIdsFiremaking]
                     case Skill.ALCHEMY:
-                        return allActionChoiceIdsAlchemy
+                        return [...allActionChoiceIdsAlchemy]
                     case Skill.FORGING:
-                        return allActionChoiceIdsForging
+                        return [...allActionChoiceIdsForging]
                     case Skill.FLETCHING:
-                        return allActionChoiceIdsFletching
+                        return [...allActionChoiceIdsFletching]
                     default:
                         return []
                 }
