@@ -648,23 +648,23 @@ export const useSkillStore = defineStore({
                 }
             }
         },
-        getActionChoicesForSkill: (state: SkillState) => {
+        getActionChoicesForSkill: () => {
             return (skill: Skill): ActionChoiceInput[] => {
                 switch (skill) {
                     case Skill.COOKING:
-                        return state.cooking
+                        return [...allActionChoicesCooking]
                     case Skill.CRAFTING:
-                        return state.crafting
+                        return [...allActionChoicesCrafting]
                     case Skill.SMITHING:
-                        return state.smithing
+                        return [...allActionChoicesSmithing]
                     case Skill.FIREMAKING:
-                        return state.firemaking
+                        return [...allActionChoicesFiremaking]
                     case Skill.ALCHEMY:
-                        return state.alchemy
+                        return [...allActionChoicesAlchemy]
                     case Skill.FORGING:
-                        return state.forging
+                        return [...allActionChoicesForging]
                     case Skill.FLETCHING:
-                        return state.fletching
+                        return [...allActionChoicesFletching]
                     default:
                         return []
                 }
