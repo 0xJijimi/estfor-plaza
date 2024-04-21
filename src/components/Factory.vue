@@ -116,6 +116,7 @@ const broochStore = useBroochStore()
 const loading = ref(factoryStore.initialised === false)
 const creating = ref(false)
 const silosToCreate = ref(5)
+const previousCount = ref(0)
 
 const viewSilosRef = ref<typeof ViewSilos>()
 
@@ -143,9 +144,9 @@ const { onError, refetch, fetchMore, onResult } = useQuery(
 
 onResult(async (v) => {
     if (v.data) {
-        if (v?.data?.factoryRegistryCreateds?.length > 0) {
-            if (v.data?.factoryRegistryCreateds.length % 100 === 0) {
-                const a = await fetchMore({
+        if (v?.data?.factoryRegistryCreateds?.length > 0) {            
+            if (v.data?.factoryRegistryCreateds.length !== previousCount.value) {
+                await fetchMore({
                     variables: {
                         offset: v?.data?.factoryRegistryCreateds?.length,
                     },
@@ -161,16 +162,12 @@ onResult(async (v) => {
                         }
                     },
                 })
-                if (a?.data?.factoryRegistryCreateds?.length === 0) {
-                    await factoryStore.setProxys(v.data?.factoryRegistryCreateds)
-                    await factoryStore.getAllProxyStates()
-                    loading.value = false
-                }
             } else {
                 await factoryStore.setProxys(v.data?.factoryRegistryCreateds)
                 await factoryStore.getAllProxyStates()
                 loading.value = false
             }
+            previousCount.value = v.data?.factoryRegistryCreateds.length
         } else {
             loading.value = false
         }
@@ -220,6 +217,7 @@ const viewSilos = () => {
 watchAccount(config, {
     onChange(account) {
         factoryAccount.value = getAccount(config)
+        previousCount.value = 0
         refetch({
             offset: 0,
             acc: account.address,
