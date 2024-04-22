@@ -200,7 +200,6 @@ const createSilos = async () => {
                 offset: 0,
                 acc: factoryAccount.value.address,
             })
-            await new Promise((resolve) => setTimeout(resolve, 2000))
         }
     } catch {
         // user rejected tx
