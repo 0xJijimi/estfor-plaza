@@ -704,10 +704,9 @@ export const useFactoryStore = defineStore({
             const splits = Math.ceil(data.length / actualChunks)
             this.totalTransactionNumber = splits
             try {
-                const hashes: `0x${string}`[] = []
                 for (let i = 0; i < splits; i++) {
                     this.currentTransactionNumber = i + 1
-                    hashes.push(await writeContract(config, {
+                    const hash = await writeContract(config, {
                         address: factoryAddress as `0x${string}`,
                         abi: factoryAbi,
                         functionName: "multicall",
@@ -718,9 +717,9 @@ export const useFactoryStore = defineStore({
                             ),
                         ],
                         type: "legacy",
-                    }))
-                }
-                await waitForTransactionReceipt(config, { hash: hashes[hashes.length - 1] })
+                    })
+                    await waitForTransactionReceipt(config, { hash })
+                }                
             } catch (e) {
                 throw e
             } finally {
