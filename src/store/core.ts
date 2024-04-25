@@ -9,6 +9,7 @@ import {
     getUserItemNFTs,
     getSoloPlayerState,
     getOwnedPets,
+    getClanByName,
 } from "../utils/api"
 import {
     BoostType,
@@ -420,7 +421,8 @@ export const useCoreStore = defineStore({
                 this.playerState = playerState.clanMember.player
 
                 if (playerState.clanMember.clan) {
-                    this.clanState = playerState.clanMember.clan
+                    const clan = await getClanByName(playerState.clanMember.clan.name)
+                    this.clanState = clan.clans[0]
                 }
             } else {
                 this.clanState = null

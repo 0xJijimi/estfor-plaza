@@ -173,6 +173,10 @@ export const getClans = async (numToSkip: number): Promise<ClansResult> => {
     return fetchRetry(`${baseUrl}/clans?numToSkip=${numToSkip}`)
 }
 
+export const getClanByName = async (name: string): Promise<ClansResult> => {
+    return fetchRetry(`${baseUrl}/clans?name=${name}`)
+}
+
 export const searchQueuedActions = async (
     playerId: string
 ): Promise<SearchQueuedActionsResult> => {
