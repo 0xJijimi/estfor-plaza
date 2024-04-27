@@ -51,15 +51,25 @@
                         silosWithActionChoicesOnly.length === 1 ? "" : "s"
                     }}
                 </button>
-                <label class="label cursor-pointer">
+                <label v-if="silosWithActionChoicesOnly.length > 0" class="label cursor-pointer">
                     <span class="label-text text-xs mr-2 items-center flex">
                         Override missing items and execute anyway                
                     </span>
                     <input
                         type="checkbox"
-                        class="checkbox checkbox-primary"
+                        class="checkbox checkbox-primary card"
                         v-model="executeComplexOverride"
                         @change="missingItems = []"
+                    />
+                </label>
+                <label class="label cursor-pointer">
+                    <span class="label-text text-xs mr-2 items-center flex">
+                        Execute all transactions without waiting for confirmation (can cause issues with some wallets)        
+                    </span>
+                    <input
+                        type="checkbox"
+                        class="checkbox checkbox-primary card"
+                        v-model="shouldFastCall"
                     />
                 </label>
                 <div class="mt-5">
@@ -203,6 +213,7 @@ const error = ref<string | null>(null)
 const relevantTokens = ref<{ selected: boolean; tokenId: number }[]>([])
 const stage = ref<string | null>(null)
 const executeComplexOverride = ref(false)
+const shouldFastCall = ref(false)
 
 const silosWithEmptyQueuesOrActionInputOnly = computed(() => {
     return silosToExecute.value.filter(
@@ -243,7 +254,8 @@ const executeSavedTransactions = async () => {
     error.value = null
     try {
         await factoryStore.executeSavedTransactions(
-            silosWithEmptyQueuesOrActionInputOnly.value
+            silosWithEmptyQueuesOrActionInputOnly.value,
+            shouldFastCall.value,
         )
         app.addToast(
             `${silosWithEmptyQueuesOrActionInputOnly.value.length} hero${
@@ -528,7 +540,8 @@ const executeActionChoiceSavedTransactions = async () => {
                 await factoryStore.transferItemsFromBankToProxys(itemsNeeded)
                 stage.value = "Executing actions (Part 2 of 2)"
                 await factoryStore.executeSavedTransactions(
-                    silosWithActionChoicesOnly.value
+                    silosWithActionChoicesOnly.value,
+                    true,
                 )
                 stage.value = null
                 app.addToast(

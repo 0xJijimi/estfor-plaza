@@ -522,6 +522,8 @@ const getChunksForMulticall = async (
         } catch {
             if (actualChunks <= 8) {
                 actualChunks -= 1
+            } else if (actualChunks <= 16) {
+                actualChunks -= 2
             } else {
                 actualChunks -= 5
             }
@@ -683,10 +685,10 @@ export const useFactoryStore = defineStore({
                 )
             )
 
-            await this.multicall(selectorArray)
+            await this.multicall(selectorArray, false)
             await this.getAllProxyStates()
         },
-        async multicall(data: any[], chunks = 10) {
+        async multicall(data: any[], fastCall: boolean, chunks = 10) {
             const coreStore = useCoreStore()
             const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
 
@@ -704,22 +706,44 @@ export const useFactoryStore = defineStore({
             const splits = Math.ceil(data.length / actualChunks)
             this.totalTransactionNumber = splits
             try {
-                for (let i = 0; i < splits; i++) {
-                    this.currentTransactionNumber = i + 1
-                    const hash = await writeContract(config, {
-                        address: factoryAddress as `0x${string}`,
-                        abi: factoryAbi,
-                        functionName: "multicall",
-                        args: [
-                            data.slice(
-                                i * actualChunks,
-                                (i + 1) * actualChunks
-                            ),
-                        ],
-                        type: "legacy",
-                    })
-                    await waitForTransactionReceipt(config, { hash })
-                }                
+                if (fastCall) {
+                    let latestHash
+                    for (let i = 0; i < splits; i++) {
+                        this.currentTransactionNumber = i + 1
+                        latestHash = await writeContract(config, {
+                            address: factoryAddress as `0x${string}`,
+                            abi: factoryAbi,
+                            functionName: "multicall",
+                            args: [
+                                data.slice(
+                                    i * actualChunks,
+                                    (i + 1) * actualChunks
+                                ),
+                            ],
+                            type: "legacy",
+                        })
+                    }
+                    if (latestHash) {
+                        await waitForTransactionReceipt(config, { hash: latestHash })
+                    }
+                } else {
+                    for (let i = 0; i < splits; i++) {
+                        this.currentTransactionNumber = i + 1
+                        const hash = await writeContract(config, {
+                            address: factoryAddress as `0x${string}`,
+                            abi: factoryAbi,
+                            functionName: "multicall",
+                            args: [
+                                data.slice(
+                                    i * actualChunks,
+                                    (i + 1) * actualChunks
+                                ),
+                            ],
+                            type: "legacy",
+                        })
+                        await waitForTransactionReceipt(config, { hash })
+                    } 
+                }
             } catch (e) {
                 throw e
             } finally {
@@ -763,7 +787,7 @@ export const useFactoryStore = defineStore({
                 )
             )
 
-            await this.multicall(selectorArray)
+            await this.multicall(selectorArray, false)
         },
         async sendBrush(proxys: ProxySilo[], amount: bigint) {
             const coreStore = useCoreStore()
@@ -830,7 +854,7 @@ export const useFactoryStore = defineStore({
                 )
             )
 
-            await this.multicall(selectorArray)
+            await this.multicall(selectorArray, false)
         },
         async getAllProxyStates(proxys: ProxySilo[] = []) {
             const coreStore = useCoreStore()
@@ -1216,7 +1240,7 @@ export const useFactoryStore = defineStore({
 
             const combined = [...pauseArray, ...selectorArray]
 
-            await this.multicall(combined, 40)
+            await this.multicall(combined, false, 40)
 
             // update savedTransactions and isPaused in state
             let i = 0
@@ -1289,11 +1313,11 @@ export const useFactoryStore = defineStore({
                     )
                 )
 
-                await this.multicall(selectorArray, 40)
+                await this.multicall(selectorArray, false, 40)
             }
             await this.getBankItems()
         },
-        async executeSavedTransactions(proxys: ProxySilo[]) {
+        async executeSavedTransactions(proxys: ProxySilo[], fastCall: boolean) {
             const coreStore = useCoreStore()
             const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
             const itemAddress = coreStore.getAddress(Address.itemNFT)
@@ -1322,7 +1346,7 @@ export const useFactoryStore = defineStore({
                     )
                 )
 
-                await this.multicall(selectorArray, 40)
+                await this.multicall(selectorArray, fastCall, 40)
             } else {
                 // execute one by one
                 this.totalTransactionNumber = proxys.length
@@ -1572,7 +1596,7 @@ export const useFactoryStore = defineStore({
             )
 
             if (selectorArray.length > 0) {
-                this.multicall(selectorArray, 50)
+                this.multicall(selectorArray, false, 50)
             }
             await sleep(2000)
             await this.getBankItems()
@@ -1654,7 +1678,7 @@ export const useFactoryStore = defineStore({
                 )
             )
 
-            await this.multicall(selectorArray, 40)
+            await this.multicall(selectorArray, false, 40)
             await sleep(2000)
             await this.getBankItems()
         },
