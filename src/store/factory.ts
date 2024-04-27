@@ -1596,7 +1596,7 @@ export const useFactoryStore = defineStore({
             )
 
             if (selectorArray.length > 0) {
-                this.multicall(selectorArray, false, 50)
+                await this.multicall(selectorArray, false, 50)
             }
             await sleep(2000)
             await this.getBankItems()
