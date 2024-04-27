@@ -541,7 +541,7 @@ const executeActionChoiceSavedTransactions = async () => {
                 stage.value = "Executing actions (Part 2 of 2)"
                 await factoryStore.executeSavedTransactions(
                     silosWithActionChoicesOnly.value,
-                    true,
+                    shouldFastCall.value,
                 )
                 stage.value = null
                 app.addToast(
