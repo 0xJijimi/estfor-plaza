@@ -357,8 +357,8 @@ const executeActionChoiceSavedTransactions = async () => {
 
                     const monster = allActions.find(x => x.actionId === action.actionId)
                     if (monster) {
-                        const { totalFoodRequired, itemsConsumed } = monsterStore.getKillsPerHour(elapsedHours, proxy, monster)
-                        
+                        const { totalFoodRequired, itemsConsumed } = monsterStore.getKillsPerHourFromAction(elapsedHours, proxy, action, monster)
+
                         // food
                         {
                             const ownedItem = userItemNFTResult?.userItemNFTs.find(

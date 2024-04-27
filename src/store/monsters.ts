@@ -2,6 +2,7 @@ import {
     ActionInput,
     CombatStats,
     GuaranteedReward,
+    QueuedAction,
     RandomReward,
     Skill,
 } from "@paintswap/estfor-definitions/types"
@@ -239,6 +240,52 @@ export const useMonsterStore = defineStore({
                         : 0 
                 const elapsedTime = hours * 3600
                 return calculateMonsterDamage(attackSkill, isMelee, isRanged, isMagic, monster, combatStats, hours, itemStore, equippedItems, elapsedTime, Number(decoded?.[1]?.[0]?.[3]))
+            }
+        },
+        getKillsPerHourFromAction: () => {
+            return (hours: number, hero: ProxySilo, action: QueuedAction, monster: ActionInput) => {
+                const itemStore = useItemStore()
+                
+                const equippedItems: EquippedItems = {
+                    rightHand: action.rightHandEquipmentTokenId,
+                    leftHand: action.leftHandEquipmentTokenId,
+                    food: action.regenerateId,
+                    head: action.headEquipped,
+                    neck: action.neckEquipped,
+                    body: action.bodyEquipped,
+                    arms: action.armsEquipped,
+                    legs: action.legsEquipped,
+                    feet: action.feetEquipped,
+                    magicBag: Number(action.choice.id),
+                    quiver: Number(action.choice.id),
+                    playerId: 0,
+                    pet: undefined,
+                }
+
+                let isMelee =
+                    itemStore.items.find(
+                        (x) => x.tokenId === equippedItems?.rightHand
+                    )?.skill === Skill.MELEE || false
+                let isRanged =
+                    itemStore.items.find(
+                        (x) => x.tokenId === equippedItems?.rightHand
+                    )?.skill === Skill.RANGED || false
+                let isMagic =
+                    itemStore.items.find(
+                        (x) => x.tokenId === equippedItems?.rightHand
+                    )?.skill === Skill.MAGIC || false
+
+                const combatStats = itemStore.getTotalCombatStatsForHero(hero, equippedItems)
+
+                const attackSkill = isMelee
+                    ? combatStats.melee
+                    : isRanged
+                      ? combatStats.ranged
+                      : isMagic
+                        ? combatStats.magic
+                        : 0 
+                const elapsedTime = hours * 3600
+                return calculateMonsterDamage(attackSkill, isMelee, isRanged, isMagic, monster, combatStats, hours, itemStore, equippedItems, elapsedTime, Number(action.choice.id))
             }
         },
         getMonsterRankings: (state: MonsterState) => {
