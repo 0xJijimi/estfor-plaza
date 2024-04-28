@@ -39,8 +39,11 @@
         </div>
     </div>
     <div class="container mx-auto">
+        <div v-if="route.meta.public">
+            <RouterView />
+        </div>
         <div
-            v-if="!isConnected"
+            v-else-if="!isConnected"
             class="card md:w-[500px] bg-base-100-50 shadow-xl mx-auto my-[100px] p-10"
         >
             <div class="text-center">
@@ -124,6 +127,7 @@ import { useAppStore } from "../store/app"
 import { useBroochStore } from "../store/brooch"
 import { config } from "../config"
 import { useFactoryStore } from "../store/factory"
+import { useRoute } from "vue-router"
 
 const coreStore = useCoreStore()
 const broochStore = useBroochStore()
@@ -133,6 +137,7 @@ const { open } = useWeb3Modal()
 
 const toasts = computed(() => app.toasts)
 const isConnected = ref(false)
+const route = useRoute()
 
 const init = async () => {
     try {

@@ -21,6 +21,7 @@ declare module "vue-router" {
         showItemSearch?: boolean
         requiresEmeraldBrooch?: boolean
         requiresRubyBrooch?: boolean
+        public?: boolean
     }
 }
 
@@ -98,6 +99,9 @@ const routes: Array<RouteRecordRaw> = [
             {
                 path: "about",
                 component: About,
+                meta: {
+                    public: true,
+                },
             }
         ],
     },
