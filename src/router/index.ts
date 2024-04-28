@@ -14,6 +14,7 @@ import VaultBattleRankings from "../components/VaultBattleRankings.vue"
 import ClanManagement from "../components/ClanManagement.vue"
 import WishContributions from "../components/clan-management/WishContributions.vue"
 import Factory from "../components/Factory.vue"
+import About from "../components/About.vue"
 
 declare module "vue-router" {
     interface RouteMeta {
@@ -94,6 +95,10 @@ const routes: Array<RouteRecordRaw> = [
                 path: "factory",
                 component: Factory,
             },
+            {
+                path: "about",
+                component: About,
+            }
         ],
     },
 ]
