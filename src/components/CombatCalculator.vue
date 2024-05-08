@@ -192,7 +192,7 @@ const magicBagItems = computed(() => itemStore.getMagicActionChoicesForXP)
 const foodItems = computed(() =>
     itemStore.getItemsForSlotAndXP(EquipPosition.FOOD)
 )
-const pets = computed(() => itemStore.getOwnedAndBasicPets(ownedPetsOnly.value).filter(x => (isMelee.value ? x.basePet.enhancementType === PetEnhancementType.MELEE || x.basePet.enhancementType === PetEnhancementType.MELEE_AND_DEFENCE : isRanged.value ? x.basePet.enhancementType === PetEnhancementType.RANGED || x.basePet.enhancementType === PetEnhancementType.RANGED_AND_DEFENCE : isMagic.value ? x.basePet.enhancementType === PetEnhancementType.MAGIC || x.basePet.enhancementType === PetEnhancementType.MAGIC_AND_DEFENCE : false) || x.basePet.enhancementType === PetEnhancementType.DEFENCE || x.basePet.enhancementType === PetEnhancementType.HEALTH))
+const pets = computed(() => itemStore.getOwnedAndBasicPets(ownedPetsOnly.value).filter(x => (isMelee.value ? x.basePet.enhancementType === PetEnhancementType.MELEE : isRanged.value ? x.basePet.enhancementType === PetEnhancementType.RANGED : isMagic.value ? x.basePet.enhancementType === PetEnhancementType.MAGIC : false) || x.basePet.enhancementType === PetEnhancementType.DEFENCE || x.basePet.enhancementType === PetEnhancementType.HEALTH || x.basePet.enhancementType === PetEnhancementType.MELEE_AND_DEFENCE || x.basePet.enhancementType === PetEnhancementType.MAGIC_AND_DEFENCE || x.basePet.enhancementType === PetEnhancementType.RANGED_AND_DEFENCE))
 
 const findLast = (arr: any[], criteria: any) => {
     for (let i = arr.length - 1; i >= 0; i--) {
