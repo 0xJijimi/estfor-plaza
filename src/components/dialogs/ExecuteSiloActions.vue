@@ -510,8 +510,9 @@ const executeActionChoiceSavedTransactions = async () => {
                     (t) => Number(t.tokenId) === Number(tokenId)
                 )
                 if (
-                    !ownedItem ||
-                    itemTotals[tokenId] > Number(ownedItem.amount)
+                    (!ownedItem ||
+                    itemTotals[tokenId] > Number(ownedItem.amount)) &&
+                    itemTotals[tokenId] < Number.POSITIVE_INFINITY
                 ) {
                     if (executeComplexOverride.value) {
                         // get percentage of ownedItems vs itemTotals
@@ -536,8 +537,10 @@ const executeActionChoiceSavedTransactions = async () => {
             }
 
             if (missingItems.value.length === 0) {
-                stage.value = "Transferring items to heroes (Part 1 of 2)"
-                await factoryStore.transferItemsFromBankToProxys(itemsNeeded)
+                if (itemsNeeded.filter(x => x.items.some(i => i.amount < Number.POSITIVE_INFINITY && i.tokenId > 0)).length > 0) {
+                    stage.value = "Transferring items to heroes (Part 1 of 2)"
+                    await factoryStore.transferItemsFromBankToProxys(itemsNeeded)
+                }
                 stage.value = "Executing actions (Part 2 of 2)"
                 await factoryStore.executeSavedTransactions(
                     silosWithActionChoicesOnly.value,
