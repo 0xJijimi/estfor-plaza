@@ -187,13 +187,13 @@ export const monsterImageMap = {
     [EstforConstants.ACTION_COMBAT_SNUFFLEQUARG]: "monster_11_ddmkmh7y.jpg",
     [EstforConstants.ACTION_COMBAT_SQUIGGLE_EGG]: "monster_14_5tnfLn.jpg",
     [EstforConstants.ACTION_COMBAT_UFFINCH]: "monster_5_jltmx4zq.jpg",
-    [EstforConstants.ACTION_COMBAT_ADULT_FROST_MAGE]: "monster_22_zcfpzqp5.jpg",
-    [EstforConstants.ACTION_COMBAT_BABY_DRAGON]: "monster_24_b8lwohyf.jpg",
+    [EstforConstants.ACTION_COMBAT_ADULT_FROST_MAGE]: "monster_26_xg5eos4d.jpg",
+    [EstforConstants.ACTION_COMBAT_BABY_DRAGON]: "monster_22_zcfpzqp5.jpg",
     [EstforConstants.ACTION_COMBAT_BABY_FROST_MAGE]: "monster_25_s8uaum2x.jpg",
-    [EstforConstants.ACTION_COMBAT_FIRE_DEMON]: "monster_23_xe7wgjin.jpg",
-    [EstforConstants.ACTION_COMBAT_FROST_MAMMOTH_SHEEP]: "monster_26_xg5eos4d.jpg",
-    [EstforConstants.ACTION_COMBAT_FROST_TITAN_GIANT]: "monster_27_8m5h2oi4.jpg",
-    [EstforConstants.ACTION_COMBAT_LAVA_FIEND]: "monster_28_cwyo2ixv.jpg",
+    [EstforConstants.ACTION_COMBAT_FIRE_DEMON]: "monster_24_b8lwohyf.jpg",
+    [EstforConstants.ACTION_COMBAT_FROST_MAMMOTH_SHEEP]: "monster_27_8m5h2oi4.jpg",
+    [EstforConstants.ACTION_COMBAT_FROST_TITAN_GIANT]: "monster_30_fwn42nli.jpg",
+    [EstforConstants.ACTION_COMBAT_LAVA_FIEND]: "monster_23_xe7wgjin.jpg",
 
 }
 
