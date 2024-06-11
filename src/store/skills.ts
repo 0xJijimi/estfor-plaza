@@ -104,6 +104,11 @@ export const actionNames = {
     [EstforConstants.ACTION_WOODCUTTING_ASH]: "Ash",
     [EstforConstants.ACTION_WOODCUTTING_ENCHANTED]: "Enchanted",
     [EstforConstants.ACTION_WOODCUTTING_LIVING]: "Living",
+    [EstforConstants.ACTION_WOODCUTTING_SECLUDED_FOREST]: "Secluded Forest",
+    [EstforConstants.ACTION_WOODCUTTING_CURSED_MOUNTAIN]: "Cursed Mountain",
+    [EstforConstants.ACTION_WOODCUTTING_ENCHANTED_GROVE]: "Enchanted Grove",
+    [EstforConstants.ACTION_WOODCUTTING_THE_WOODLANDS]: "The Woodlands",
+    [EstforConstants.ACTION_WOODCUTTING_WHISPERING_WOODS]: "Whispering Woods",
 
     [EstforConstants.ACTION_MINING_COPPER]: "Copper",
     [EstforConstants.ACTION_MINING_TIN]: "Tin",
@@ -141,6 +146,12 @@ export const actionNames = {
     [EstforConstants.ACTION_FISHING_CHODFISH]: "Chodfish",
     [EstforConstants.ACTION_FISHING_DOUBTFISH]: "Doubtfish",
     [EstforConstants.ACTION_FISHING_ROSEFIN]: "Rosefin",
+    [EstforConstants.ACTION_FISHING_HIDDEN_POND]: "Hidden Pond",
+    [EstforConstants.ACTION_FISHING_ENCHANTED_LAGOON]: "Enchanted Lagoon",
+    [EstforConstants.ACTION_FISHING_SECRET_LAKE]: "Secret Lake",
+    [EstforConstants.ACTION_FISHING_UNDERGROUND_RIVER]: "Underground River",
+    [EstforConstants.ACTION_FISHING_DEEP_SEA]: "Deep Sea",
+    [EstforConstants.ACTION_FISHING_GRAN_SQUIN]: "Gran Squin",
 
     [EstforConstants.ACTION_THIEVING_CHILD]: "Child",
     [EstforConstants.ACTION_THIEVING_MAN]: "Man",
@@ -178,7 +189,26 @@ export const actionNames = {
     [EstforConstants.ACTION_COMBAT_SNAPPER_BUG]: "Snapper Bug",
     [EstforConstants.ACTION_COMBAT_SNUFFLEQUARG]: "Snufflequarg",
     [EstforConstants.ACTION_COMBAT_SQUIGGLE_EGG]: "Squiggle Egg",
-    [EstforConstants.ACTION_COMBAT_UFFINCH]: "Uffinch",
+    [EstforConstants.ACTION_COMBAT_UFFINCH]: "Uffinch",    
+    [EstforConstants.ACTION_COMBAT_ADULT_FROST_MAGE]: "Adult Frost Mage",
+    [EstforConstants.ACTION_COMBAT_BABY_DRAGON]: "Baby Dragon",
+    [EstforConstants.ACTION_COMBAT_BABY_FROST_MAGE]: "Baby Frost Mage",
+    [EstforConstants.ACTION_COMBAT_FIRE_DEMON]: "Fire Demon",
+    [EstforConstants.ACTION_COMBAT_FROST_MAMMOTH_SHEEP]: "Frost Mammoth Sheep",
+    [EstforConstants.ACTION_COMBAT_FROST_TITAN_GIANT]: "Frost Titan Giant",
+    [EstforConstants.ACTION_COMBAT_LAVA_FIEND]: "Lava Fiend",
+
+    [EstforConstants.ACTION_MINING_ADAMANTINE_MOTHERLODE]: "Adamantine Motherlode",
+    [EstforConstants.ACTION_MINING_MITHRIL_MOTHERLODE]: "Mithril Motherlode",
+    [EstforConstants.ACTION_MINING_RUNITE_MOTHERLODE]: "Runite Motherlode",
+    [EstforConstants.ACTION_MINING_TIN_MOTHERLODE]: "Tin Motherlode",
+    [EstforConstants.ACTION_MINING_TITANIUM_MOTHERLODE]: "Titanium Motherlode",
+
+    [EstforConstants.ACTION_THIEVING_FOREST]: "Forest",
+    [EstforConstants.ACTION_THIEVING_LAIR]: "Lair",
+    [EstforConstants.ACTION_THIEVING_LAKE]: "Lake",
+    [EstforConstants.ACTION_THIEVING_NEST]: "Nest",
+    [EstforConstants.ACTION_THIEVING_HIDEOUT]: "Hideout",
 }
 
 export const actionChoiceNames = {

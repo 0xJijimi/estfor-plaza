@@ -18,7 +18,8 @@
                             <th class="text-right">Level</th>
                             <th class="text-right">XP (per hour)</th>
                             <th class="text-left">Item required</th>
-                            <th class="text-right">Loot (per hour)</th>
+                            <th class="text-right">Guaranteed Loot (per hour)</th>
+                            <th class="text-right">Random Loot (per hour)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -43,21 +44,21 @@
                                 }}
                             </td>
                             <td
-                                v-if="a.guaranteedRewards.length > 0"
                                 class="text-right cursor-pointer"
                             >
                                 <span
                                     v-for="r in a.guaranteedRewards"
                                     :key="r.itemTokenId"
+                                    class="text-xs flex justify-between"
                                     @click.prevent="
                                         itemStore.itemSearch =
                                             itemNames[r.itemTokenId]
                                     "
-                                    >{{ r.rate / 10 }}</span
+                                    ><span>{{ itemNames[r.itemTokenId] }}</span
+                                        >{{ r.rate / 10 }}</span
                                 >
                             </td>
                             <td
-                                v-if="a.randomRewards.length > 0"
                                 class="text-right cursor-pointer"
                             >
                                 <div

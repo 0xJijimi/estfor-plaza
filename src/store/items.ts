@@ -18,7 +18,7 @@ import {
 } from "../data/actionChoices"
 import { getLevel, useCoreStore } from "./core"
 import { EstforConstants } from "@paintswap/estfor-definitions"
-import { calculateExtraXPForHeroActionInput } from "./factory"
+import { calculateExtraXPForHeroActionChoiceInput, calculateExtraXPForHeroActionInput } from "./factory"
 import { EquippedItems, ProxySilo } from "./models/factory.models"
 import { allActionChoiceIdsMagic, allActionChoiceIdsRanged } from "../data/actionChoiceIds"
 import { allBasePets } from "../data/pets"
@@ -405,6 +405,32 @@ export const itemNames = {
     [EstforConstants.INFUSED_SCORCHING_COWL]: "Infused Scorching Cowl",
     [EstforConstants.INFUSED_SCORCHING_BOOTS]: "Infused Scorching Boots",
     [EstforConstants.INFUSED_SCORCHING_CHAPS]: "Infused Scorching Chaps",
+
+    [EstforConstants.BRIMSTONE]: "Brimstone",
+    [EstforConstants.RING_1]: "Basic Ring",
+    [EstforConstants.RING_2]: "Medium Ring",
+    [EstforConstants.RING_3]: "Melee Ring",
+    [EstforConstants.RING_4]: "Magic Ring",
+    [EstforConstants.RING_5]: "Ranged Ring",
+    [EstforConstants.RING_6]: "Dragon Stone Ring",
+    [EstforConstants.COIN]: "Coin",
+    [EstforConstants.BONE_CHEST]: "Bone Chest",
+    [EstforConstants.DRAGON_CHEST]: "Dragon Chest",
+    [EstforConstants.MINING_CHEST_1]: "Mining Chest 1",
+    [EstforConstants.MINING_CHEST_2]: "Mining Chest 2",
+    [EstforConstants.MINING_CHEST_3]: "Mining Chest 3",
+    [EstforConstants.MINING_CHEST_4]: "Mining Chest 4",
+    [EstforConstants.MINING_CHEST_5]: "Mining Chest 5",
+    [EstforConstants.WOODCUTTING_CHEST_1]: "Woodcutting Chest 1",
+    [EstforConstants.WOODCUTTING_CHEST_2]: "Woodcutting Chest 2",
+    [EstforConstants.WOODCUTTING_CHEST_3]: "Woodcutting Chest 3",
+    [EstforConstants.WOODCUTTING_CHEST_4]: "Woodcutting Chest 4",
+    [EstforConstants.WOODCUTTING_CHEST_5]: "Woodcutting Chest 5",
+    [EstforConstants.FISHING_CHEST_1]: "Fishing Chest 1",
+    [EstforConstants.FISHING_CHEST_2]: "Fishing Chest 2",
+    [EstforConstants.FISHING_CHEST_3]: "Fishing Chest 3",
+    [EstforConstants.FISHING_CHEST_4]: "Fishing Chest 4",
+    [EstforConstants.FISHING_CHEST_5]: "Fishing Chest 5",
 }
 
 export const starterItems = [
@@ -418,34 +444,65 @@ export const starterItems = [
     allItems.find((x) => x.tokenId === EstforConstants.TOTEM_STAFF)?.tokenId,
 ]
 
-export const rangedItemToActionChoice = {
-    [EstforConstants.BASIC_BOW]: EstforConstants.ACTIONCHOICE_RANGED_BASIC_BOW,
-    [EstforConstants.BONE_BOW]: EstforConstants.ACTIONCHOICE_RANGED_BONE_BOW,
-    [EstforConstants.EXPERT_BOW]: EstforConstants.ACTIONCHOICE_RANGED_EXPERT_BOW,
-    [EstforConstants.SPECTRAL_BOW]: EstforConstants.ACTIONCHOICE_RANGED_SPECTRAL_BOW,
-    [EstforConstants.ICY_BOW]: EstforConstants.ACTIONCHOICE_RANGED_ICY_BOW,
-    [EstforConstants.GLITTERING_BOW]: EstforConstants.ACTIONCHOICE_RANGED_GLITTERING_BOW,
-    [EstforConstants.GODLY_BOW]: EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW,
-    [EstforConstants.GODLY_BOW_1]: EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW,
-    [EstforConstants.GODLY_BOW_2]: EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW,
-    [EstforConstants.GODLY_BOW_3]: EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW,
-    [EstforConstants.GODLY_BOW_4]: EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW,
-    [EstforConstants.GODLY_BOW_5]: EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW,
-}
-
-export const magicItemToActionChoice = {
-    [EstforConstants.BASIC_BOW]: EstforConstants.ACTIONCHOICE_RANGED_BASIC_BOW,
-    [EstforConstants.BONE_BOW]: EstforConstants.ACTIONCHOICE_RANGED_BONE_BOW,
-    [EstforConstants.EXPERT_BOW]: EstforConstants.ACTIONCHOICE_RANGED_EXPERT_BOW,
-    [EstforConstants.SPECTRAL_BOW]: EstforConstants.ACTIONCHOICE_RANGED_SPECTRAL_BOW,
-    [EstforConstants.ICY_BOW]: EstforConstants.ACTIONCHOICE_RANGED_ICY_BOW,
-    [EstforConstants.GLITTERING_BOW]: EstforConstants.ACTIONCHOICE_RANGED_GLITTERING_BOW,
-    [EstforConstants.GODLY_BOW]: EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW,
-    [EstforConstants.GODLY_BOW_1]: EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW,
-    [EstforConstants.GODLY_BOW_2]: EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW,
-    [EstforConstants.GODLY_BOW_3]: EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW,
-    [EstforConstants.GODLY_BOW_4]: EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW,
-    [EstforConstants.GODLY_BOW_5]: EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW,
+export const rangedItemToActionChoice = (rightHand: number, arrow: number) => {
+    switch (rightHand) {
+        case EstforConstants.BASIC_BOW:
+            if (arrow === EstforConstants.POISON) {
+                return EstforConstants.ACTIONCHOICE_RANGED_BASIC_BOW_POISON
+            } else if (arrow === EstforConstants.BRIMSTONE) {
+                return EstforConstants.ACTIONCHOICE_RANGED_BASIC_BOW_FIRE
+            } else {
+                return EstforConstants.ACTIONCHOICE_RANGED_BASIC_BOW            
+            }
+        case EstforConstants.BONE_BOW:
+            if (arrow === EstforConstants.POISON) {
+                return EstforConstants.ACTIONCHOICE_RANGED_BONE_BOW_POISON
+            } else if (arrow === EstforConstants.BRIMSTONE) {
+                return EstforConstants.ACTIONCHOICE_RANGED_BONE_BOW_FIRE
+            } else {
+                return EstforConstants.ACTIONCHOICE_RANGED_BONE_BOW            
+            }
+        case EstforConstants.EXPERT_BOW:
+            if (arrow === EstforConstants.POISON) {
+                return EstforConstants.ACTIONCHOICE_RANGED_EXPERT_BOW_POISON
+            } else if (arrow === EstforConstants.BRIMSTONE) {
+                return EstforConstants.ACTIONCHOICE_RANGED_EXPERT_BOW_FIRE
+            } else {
+                return EstforConstants.ACTIONCHOICE_RANGED_EXPERT_BOW            
+            }
+        case EstforConstants.SPECTRAL_BOW:
+            if (arrow === EstforConstants.POISON) {
+                return EstforConstants.ACTIONCHOICE_RANGED_SPECTRAL_BOW_POISON
+            } else if (arrow === EstforConstants.BRIMSTONE) {
+                return EstforConstants.ACTIONCHOICE_RANGED_SPRECTRAL_BOW_FIRE
+            } else {
+                return EstforConstants.ACTIONCHOICE_RANGED_SPECTRAL_BOW            
+            }
+        case EstforConstants.ICY_BOW:
+            if (arrow === EstforConstants.POISON) {
+                return EstforConstants.ACTIONCHOICE_RANGED_ICY_BOW_POISON
+            } else if (arrow === EstforConstants.BRIMSTONE) {
+                return EstforConstants.ACTIONCHOICE_RANGED_ICY_BOW_FIRE
+            } else {
+                return EstforConstants.ACTIONCHOICE_RANGED_ICY_BOW            
+            }
+        case EstforConstants.GLITTERING_BOW:
+            if (arrow === EstforConstants.POISON) {
+                return EstforConstants.ACTIONCHOICE_RANGED_GLITTERING_BOW_POISON
+            } else if (arrow === EstforConstants.BRIMSTONE) {
+                return EstforConstants.ACTIONCHOICE_RANGED_GLITTERING_BOW_FIRE
+            } else {
+                return EstforConstants.ACTIONCHOICE_RANGED_GLITTERING_BOW            
+            }
+        default:
+            if (arrow === EstforConstants.POISON) {
+                return EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW_POISON
+            } else if (arrow === EstforConstants.BRIMSTONE) {
+                return EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW_FIRE
+            } else {
+                return EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW            
+            }
+        }
 }
 
 export const petEnhancementTypeToName = {
@@ -476,7 +533,26 @@ const getMagicBag = (state: ItemState, magicXp: number) => {
                 }))
 }
 
+const getQuiverOptions = (state: ItemState, rangedXp: number, fletchingXp : number) => {
+    return state.rangedActionChoices
+                .filter((x) => x.minXPs.every((y, i) => i === 0 ? y <= rangedXp : y <= fletchingXp))
+                .map((x) => ({
+                    ...x,
+                    tokenId: x.inputTokenIds.indexOf(EstforConstants.BRIMSTONE) !== -1 ? EstforConstants.BRIMSTONE : x.inputTokenIds.indexOf(EstforConstants.POISON) !== -1 ? EstforConstants.POISON : x.inputTokenIds[0],
+                    name: (x.inputTokenIds.indexOf(EstforConstants.BRIMSTONE) !== -1 ? "Fire " : x.inputTokenIds.indexOf(EstforConstants.POISON) !== -1 ? "Poison " : "") + itemNames[x.inputTokenIds[0]],
+                }))
+}
 
+const getQuiverOptionsForRightHand = (state: ItemState, rangedXp: number, fletchingXp : number, rightHand: number) => {
+    return state.rangedActionChoices
+                .filter((x) => x.minXPs.every((y, i) => i === 0 ? y <= rangedXp : y <= fletchingXp))
+                .filter((x) => x.handItemTokenIdRangeMin === rightHand)
+                .map((x) => ({
+                    ...x,
+                    tokenId: x.inputTokenIds.indexOf(EstforConstants.BRIMSTONE) !== -1 ? EstforConstants.BRIMSTONE : x.inputTokenIds.indexOf(EstforConstants.POISON) !== -1 ? EstforConstants.POISON : x.inputTokenIds[0],
+                    name: (x.inputTokenIds.indexOf(EstforConstants.BRIMSTONE) !== -1 ? "Fire " : x.inputTokenIds.indexOf(EstforConstants.POISON) !== -1 ? "Poison " : "") + itemNames[x.inputTokenIds[0]],
+                }))
+}
 
 export interface ItemState {
     items: ItemInput[]
@@ -643,6 +719,26 @@ export const useItemStore = defineStore({
                 )
             }
         },
+        getRangedActionChoicesForHeroes(state: ItemState) {
+            return (heroes: ProxySilo[]) => {
+                
+                let minRangedXp = 0
+                let minFletchingXp = 0
+
+                for (const h of heroes) {
+                    const { rangedXP } = calculateExtraXPForHeroActionInput(h, Skill.COMBAT)
+                    if (Number(h.playerState.rangedXP) + rangedXP > minRangedXp) {
+                        minRangedXp = Number(h.playerState.rangedXP) + rangedXP
+                    }
+                    const fletchingXP = calculateExtraXPForHeroActionChoiceInput(h, Skill.FLETCHING)
+                    if (Number(h.playerState.fletchingXP) + fletchingXP > minFletchingXp) {
+                        minFletchingXp = Number(h.playerState.fletchingXP) + fletchingXP
+                    }
+                }
+
+                return getQuiverOptions(state, minRangedXp, minFletchingXp)
+            }
+        },
         getMagicActionChoicesForHeroes(state: ItemState) {
             return (heroes: ProxySilo[]) => {
 
@@ -662,6 +758,14 @@ export const useItemStore = defineStore({
             const playerState = coreStore.playerState
 
             return getMagicBag(state, Number(playerState.magicXP))
+        },        
+        getRangedActionChoicesForXP(state: ItemState) {
+            const coreStore = useCoreStore()
+            const playerState = coreStore.playerState
+
+            return getQuiverOptionsForRightHand(state, Number(playerState.rangedXP), Number(playerState.fletchingXP), state.equippedItems.find(
+                (x) => x.playerId === Number(playerState.id)
+            )?.rightHand || 0)
         },
         getAggregatedCombatStats(state: ItemState) {
             const coreStore = useCoreStore()
@@ -673,7 +777,7 @@ export const useItemStore = defineStore({
                     (x) => x.playerId === Number(playerState.id)
                 ) as any) || {}
             Object.keys(localEquippedItems).forEach((key) => {
-                if (key !== "magicBag" && key !== "playerId" && key !== "pet") {
+                if (key !== "magicBag" && key !== "playerId" && key !== "pet" && key !== "quiver") {
                     // skip magic bag as they require special calculations
                     const item = state.items.find(
                         (x) => x.tokenId === localEquippedItems[key]
@@ -692,6 +796,9 @@ export const useItemStore = defineStore({
 
             if (localEquippedItems.magicBag) {
                 stats.magic += localEquippedItems.magicBag
+            }            
+            if (localEquippedItems.quiver) {
+                stats.ranged += allActionChoicesRanged[allActionChoiceIdsRanged.findIndex(x => x === rangedItemToActionChoice(Number(localEquippedItems.rightHand), Number(localEquippedItems.quiver)))]?.skillDiff || 0
             }
 
             if (localEquippedItems.pet) {
@@ -746,7 +853,7 @@ export const useItemStore = defineStore({
                     (x) => x.playerId === Number(playerState.id)
                 ) as any) || {}
             Object.keys(localEquippedItems).forEach((key) => {
-                if (key !== "magicBag" && key !== "playerId" && key !== "pet") {
+                if (key !== "magicBag" && key !== "playerId" && key !== "pet" && key !== "quiver") {
                     // skip magic bag as they require special calculations
                     const item = state.items.find(
                         (x) => x.tokenId === localEquippedItems[key]
@@ -765,6 +872,9 @@ export const useItemStore = defineStore({
 
             if (localEquippedItems.magicBag) {
                 stats.magic += localEquippedItems.magicBag
+            }
+            if (localEquippedItems.quiver) {
+                stats.ranged += allActionChoicesRanged[allActionChoiceIdsRanged.findIndex(x => x === rangedItemToActionChoice(Number(localEquippedItems.rightHand), Number(localEquippedItems.quiver)))]?.skillDiff || 0
             }
 
             if (localEquippedItems.pet) {
@@ -822,7 +932,7 @@ export const useItemStore = defineStore({
                 const stats = new CombatStats()
 
                 Object.keys(equippedItems).forEach((key) => {
-                    if (key !== "magicBag" && key !== "playerId" && key !== "pet") {
+                    if (key !== "magicBag" && key !== "playerId" && key !== "pet" && key !== "quiver") {
                         // skip magic bag as they require special calculations
                         const item = state.items.find(
                             // @ts-ignore
@@ -844,7 +954,7 @@ export const useItemStore = defineStore({
                     stats.magic += allActionChoicesMagic[allActionChoiceIdsMagic.findIndex(x => x === Number(equippedItems.magicBag))]?.skillDiff || 0
                 }
                 if (equippedItems.quiver) {
-                    stats.ranged += allActionChoicesRanged[allActionChoiceIdsRanged.findIndex(x => x === Number(equippedItems.quiver))]?.skillDiff || 0
+                    stats.ranged += allActionChoicesRanged[allActionChoiceIdsRanged.findIndex(x => x === rangedItemToActionChoice(Number(equippedItems.rightHand), Number(equippedItems.quiver)))]?.skillDiff || 0
                 }
  
                 stats.melee += getLevel(hero.playerState.meleeXP)
@@ -875,6 +985,7 @@ export const useItemStore = defineStore({
                 e.rightHand = equippedItems.rightHand
                 e.leftHand = equippedItems.leftHand
                 e.magicBag = equippedItems.magicBag
+                e.ring = equippedItems.ring
                 e.quiver = equippedItems.quiver
                 e.food = equippedItems.food
                 e.pet = equippedItems.pet

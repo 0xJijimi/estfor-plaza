@@ -156,6 +156,13 @@ export const monsterNames = {
     [EstforConstants.ACTION_COMBAT_SNUFFLEQUARG]: "Snufflequarg",
     [EstforConstants.ACTION_COMBAT_SQUIGGLE_EGG]: "Squiggle Egg",
     [EstforConstants.ACTION_COMBAT_UFFINCH]: "Uffinch",
+    [EstforConstants.ACTION_COMBAT_ADULT_FROST_MAGE]: "Adult Frost Mage",
+    [EstforConstants.ACTION_COMBAT_BABY_DRAGON]: "Baby Dragon",
+    [EstforConstants.ACTION_COMBAT_BABY_FROST_MAGE]: "Baby Frost Mage",
+    [EstforConstants.ACTION_COMBAT_FIRE_DEMON]: "Fire Demon",
+    [EstforConstants.ACTION_COMBAT_FROST_MAMMOTH_SHEEP]: "Frost Mammoth Sheep",
+    [EstforConstants.ACTION_COMBAT_FROST_TITAN_GIANT]: "Frost Titan Giant",
+    [EstforConstants.ACTION_COMBAT_LAVA_FIEND]: "Lava Fiend",
 }
 
 export const monsterImageMap = {
@@ -180,6 +187,14 @@ export const monsterImageMap = {
     [EstforConstants.ACTION_COMBAT_SNUFFLEQUARG]: "monster_11_ddmkmh7y.jpg",
     [EstforConstants.ACTION_COMBAT_SQUIGGLE_EGG]: "monster_14_5tnfLn.jpg",
     [EstforConstants.ACTION_COMBAT_UFFINCH]: "monster_5_jltmx4zq.jpg",
+    [EstforConstants.ACTION_COMBAT_ADULT_FROST_MAGE]: "monster_22_zcfpzqp5.jpg",
+    [EstforConstants.ACTION_COMBAT_BABY_DRAGON]: "monster_24_b8lwohyf.jpg",
+    [EstforConstants.ACTION_COMBAT_BABY_FROST_MAGE]: "monster_25_s8uaum2x.jpg",
+    [EstforConstants.ACTION_COMBAT_FIRE_DEMON]: "monster_23_xe7wgjin.jpg",
+    [EstforConstants.ACTION_COMBAT_FROST_MAMMOTH_SHEEP]: "monster_26_xg5eos4d.jpg",
+    [EstforConstants.ACTION_COMBAT_FROST_TITAN_GIANT]: "monster_27_8m5h2oi4.jpg",
+    [EstforConstants.ACTION_COMBAT_LAVA_FIEND]: "monster_28_cwyo2ixv.jpg",
+
 }
 
 export const useMonsterStore = defineStore({
@@ -212,6 +227,7 @@ export const useMonsterStore = defineStore({
                     feet: Number(decoded?.[1]?.[0]?.[0]?.[5]),
                     magicBag: Number(decoded?.[1]?.[0]?.[3]),
                     quiver: Number(decoded?.[1]?.[0]?.[3]),
+                    ring: Number(decoded?.[1]?.[0]?.[0]?.[6]),
                     playerId: 0,
                     pet: undefined,
                 }
@@ -258,6 +274,7 @@ export const useMonsterStore = defineStore({
                     feet: action.feetEquipped,
                     magicBag: Number(action.choice.id),
                     quiver: Number(action.choice.id),
+                    ring: action.ringEquipped,
                     playerId: 0,
                     pet: undefined,
                 }
@@ -321,9 +338,10 @@ export const useMonsterStore = defineStore({
                         : 0
                 const monsterRankings = []
                 const elapsedTime = hours * 3600
+                const choiceId = 0
 
                 for (const m of state.monsters) {
-                    const { totalFoodRequired, totalHealthLost, xpPerHour, damagePerMinute, magicDamagePerMinute, meleeDamagePerMinute, rangedDamagePerMinute } = calculateMonsterDamage(attackSkill, isMelee, isRanged, isMagic, m, combatStats, hours, itemStore, equippedItems, elapsedTime, 0)
+                    const { totalFoodRequired, totalHealthLost, xpPerHour, damagePerMinute, magicDamagePerMinute, meleeDamagePerMinute, rangedDamagePerMinute } = calculateMonsterDamage(attackSkill, isMelee, isRanged, isMagic, m, combatStats, hours, itemStore, equippedItems, elapsedTime, choiceId)
 
                     monsterRankings.push({
                         actionId: m.actionId,

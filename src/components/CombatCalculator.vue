@@ -46,6 +46,12 @@
                     v-model="equippedItems.feet"
                 />
                 <ItemSelect
+                    :items="ringItems"
+                    label="Ring"
+                    @update:model-value="onUpdate"
+                    v-model="equippedItems.ring"
+                />
+                <ItemSelect
                     :items="rightHandItems"
                     label="Right Hand"
                     @update:model-value="onUpdate"
@@ -73,7 +79,6 @@
                     label="Quiver"
                     @update:model-value="onUpdate"
                     v-model="equippedItems.quiver"
-                    disabled
                     :empty-equipment="false"
                 />
                 <PetSelect 
@@ -185,8 +190,11 @@ const feetItems = computed(() =>
 const armItems = computed(() =>
     itemStore.getItemsForSlotAndXP(EquipPosition.ARMS)
 )
+const ringItems = computed(() =>
+    itemStore.getItemsForSlotAndXP(EquipPosition.RING)
+)
 const quiverItems = computed(() =>
-    itemStore.getItemsForSlotAndXP(EquipPosition.QUIVER)
+    itemStore.getRangedActionChoicesForXP
 )
 const magicBagItems = computed(() => itemStore.getMagicActionChoicesForXP)
 const foodItems = computed(() =>
@@ -206,9 +214,7 @@ const findLast = (arr: any[], criteria: any) => {
 const onUpdate = async () => {
     await nextTick() // wait for the model to update
     if (isRanged.value) {
-        equippedItems.value.quiver = itemStore.rangedActionChoices.find(
-            (x) => x.handItemTokenIdRangeMin === equippedItems.value.rightHand
-        )?.inputTokenIds[0]
+        // equippedItems.value.quiver = rangedItemToActionChoice(equippedItems.value.rightHand || 0, equippedItems.value.quiver || 0)
         equippedItems.value.magicBag = undefined
         equippedItems.value.leftHand = undefined
     }
@@ -255,7 +261,6 @@ const equipFullMelee = () => {
         feetItems.value,
         (x: ItemInput) => x.skill === Skill.DEFENCE
     )?.tokenId
-    equippedItems.value.pet = undefined
     onUpdate()
 }
 
@@ -284,7 +289,6 @@ const equipFullRanged = () => {
         feetItems.value,
         (x: ItemInput) => x.skill === Skill.RANGED
     )?.tokenId
-    equippedItems.value.pet = undefined
     onUpdate()
 }
 
@@ -317,7 +321,6 @@ const equipFullMagic = () => {
         magicBagItems.value,
         (x: ItemInput) => x.skill === Skill.MAGIC
     )?.tokenId
-    equippedItems.value.pet = undefined
     onUpdate()
 }
 

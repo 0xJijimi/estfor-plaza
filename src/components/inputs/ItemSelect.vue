@@ -10,8 +10,8 @@
             <span v-if="props.emptyEquipment">(No Equipment)</span>
         </option>
         <option
-            v-for="item in props.items"
-            :key="item.tokenId"
+            v-for="(item, i) in props.items"
+            :key="i"
             :value="item.tokenId"
         >
             {{ item.name }}

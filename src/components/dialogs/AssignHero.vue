@@ -89,6 +89,15 @@
             />
             <ItemSelect
                 v-if="skillId === Skill.COMBAT"
+                :items="ringItems"
+                label="Ring"
+                @update:model-value="onUpdate"
+                v-model="equippedItems.ring"
+                class="mt-5"
+                custom-class="select-md"
+            />
+            <ItemSelect
+                v-if="skillId === Skill.COMBAT"
                 :items="combatRightHandItems"
                 class="mt-5"
                 custom-class="select-md"
@@ -124,7 +133,6 @@
                 label="Quiver"
                 @update:model-value="onUpdate"
                 v-model="equippedItems.quiver"
-                disabled
                 :empty-equipment="false"
             />
             <ItemSelect
@@ -290,9 +298,10 @@ const equippedItems = ref({
     neck: undefined,
     rightHand: undefined,
     leftHand: undefined,
-    quiver: undefined,
     magicBag: undefined,
     food: undefined,
+    quiver: undefined,
+    ring: undefined,
 })
 const checkItems = ref(true)
 const manualRightHand = ref(undefined)
@@ -312,9 +321,10 @@ const openDialog = (heroes: ProxySilo[]) => {
         neck: undefined,
         rightHand: undefined,
         leftHand: undefined,
-        quiver: undefined,
         magicBag: undefined,
         food: undefined,
+        quiver: undefined,
+        ring: undefined,
     }
     checkItems.value = true
     const dialog = document.getElementById(props.id) as HTMLDialogElement
@@ -346,8 +356,11 @@ const feetItems = computed(() =>
 const armItems = computed(() =>
     itemStore.getItemsForSlotAndHeroes(EquipPosition.ARMS, heroesToAssign.value)
 )
+const ringItems = computed(() =>
+    itemStore.getItemsForSlotAndHeroes(EquipPosition.RING, heroesToAssign.value)
+)
 const quiverItems = computed(() =>
-    itemStore.getItemsForSlotAndHeroes(EquipPosition.QUIVER, heroesToAssign.value)
+    itemStore.getRangedActionChoicesForHeroes(heroesToAssign.value)
 )
 const magicBagItems = computed(() => itemStore.getMagicActionChoicesForHeroes(heroesToAssign.value))
 const foodItems = computed(() =>
@@ -421,9 +434,6 @@ const isMagic = computed(() => {
 const onUpdate = async () => {
     await nextTick() // wait for the model to update
     if (isRanged.value) {
-        equippedItems.value.quiver = itemStore.rangedActionChoices.find(
-            (x) => x.handItemTokenIdRangeMin === equippedItems.value.rightHand
-        )?.inputTokenIds[0]
         equippedItems.value.magicBag = undefined
         equippedItems.value.leftHand = undefined
         if (combatStyle.value !== Skill.DEFENCE) {
@@ -509,7 +519,7 @@ const checkCombatItems = async () => {
     checking.value = true
     try {
         if (actionId.value > 0) {
-            const requiredItems = [equippedItems.value.head, equippedItems.value.neck, equippedItems.value.body, equippedItems.value.arms, equippedItems.value.legs, equippedItems.value.feet, equippedItems.value.rightHand, equippedItems.value.leftHand].filter(x => x !== undefined)
+            const requiredItems = [equippedItems.value.head, equippedItems.value.neck, equippedItems.value.body, equippedItems.value.arms, equippedItems.value.legs, equippedItems.value.feet, equippedItems.value.rightHand, equippedItems.value.leftHand, equippedItems.value.ring].filter(x => x !== undefined)
 
             for (const h of heroesToAssign.value) {
                 const userItemsResult = await getUserItemNFTs(h.address, [])
@@ -652,7 +662,7 @@ const assignHeroes = async () => {
                     isMelee.value ? 
                         EstforConstants.ACTIONCHOICE_MELEE_MONSTER : 
                     isRanged.value ? 
-                        rangedItemToActionChoice[equippedItems.value.rightHand || 0] : 
+                        rangedItemToActionChoice(equippedItems.value.rightHand || 0, equippedItems.value.quiver || 0) : 
                         allActionChoiceIdsMagic[allActionChoicesMagic.findIndex(x => x.skillDiff === equippedItems.value.magicBag)] || 0 : 0,
                 equippedItems.value.head,
                 equippedItems.value.neck,
@@ -660,6 +670,7 @@ const assignHeroes = async () => {
                 equippedItems.value.arms,
                 equippedItems.value.legs,
                 equippedItems.value.feet,
+                equippedItems.value.ring,
                 skillId.value === Skill.COMBAT ? equippedItems.value.rightHand : rightHandItems.value[0],
                 equippedItems.value.leftHand,
                 equippedItems.value.food,
@@ -692,6 +703,7 @@ const assignHeroes = async () => {
                 allActions.find((x) => x.info.skill == skillId.value)
                     ?.actionId || 0,
                 actionChoiceOutputId.value,
+                0,
                 0,
                 0,
                 0,

@@ -94,6 +94,7 @@ export const proxyNeedsItem = (item: UserItemNFT, p: ProxySilo): boolean => {
             arms: Number(decoded?.[1]?.[0]?.[0]?.[3]),
             legs: Number(decoded?.[1]?.[0]?.[0]?.[4]),
             feet: Number(decoded?.[1]?.[0]?.[0]?.[5]),
+            ring: Number(decoded?.[1]?.[0]?.[0]?.[6]),
             magicBag: 0,
             quiver: 0,
             playerId: 0,
@@ -121,6 +122,9 @@ export const proxyNeedsItem = (item: UserItemNFT, p: ProxySilo): boolean => {
             return true
         }
         if (equippedItems.neck === item.tokenId) {
+            return true
+        }
+        if (equippedItems.ring === item.tokenId) {
             return true
         }
     }
@@ -333,6 +337,7 @@ const constructQueuedActions = (
     arms: number | undefined,
     legs: number | undefined,
     feet: number | undefined,
+    ring: number | undefined,
     food: number | undefined,
     leftHand: number | undefined,
     rightHand: number | undefined,
@@ -347,7 +352,7 @@ const constructQueuedActions = (
                 arms || 0, // arms
                 legs || 0, // legs
                 feet || 0, // feet
-                0, // ring
+                ring || 0, // ring
                 0, // reserved1
             ],
             actionId,
@@ -1171,7 +1176,8 @@ export const useFactoryStore = defineStore({
             body: number | undefined,
             arms: number | undefined,
             legs: number | undefined,
-            feet: number | undefined,            
+            feet: number | undefined,   
+            ring: number | undefined,         
             rightHand: number | undefined,
             leftHand: number | undefined,            
             food: number | undefined,
@@ -1211,6 +1217,7 @@ export const useFactoryStore = defineStore({
                                         arms,
                                         legs,
                                         feet,
+                                        ring,
                                         food,
                                         leftHand,
                                         rightHand,
@@ -1263,6 +1270,7 @@ export const useFactoryStore = defineStore({
                                         arms,
                                         legs,
                                         feet,
+                                        ring,
                                         food,
                                         leftHand,
                                         rightHand,

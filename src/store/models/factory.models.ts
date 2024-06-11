@@ -57,4 +57,5 @@ export interface EquippedItems {
     food: number | undefined
     playerId: number | undefined
     pet: Pet | undefined
+    ring: number | undefined
 }
