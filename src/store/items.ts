@@ -407,12 +407,12 @@ export const itemNames = {
     [EstforConstants.INFUSED_SCORCHING_CHAPS]: "Infused Scorching Chaps",
 
     [EstforConstants.BRIMSTONE]: "Brimstone",
-    [EstforConstants.RING_1]: "Basic Ring",
-    [EstforConstants.RING_2]: "Medium Ring",
-    [EstforConstants.RING_3]: "Melee Ring",
-    [EstforConstants.RING_4]: "Magic Ring",
-    [EstforConstants.RING_5]: "Ranged Ring",
-    [EstforConstants.RING_6]: "Dragon Stone Ring",
+    [EstforConstants.PANGSTEN_RING]: "Pangsten Ring",
+    [EstforConstants.CANVITE_RING]: "Canvite Ring",
+    [EstforConstants.ETCHED_RING]: "Etched Ring",
+    [EstforConstants.PRIMDIAT_RING]: "Primdiat Ring",
+    [EstforConstants.OCULITE_RING]: "Oculite Ring",
+    [EstforConstants.NOVIAN_RING]: "Novian Ring",
     [EstforConstants.COIN]: "Coin",
     [EstforConstants.BONE_CHEST]: "Bone Chest",
     [EstforConstants.DRAGON_CHEST]: "Dragon Chest",
@@ -474,7 +474,7 @@ export const rangedItemToActionChoice = (rightHand: number, arrow: number) => {
             if (arrow === EstforConstants.POISON) {
                 return EstforConstants.ACTIONCHOICE_RANGED_SPECTRAL_BOW_POISON
             } else if (arrow === EstforConstants.BRIMSTONE) {
-                return EstforConstants.ACTIONCHOICE_RANGED_SPRECTRAL_BOW_FIRE
+                return EstforConstants.ACTIONCHOICE_RANGED_SPECTRAL_BOW_FIRE
             } else {
                 return EstforConstants.ACTIONCHOICE_RANGED_SPECTRAL_BOW            
             }
@@ -546,7 +546,7 @@ const getQuiverOptions = (state: ItemState, rangedXp: number, fletchingXp : numb
 const getQuiverOptionsForRightHand = (state: ItemState, rangedXp: number, fletchingXp : number, rightHand: number) => {
     return state.rangedActionChoices
                 .filter((x) => x.minXPs.every((y, i) => i === 0 ? y <= rangedXp : y <= fletchingXp))
-                .filter((x) => x.handItemTokenIdRangeMin === rightHand)
+                .filter((x) => x.handItemTokenIdRangeMin >= rightHand && x.handItemTokenIdRangeMax <= rightHand)
                 .map((x) => ({
                     ...x,
                     tokenId: x.inputTokenIds.indexOf(EstforConstants.BRIMSTONE) !== -1 ? EstforConstants.BRIMSTONE : x.inputTokenIds.indexOf(EstforConstants.POISON) !== -1 ? EstforConstants.POISON : x.inputTokenIds[0],

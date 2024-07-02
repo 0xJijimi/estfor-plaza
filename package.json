@@ -13,7 +13,7 @@
   "dependencies": {
     "@apollo/client": "^3.9.6",
     "@heroicons/vue": "^2.0.18",
-    "@paintswap/estfor-definitions": "^1.0.210",
+    "@paintswap/estfor-definitions": "^1.0.218",
     "@vue/apollo-composable": "^4.0.2",
     "@vueuse/core": "^10.7.0",
     "@vueuse/head": "^2.0.0",

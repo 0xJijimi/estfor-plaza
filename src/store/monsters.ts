@@ -156,13 +156,13 @@ export const monsterNames = {
     [EstforConstants.ACTION_COMBAT_SNUFFLEQUARG]: "Snufflequarg",
     [EstforConstants.ACTION_COMBAT_SQUIGGLE_EGG]: "Squiggle Egg",
     [EstforConstants.ACTION_COMBAT_UFFINCH]: "Uffinch",
-    [EstforConstants.ACTION_COMBAT_ADULT_FROST_MAGE]: "Adult Frost Mage",
-    [EstforConstants.ACTION_COMBAT_BABY_DRAGON]: "Baby Dragon",
-    [EstforConstants.ACTION_COMBAT_BABY_FROST_MAGE]: "Baby Frost Mage",
-    [EstforConstants.ACTION_COMBAT_FIRE_DEMON]: "Fire Demon",
-    [EstforConstants.ACTION_COMBAT_FROST_MAMMOTH_SHEEP]: "Frost Mammoth Sheep",
-    [EstforConstants.ACTION_COMBAT_FROST_TITAN_GIANT]: "Frost Titan Giant",
-    [EstforConstants.ACTION_COMBAT_LAVA_FIEND]: "Lava Fiend",
+    [EstforConstants.ACTION_COMBAT_BLAZING_MONTANITE]: "Blazing Montanite",
+    [EstforConstants.ACTION_COMBAT_CAVE_FAIRY]: "Cave Fairy",
+    [EstforConstants.ACTION_COMBAT_EMBER_WHELP]: "Ember Whelp",
+    [EstforConstants.ACTION_COMBAT_ICE_TROLL]: "Ice Troll",
+    [EstforConstants.ACTION_COMBAT_JUVENILE_CAVE_FAIRY]: "Juvenile Cave Fairy",
+    [EstforConstants.ACTION_COMBAT_MONTANITE_FIRE_TITAN]: "Montanite Fire Titan",
+    [EstforConstants.ACTION_COMBAT_MONTANITE_ICE_TITAN]: "Montanite Ice Titan",
 }
 
 export const monsterImageMap = {
@@ -187,13 +187,13 @@ export const monsterImageMap = {
     [EstforConstants.ACTION_COMBAT_SNUFFLEQUARG]: "monster_11_ddmkmh7y.jpg",
     [EstforConstants.ACTION_COMBAT_SQUIGGLE_EGG]: "monster_14_5tnfLn.jpg",
     [EstforConstants.ACTION_COMBAT_UFFINCH]: "monster_5_jltmx4zq.jpg",
-    [EstforConstants.ACTION_COMBAT_ADULT_FROST_MAGE]: "monster_26_xg5eos4d.jpg",
-    [EstforConstants.ACTION_COMBAT_BABY_DRAGON]: "monster_22_zcfpzqp5.jpg",
-    [EstforConstants.ACTION_COMBAT_BABY_FROST_MAGE]: "monster_25_s8uaum2x.jpg",
-    [EstforConstants.ACTION_COMBAT_FIRE_DEMON]: "monster_24_b8lwohyf.jpg",
-    [EstforConstants.ACTION_COMBAT_FROST_MAMMOTH_SHEEP]: "monster_27_8m5h2oi4.jpg",
-    [EstforConstants.ACTION_COMBAT_FROST_TITAN_GIANT]: "monster_30_fwn42nli.jpg",
-    [EstforConstants.ACTION_COMBAT_LAVA_FIEND]: "monster_23_xe7wgjin.jpg",
+    [EstforConstants.ACTION_COMBAT_BLAZING_MONTANITE]: "monster_23_xe7wgjin.jpg",
+    [EstforConstants.ACTION_COMBAT_CAVE_FAIRY]: "monster_25_s8uaum2x.jpg",
+    [EstforConstants.ACTION_COMBAT_EMBER_WHELP]: "monster_22_zcfpzqp5.jpg",
+    [EstforConstants.ACTION_COMBAT_ICE_TROLL]: "monster_27_8m5h2oi4.jpg",
+    [EstforConstants.ACTION_COMBAT_JUVENILE_CAVE_FAIRY]: "monster_26_xg5eos4d.jpg",
+    [EstforConstants.ACTION_COMBAT_MONTANITE_FIRE_TITAN]: "monster_24_b8lwohyf.jpg",
+    [EstforConstants.ACTION_COMBAT_MONTANITE_ICE_TITAN]: "monster_30_fwn42nli.jpg",
 
 }
 
