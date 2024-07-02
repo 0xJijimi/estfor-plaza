@@ -33,7 +33,7 @@ export const config = createConfig({
 export const estimateConfig = createConfig({
     chains: [fantom],
     transports: {
-        [fantom.id]: http('https://rpc.ftm.tools'),
+        [fantom.id]: http('https://rpcapi.fantom.network'),
     },
     connectors: [
         walletConnect({ projectId, metadata, showQrModal: false }),
