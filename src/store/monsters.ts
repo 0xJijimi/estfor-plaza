@@ -127,10 +127,11 @@ export const calculateMonsterDamage = (attackSkill: number, isMelee: boolean, is
         )?.healthRestored || 0
 
     const alphaCombatHealing = 8
-    const healingFromHealthStat = 1000000 + (((1000000 * alphaCombatHealing) / 100) * combatStats.health / 100)
-    const totalFoodRequired = Math.ceil(
-        (totalHealthLost * 1000000) / (fishHealthRestored * healingFromHealthStat)
-    )
+    const healingScale = 1000000
+    const healingFromHealthStat = healingScale + ((((healingScale * alphaCombatHealing) / 100) * combatStats.health) / 100)
+    const totalFoodRequired = Math.min(1, Math.ceil(
+        (totalHealthLost * healingScale) / (fishHealthRestored * healingFromHealthStat)
+    ))
     const xpPerHour =
         (m.info.xpPerHour * xpElapsedTime) / elapsedTime
 
