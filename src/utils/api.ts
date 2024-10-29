@@ -170,7 +170,7 @@ export const getClanMembers = async (
 }
 
 export const getClans = async (numToSkip: number): Promise<ClansResult> => {
-    return fetchRetry(`${baseUrl}/clans?numToSkip=${numToSkip}`)
+    return fetchRetry(`${baseUrl}/clans?numToSkip=${numToSkip}&onlyHasVaults=true`)
 }
 
 export const getClanByName = async (name: string): Promise<ClansResult> => {
