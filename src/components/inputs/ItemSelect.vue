@@ -9,19 +9,30 @@
             {{ props.label }}
             <span v-if="props.emptyEquipment">(No Equipment)</span>
         </option>
-        <option
-            v-for="(item, i) in props.items"
-            :key="i"
-            :value="item.tokenId"
-        >
+        <option v-for="(item, i) in props.items" :key="i" :value="item.tokenId">
             {{ item.name }}
+            {{
+                item.equipPosition === EquipPosition.FOOD
+                    ? `(+${item.healthRestored} HP)`
+                    : ""
+            }}
+            {{
+                item.equipPosition === EquipPosition.QUIVER
+                    ? `(+${item.combatStats.rangedAttack})`
+                    : ""
+            }}
+            {{
+                item.equipPosition === EquipPosition.MAGIC_BAG
+                    ? `(+${item.combatStats.magicAttack})`
+                    : ""
+            }}
         </option>
     </select>
 </template>
 
 <script setup lang="ts">
 import { computed, PropType } from "vue"
-import { ItemInput } from "@paintswap/estfor-definitions/types"
+import { EquipPosition, ItemInput } from "@paintswap/estfor-definitions/types"
 
 const emit = defineEmits(["update:modelValue"])
 

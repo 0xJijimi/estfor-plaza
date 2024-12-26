@@ -7,6 +7,10 @@
                 Welcome to the Factory floor! Here you can create silos for your
                 Estfor heroes and tell them to do things.
             </p>
+            <p class="alert alert-warning my-5">
+                This Factory works only on Fantom Opera. Sonic will be available
+                soon (along with bridging).
+            </p>
             <p v-if="!hasRubyBrooch" class="alert alert-warning my-5">
                 <img
                     src="/src/assets/ruby_brooch_icon.png"
@@ -28,9 +32,12 @@
                     click the Ruby brooch to the left of this message.</span
                 >
             </p>
-            <div
-                v-if="loading"                
-            >Loading heroes... <span class="loading loading-spinner text-white loading-md mx-2"></span></div>
+            <div v-if="loading">
+                Loading heroes...
+                <span
+                    class="loading loading-spinner text-white loading-md mx-2"
+                ></span>
+            </div>
             <div v-else>
                 <p>
                     You currently have
@@ -79,15 +86,24 @@
         <EmptySilos
             v-if="!loading && factoryStore.emptyProxys.length > 0"
             @create-heroes="onCreateHeroes"
-            
+            :chainId="chainId"
         />
-        <UnassignedSilos v-if="!loading && factoryStore.unassignedProxys.length > 0" />
+        <UnassignedSilos
+            v-if="!loading && factoryStore.unassignedProxys.length > 0"
+            :chainId="chainId"
+        />
     </div>
     <div class="lg:flex flex-row justify-evenly items-start gap-10">
-        <ItemBank v-if="!loading && factoryStore.proxys.length > 0" />
-        <AssignedSilos v-if="!loading && factoryStore.assignedProxys.length > 0" />
+        <ItemBank
+            v-if="!loading && factoryStore.proxys.length > 0"
+            :chainId="chainId"
+        />
+        <AssignedSilos
+            v-if="!loading && factoryStore.assignedProxys.length > 0"
+            :chainId="chainId"
+        />
     </div>
-    <ViewSilos ref="viewSilosRef" />
+    <ViewSilos ref="viewSilosRef" :chainId="chainId" />
     <RubyBroochPaywall
         ref="rubyBroochPaywallRef"
         id="factory_ruby_brooch_modal"
@@ -117,6 +133,7 @@ const loading = ref(factoryStore.initialised === false)
 const creating = ref(false)
 const silosToCreate = ref(5)
 const previousCount = ref(0)
+const chainId = ref<250 | 146>(250)
 
 const viewSilosRef = ref<typeof ViewSilos>()
 
@@ -127,15 +144,15 @@ const rubyBroochPaywallRef = ref<typeof RubyBroochPaywall>()
 
 const { onError, refetch, fetchMore, onResult } = useQuery(
     gql`
-    query getProxys($offset: Int, $acc: String!) {
-        factoryRegistryCreateds(skip: $offset, where: { owner: $acc }) {
-            sender
-            owner
-            proxy
-            proxyId
+        query getProxys($offset: Int, $acc: String!) {
+            factoryRegistryCreateds(skip: $offset, where: { owner: $acc }) {
+                sender
+                owner
+                proxy
+                proxyId
+            }
         }
-    }
-`,
+    `,
     () => ({
         offset: 0,
         acc: factoryAccount.value.address,
@@ -144,8 +161,10 @@ const { onError, refetch, fetchMore, onResult } = useQuery(
 
 onResult(async (v) => {
     if (v.data) {
-        if (v?.data?.factoryRegistryCreateds?.length > 0) {            
-            if (v.data?.factoryRegistryCreateds.length !== previousCount.value) {
+        if (v?.data?.factoryRegistryCreateds?.length > 0) {
+            if (
+                v.data?.factoryRegistryCreateds.length !== previousCount.value
+            ) {
                 await fetchMore({
                     variables: {
                         offset: v?.data?.factoryRegistryCreateds?.length,
@@ -164,7 +183,7 @@ onResult(async (v) => {
                 })
             } else {
                 await factoryStore.setProxys(v.data?.factoryRegistryCreateds)
-                await factoryStore.getAllProxyStates()
+                await factoryStore.getAllProxyStates(chainId.value)
                 loading.value = false
             }
             previousCount.value = v.data?.factoryRegistryCreateds.length
@@ -186,7 +205,7 @@ const createSilos = async () => {
     creating.value = true
     try {
         const originalProxyCount = factoryStore.proxys.length
-        await factoryStore.createProxy(silosToCreate.value)
+        await factoryStore.createProxy(silosToCreate.value, chainId.value)
         app.addToast(
             `${silosToCreate.value} silo${
                 silosToCreate.value > 1 ? "s" : ""
@@ -227,8 +246,8 @@ watchAccount(config, {
 onError(async () => {
     loading.value = true
     try {
-        await factoryStore.getProxys()
-        await factoryStore.getAllProxyStates()
+        await factoryStore.getProxys(chainId.value)
+        await factoryStore.getAllProxyStates(chainId.value)
     } catch (e) {
         console.error(e)
     } finally {

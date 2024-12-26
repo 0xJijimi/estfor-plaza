@@ -125,6 +125,10 @@ import AvatarSelect from "../inputs/AvatarSelect.vue"
 
 const emit = defineEmits(["create-heroes"])
 
+const props = defineProps<{
+    chainId: 250 | 146
+}>()
+
 const factoryStore = useFactoryStore()
 const app = useAppStore()
 const mintingHeroes = ref(false)
@@ -153,7 +157,7 @@ const mintHeroes = async () => {
             hero.error = "Name cannot be empty"
             continue
         }
-        const exists = await getExactPlayers(hero.name.trim())
+        const exists = await getExactPlayers(hero.name.trim(), props.chainId)
         if (exists.players.length > 0) {
             hero.error = "Name not unique"
         }
@@ -165,7 +169,7 @@ const mintHeroes = async () => {
 
     mintingHeroes.value = true
     try {
-        await factoryStore.mintHeroes(heroesToMint.value)
+        await factoryStore.mintHeroes(heroesToMint.value, props.chainId)
         app.addToast(
             `${heroesToMint.value.length} hero${
                 heroesToMint.value.length > 1 ? "es" : ""
@@ -186,7 +190,7 @@ const addHero = () => {
 }
 
 const init = async () => {
-    const avatarsResult = await getAvatars()
+    const avatarsResult = await getAvatars(props.chainId)
     avatars.value = avatarsResult.avatars
         .map((a) => {
             return {

@@ -1,7 +1,9 @@
 import { defineStore } from "pinia"
 import { readContract, getAccount } from "@wagmi/core"
 
+import { decode } from "../utils/abi"
 import estforPlayerAbi from "../abi/estforPlayer.json"
+import oldEstforPlayerAbi from "../abi/oldEstforPlayer.json"
 import broochAbi from "../abi/brooch.json"
 import {
     getPlayerState,
@@ -25,7 +27,7 @@ import { EstforConstants } from "@paintswap/estfor-definitions"
 import { allItems } from "../data/items"
 import { allFullAttireBonuses } from "../data/fullAttireBonuses"
 import { HOMEMADE_BROOCH_ADDRESS } from "../utils/addresses"
-import { fantom } from "viem/chains"
+import { fantom, sonic } from "viem/chains"
 import { useBroochStore } from "./brooch"
 import { config } from "../config"
 
@@ -66,13 +68,6 @@ export interface CoreState {
     pets: Pet[]
 }
 
-export const boostVialNames = {
-    [EstforConstants.COMBAT_BOOST]: "Combat Boost",
-    [EstforConstants.XP_BOOST]: "XP Boost",
-    [EstforConstants.SKILL_BOOST]: "Skill Boost",
-    [EstforConstants.GATHERING_BOOST]: "Gathering Boost",
-}
-
 export const boostTypeNames = {
     [BoostType.ANY_XP]: "All XP",
     [BoostType.COMBAT_XP]: "Combat XP",
@@ -84,6 +79,7 @@ export const boostTypeNames = {
     [BoostType.PVP_BLOCK]: "PvP Block",
     [BoostType.PVP_REATTACK]: "PvP Reattack",
     [BoostType.PVP_SUPER_ATTACK]: "Sharpened Claw",
+    [BoostType.COMBAT_FIXED]: "Combat Stats",
 }
 
 export const avatarBoostSkills = {
@@ -121,6 +117,7 @@ export const skillToXPMap = {
     [Skill.RANGED]: "rangedXP",
     [Skill.MELEE]: "meleeXP",
     [Skill.DEFENCE]: "defenceXP",
+    [Skill.FARMING]: "farmingXP",
 }
 
 export const xpBoundaries = [
@@ -133,12 +130,25 @@ export const xpBoundaries = [
     148283, 158973, 170430, 182707, 195864, 209963, 225074, 241267, 258621,
     277219, 297150, 318511, 341403, 365936, 392228, 420406, 450605, 482969,
     517654, 554828, 594667, 637364, 683124, 732166, 784726, 841057, 901428,
-    966131, 1035476, 1109796,
+    966131, 1035476, 1109796, 1189448, 1274815, 1366307, 1464364, 1569456,
+    1682089, 1802804, 1932181, 2070841, 2219452, 2378726, 2549430, 2732383,
+    2928465, 3138618, 3363853, 3605251, 3863972, 4141260, 4438448, 4756963,
+    5098336, 5464209, 5856339, 6276611, 6727045, 7209805, 7727212, 8281752,
+    8876091, 9513085, 10195795, 10927503, 11711726, 12552232, 13453061,
+    14418543, 15453317, 16562359, 17750997,
 ]
 
 export const getLevel = (xp: string) => {
     const level = xpBoundaries.findIndex((x) => x > parseInt(xp, 10))
     return level === -1 ? 100 : level
+}
+
+export const safeDecode = (data: any, functionName: string) => {
+    try {
+        return decode(data, functionName, estforPlayerAbi)
+    } catch (e) {
+        return decode(data, functionName, oldEstforPlayerAbi)
+    }
 }
 
 export const heroAvatarMultiplier = (player: Player, skill: Skill) => {
@@ -213,6 +223,36 @@ export const useCoreStore = defineStore({
                         },
                     ],
                 },
+                {
+                    network: sonic.id,
+                    addresses: [
+                        {
+                            name: Address.estforPlayers,
+                            address:
+                                "0xefa670aad6d5921236e9655f346ca13a5c56481b",
+                        },
+                        {
+                            name: Address.factoryRegistry,
+                            address:
+                                "0xF9A66F8C569D23f1fA1A63950c3CA822Cf26355e",
+                        },
+                        {
+                            name: Address.estforPlayerNFT,
+                            address:
+                                "0x076aeec336f5abbdf64ba8ddf96fc974b0463528",
+                        },
+                        {
+                            name: Address.itemNFT,
+                            address:
+                                "0x8ee7d355f76fb5621ee89bca431ba0cd39fe14c5",
+                        },
+                        {
+                            name: Address.brush,
+                            address:
+                                "0xE51EE9868C1f0d6cd968A8B8C8376Dc2991BFE44",
+                        },
+                    ],
+                },
             ],
             playerId: "0",
             playerState: {} as Player,
@@ -230,16 +270,20 @@ export const useCoreStore = defineStore({
             queuedActions: [],
         }) as CoreState,
     getters: {
-        getNetworkAddressMap: (state: CoreState): AddressMap[] | undefined => {
-            const network = getAccount(config)?.chainId
+        getNetworkAddressMap: (
+            state: CoreState,
+            chainId?: number
+        ): AddressMap[] | undefined => {
+            const network = chainId || getAccount(config)?.chainId
             return state.addresses.find((x) => x.network == network)?.addresses
         },
         getAddress: (state: CoreState) => {
-            const network = getAccount(config)?.chainId
-            return (name: Address) =>
-                state.addresses
+            return (name: Address, chainId?: number) => {
+                const network = chainId || getAccount(config)?.chainId
+                return state.addresses
                     .find((x) => x.network == network)
                     ?.addresses.find((x) => x.name == name)?.address
+            }
         },
         globalBoostData: (state: CoreState) => {
             const globalBoost = {
@@ -416,31 +460,41 @@ export const useCoreStore = defineStore({
         async getAllPlayerInfo(playerId: string) {
             this.playerId = playerId
 
-            const playerState = await getPlayerState(this.playerId)
+            const playerState = await getPlayerState(this.playerId, sonic.id)
             if (playerState.clanMember) {
                 this.playerState = playerState.clanMember.player
 
                 if (playerState.clanMember.clan) {
-                    const clan = await getClanByName(playerState.clanMember.clan.name)
+                    const clan = await getClanByName(
+                        playerState.clanMember.clan.name,
+                        sonic.id
+                    )
                     this.clanState = clan.clans[0]
                 }
             } else {
                 this.clanState = null
-                const soloPlayerState = await getSoloPlayerState(this.playerId)
+                const soloPlayerState = await getSoloPlayerState(
+                    this.playerId,
+                    sonic.id
+                )
                 this.playerState = soloPlayerState.player
             }
 
             if (this.playerState) {
                 const inventory = await getUserItemNFTs(
                     this.playerState.owner,
-                    allFullAttireBonuses.flatMap((x) => x.itemTokenIds)
+                    allFullAttireBonuses.flatMap((x) => x.itemTokenIds),
+                    sonic.id
                 )
                 try {
-                    const pets = await getOwnedPets(this.playerState.owner)
+                    const pets = await getOwnedPets(
+                        this.playerState.owner,
+                        sonic.id
+                    )
                     this.pets = pets.pets
                 } catch {}
-                
-                this.inventory = inventory.userItemNFTs                
+
+                this.inventory = inventory.userItemNFTs
                 this.originalState = JSON.parse(
                     JSON.stringify(this.playerState)
                 )
@@ -449,7 +503,10 @@ export const useCoreStore = defineStore({
             }
         },
         async getActivePlayer() {
-            const playerAddress = this.getAddress(Address.estforPlayers)
+            const playerAddress = this.getAddress(
+                Address.estforPlayers,
+                sonic.id
+            )
             const account = getAccount(config)
             if (!playerAddress || !account.isConnected) {
                 return
@@ -458,8 +515,9 @@ export const useCoreStore = defineStore({
             const activePlayer = await readContract(config, {
                 address: playerAddress as `0x${string}`,
                 abi: estforPlayerAbi,
-                functionName: "activePlayer",
+                functionName: "getActivePlayer",
                 args: [account.address],
+                chainId: sonic.id,
             })
 
             if (!activePlayer) {
@@ -469,14 +527,14 @@ export const useCoreStore = defineStore({
 
             await this.getAllPlayerInfo(activePlayer as unknown as string)
 
-            const globalState = await getGlobalData()
+            const globalState = await getGlobalData(sonic.id)
             this.coreData = globalState.coreData
         },
         async refreshHeroRoster() {
             const p = []
             for (const hero of this.heroRoster) {
                 if (hero && hero.id) {
-                    p.push(getSoloPlayerState(hero.id))
+                    p.push(getSoloPlayerState(hero.id, sonic.id))
                 }
             }
             const heroes = await Promise.all(p)

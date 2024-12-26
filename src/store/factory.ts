@@ -8,7 +8,7 @@ import {
 } from "@wagmi/core"
 import {
     ActionChoiceInput,
-    ActionQueueStatus,
+    ActionQueueStrategy,
     CombatStyle,
     GuaranteedReward,
     Player,
@@ -20,7 +20,13 @@ import { defineStore } from "pinia"
 import { ZeroAddress, solidityPacked, Interface } from "ethers"
 import { fantom } from "viem/chains"
 
-import { Address, getLevel, skillToXPMap, useCoreStore } from "./core"
+import {
+    Address,
+    getLevel,
+    skillToXPMap,
+    useCoreStore,
+    safeDecode,
+} from "./core"
 
 import estforPlayerAbi from "../abi/estforPlayer.json"
 import itemNFTAbi from "../abi/itemNFT.json"
@@ -35,7 +41,6 @@ import {
     getUserItemNFTs,
     searchQueuedActions,
 } from "../utils/api"
-import { decode } from "../utils/abi"
 import { allActions } from "../data/actions"
 import { calculateChance } from "../utils/player"
 import {
@@ -49,7 +54,14 @@ import { sleep } from "../utils/time"
 import { config, estimateConfig } from "../config"
 import { useBroochStore } from "./brooch"
 import { useMonsterStore } from "./monsters"
-import { EquippedItems, FactoryState, NeededItem, ProxySilo, SavedTransaction, TransferUserItemNFT } from "./models/factory.models"
+import {
+    EquippedItems,
+    FactoryState,
+    NeededItem,
+    ProxySilo,
+    SavedTransaction,
+    TransferUserItemNFT,
+} from "./models/factory.models"
 import { allItems } from "../data/items"
 
 export const proxyNeedsItem = (item: UserItemNFT, p: ProxySilo): boolean => {
@@ -83,7 +95,7 @@ export const proxyNeedsItem = (item: UserItemNFT, p: ProxySilo): boolean => {
         }
     }
     for (const a of p.savedTransactions) {
-        const decoded = decode(a.data, "startActions", estforPlayerAbi)
+        const decoded = safeDecode(a.data, "startActions")
         const equippedItems: EquippedItems = {
             rightHand: Number(decoded?.[1]?.[0]?.[4]),
             leftHand: Number(decoded?.[1]?.[0]?.[5]),
@@ -147,8 +159,8 @@ export const calculateActionChoiceSuccessPercent = (
                     0,
                     getLevel(playerXP) -
                         getLevel(
-                            a.minXPs[
-                                a.minSkills.findIndex((s) => s === skillId)
+                            a.skillMinXPs[
+                                a.skills.findIndex((s) => s === skillId)
                             ] || 0
                         )
                 )
@@ -160,11 +172,7 @@ export const getIncomingItems = (proxys: ProxySilo[]) => {
     const items: GuaranteedReward[] = []
     const monsterStore = useMonsterStore()
     for (const s of proxys) {
-        const decoded = decode(
-            s.savedTransactions[0].data,
-            "startActions",
-            estforPlayerAbi
-        )
+        const decoded = safeDecode(s.savedTransactions[0].data, "startActions")
         const actionId = decoded?.[1]?.[0]?.[1] || BigInt(0)
         const actionChoiceId = decoded?.[1]?.[0]?.[3] || BigInt(0)
         const action = allActions.find((a) => a.actionId === Number(actionId))
@@ -176,7 +184,11 @@ export const getIncomingItems = (proxys: ProxySilo[]) => {
             const isCombat = action.info.skill === Skill.COMBAT
             let amountMultiplier = 1
             if (isCombat) {
-                const { numKilled } = monsterStore.getKillsPerHour(24, s, action)
+                const { numKilled } = monsterStore.getKillsPerHour(
+                    24,
+                    s,
+                    action
+                )
                 amountMultiplier = numKilled / 24
             }
 
@@ -185,9 +197,9 @@ export const getIncomingItems = (proxys: ProxySilo[]) => {
                     (x) => x.itemTokenId === i.itemTokenId
                 )
                 if (existing) {
-                    existing.rate += i.rate / 10 * amountMultiplier
+                    existing.rate += (i.rate / 10) * amountMultiplier
                 } else {
-                    items.push({ ...i, rate: i.rate / 10 * amountMultiplier })
+                    items.push({ ...i, rate: (i.rate / 10) * amountMultiplier })
                 }
             }
             for (const i of action.randomRewards) {
@@ -203,7 +215,8 @@ export const getIncomingItems = (proxys: ProxySilo[]) => {
                             s.playerState[skillToXPMap[action.info.skill]]
                         ) /
                             100) *
-                        i.amount * amountMultiplier
+                        i.amount *
+                        amountMultiplier
                 } else {
                     items.push({
                         ...i,
@@ -215,7 +228,8 @@ export const getIncomingItems = (proxys: ProxySilo[]) => {
                                 s.playerState[skillToXPMap[action.info.skill]]
                             ) /
                                 100) *
-                            i.amount * amountMultiplier,
+                            i.amount *
+                            amountMultiplier,
                     })
                 }
             }
@@ -257,11 +271,7 @@ export const getOutgoingItems = (proxys: ProxySilo[]) => {
     const items: GuaranteedReward[] = []
     const monsterStore = useMonsterStore()
     for (const s of proxys) {
-        const decoded = decode(
-            s.savedTransactions[0].data,
-            "startActions",
-            estforPlayerAbi
-        )
+        const decoded = safeDecode(s.savedTransactions[0].data, "startActions")
         const actionId = decoded?.[1]?.[0]?.[1] || BigInt(0)
         const food = decoded?.[1]?.[0]?.[2] || BigInt(0)
         const actionChoiceId = decoded?.[1]?.[0]?.[3] || BigInt(0)
@@ -273,24 +283,32 @@ export const getOutgoingItems = (proxys: ProxySilo[]) => {
         if (action) {
             const isCombat = action.info.skill === Skill.COMBAT
             if (isCombat) {
-                const { totalFoodRequired, itemsConsumed } = monsterStore.getKillsPerHour(24, s, action)
+                const { totalFoodRequired, itemsConsumed } =
+                    monsterStore.getKillsPerHour(24, s, action)
                 {
                     const existing = items.find(
                         (x) => x.itemTokenId === Number(food)
-                    )                                
+                    )
                     if (existing) {
                         existing.rate += totalFoodRequired / 24
                     } else {
-                        items.push({ itemTokenId: Number(food), rate: totalFoodRequired / 24 })
+                        items.push({
+                            itemTokenId: Number(food),
+                            rate: totalFoodRequired / 24,
+                        })
                     }
                 }
 
                 if (itemsConsumed > 0) {
-                    const actionChoice = getCombatActionChoiceById(Number(actionChoiceId))            
+                    const actionChoice = getCombatActionChoiceById(
+                        Number(actionChoiceId)
+                    )
                     if (actionChoice) {
                         let i = 0
                         for (const input of actionChoice.inputTokenIds) {
-                            const existing = items.find((x) => x.itemTokenId === input)
+                            const existing = items.find(
+                                (x) => x.itemTokenId === input
+                            )
                             if (existing) {
                                 existing.rate += itemsConsumed / 24
                             } else {
@@ -306,7 +324,7 @@ export const getOutgoingItems = (proxys: ProxySilo[]) => {
             }
         }
         if (actionChoice) {
-            let i = 0            
+            let i = 0
             for (const input of actionChoice.inputTokenIds) {
                 const existing = items.find((x) => x.itemTokenId === input)
                 if (existing) {
@@ -369,7 +387,13 @@ const constructQueuedActions = (
 export const calculateExtraXPForHeroActionInput = (
     h: ProxySilo,
     skillId: Skill
-): { extraXP: number, defenceXP: number, magicXP: number, meleeXP: number, rangedXP: number } => {
+): {
+    extraXP: number
+    defenceXP: number
+    magicXP: number
+    meleeXP: number
+    rangedXP: number
+} => {
     const skillStore = useSkillStore()
     const monsterStore = useMonsterStore()
     const relevantActions = h.queuedActions.filter((x) => x.skill == skillId)
@@ -388,11 +412,17 @@ export const calculateExtraXPForHeroActionInput = (
         }
         if (parseInt(action.startTime) + action.timespan < timenow) {
             if (action.skill === Skill.COMBAT) {
-                const { xpPerHour } = monsterStore.getKillsPerHour((action.timespan / 60 / 60), h, a)
+                const { xpPerHour } = monsterStore.getKillsPerHour(
+                    action.timespan / 60 / 60,
+                    h,
+                    a
+                )
                 if (action.combatStyle === CombatStyle.DEFENCE) {
                     defenceXP += xpPerHour * (action.timespan / 60 / 60)
                 } else {
-                    const rightHand = allItems.find(x => x.tokenId === action.rightHandEquipmentTokenId)
+                    const rightHand = allItems.find(
+                        (x) => x.tokenId === action.rightHandEquipmentTokenId
+                    )
                     if (rightHand) {
                         if (rightHand.skill === Skill.MAGIC) {
                             magicXP += xpPerHour * (action.timespan / 60 / 60)
@@ -409,11 +439,17 @@ export const calculateExtraXPForHeroActionInput = (
         } else if (parseInt(action.startTime) < timenow) {
             const timeInAction = timenow - parseInt(action.startTime)
             if (action.skill === Skill.COMBAT) {
-                const { xpPerHour } = monsterStore.getKillsPerHour((timeInAction / 60 / 60), h, a)
+                const { xpPerHour } = monsterStore.getKillsPerHour(
+                    timeInAction / 60 / 60,
+                    h,
+                    a
+                )
                 if (action.combatStyle === CombatStyle.DEFENCE) {
                     defenceXP += xpPerHour * (timeInAction / 60 / 60)
                 } else {
-                    const rightHand = allItems.find(x => x.tokenId === action.rightHandEquipmentTokenId)
+                    const rightHand = allItems.find(
+                        (x) => x.tokenId === action.rightHandEquipmentTokenId
+                    )
                     if (rightHand) {
                         if (rightHand.skill === Skill.MAGIC) {
                             magicXP += xpPerHour * (timeInAction / 60 / 60)
@@ -463,11 +499,7 @@ export const decodeTransaction = (savedTransactions: SavedTransaction[]) => {
     }
 
     // first transaction is the action queue
-    const decoded = decode(
-        savedTransactions[0].data,
-        "startActions",
-        estforPlayerAbi
-    )
+    const decoded = safeDecode(savedTransactions[0].data, "startActions")
 
     // [playerId, actions[[attire, actionId, regenId, choiceId], [], []], action queue type]
     const actionId = decoded?.[1]?.[0]?.[1] || BigInt(0)
@@ -479,20 +511,18 @@ export const decodeTransaction = (savedTransactions: SavedTransaction[]) => {
     )
 }
 
-export const decodeSkillFromTransaction = (savedTransactions: SavedTransaction[]) => {
+export const decodeSkillFromTransaction = (
+    savedTransactions: SavedTransaction[]
+) => {
     if (savedTransactions.length === 0) {
         return "No action"
     }
 
     // first transaction is the action queue
-    const decoded = decode(
-        savedTransactions[0].data,
-        "startActions",
-        estforPlayerAbi
-    )
+    const decoded = safeDecode(savedTransactions[0].data, "startActions")
 
     // [playerId, actions[[attire, actionId, regenId, choiceId], [], []], action queue type]
-    
+
     const actionId = decoded?.[1]?.[0]?.[1] || BigInt(0)
     const action = allActions.find((a) => a.actionId === Number(actionId))
     return action?.info.skill || Skill.NONE
@@ -651,14 +681,23 @@ export const useFactoryStore = defineStore({
 
             await waitForTransactionReceipt(config, { hash })
         },
-        async mintHeroes(heroes: any[]) {
+        async mintHeroes(heroes: any[], chainId: 250 | 146) {
             const coreStore = useCoreStore()
-            const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
+            const factoryAddress = coreStore.getAddress(
+                Address.factoryRegistry,
+                chainId
+            )
             const playerNFTAddress = coreStore.getAddress(
-                Address.estforPlayerNFT
+                Address.estforPlayerNFT,
+                chainId
             )
             const account = getAccount(config)
-            if (!factoryAddress || !playerNFTAddress || !account.isConnected) {
+            if (
+                !factoryAddress ||
+                !playerNFTAddress ||
+                !account.isConnected ||
+                account.chainId !== chainId
+            ) {
                 return
             }
 
@@ -690,12 +729,20 @@ export const useFactoryStore = defineStore({
                 )
             )
 
-            await this.multicall(selectorArray, false)
-            await this.getAllProxyStates()
+            await this.multicall(selectorArray, chainId, false)
+            await this.getAllProxyStates(chainId)
         },
-        async multicall(data: any[], fastCall: boolean, chunks = 10) {
+        async multicall(
+            data: any[],
+            chainId: 250 | 146,
+            fastCall: boolean,
+            chunks = 10
+        ) {
             const coreStore = useCoreStore()
-            const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
+            const factoryAddress = coreStore.getAddress(
+                Address.factoryRegistry,
+                chainId
+            )
 
             if (!factoryAddress) {
                 return
@@ -726,10 +773,13 @@ export const useFactoryStore = defineStore({
                                 ),
                             ],
                             type: "legacy",
+                            chainId,
                         })
                     }
                     if (latestHash) {
-                        await waitForTransactionReceipt(config, { hash: latestHash })
+                        await waitForTransactionReceipt(config, {
+                            hash: latestHash,
+                        })
                     }
                 } else {
                     for (let i = 0; i < splits; i++) {
@@ -745,9 +795,10 @@ export const useFactoryStore = defineStore({
                                 ),
                             ],
                             type: "legacy",
+                            chainId,
                         })
                         await waitForTransactionReceipt(config, { hash })
-                    } 
+                    }
                 }
             } catch (e) {
                 throw e
@@ -756,19 +807,28 @@ export const useFactoryStore = defineStore({
                 this.currentTransactionNumber = 0
             }
         },
-        async approveBrush(proxys: ProxySilo[], amount: bigint) {
+        async approveBrush(
+            proxys: ProxySilo[],
+            amount: bigint,
+            chainId: 250 | 146
+        ) {
             const coreStore = useCoreStore()
-            const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
-            const brushAddress = coreStore.getAddress(Address.brush)
+            const factoryAddress = coreStore.getAddress(
+                Address.factoryRegistry,
+                chainId
+            )
+            const brushAddress = coreStore.getAddress(Address.brush, chainId)
             const playerNFTAddress = coreStore.getAddress(
-                Address.estforPlayerNFT
+                Address.estforPlayerNFT,
+                chainId
             )
             const account = getAccount(config)
             if (
                 !factoryAddress ||
                 !brushAddress ||
                 !playerNFTAddress ||
-                !account.isConnected
+                !account.isConnected ||
+                account.chainId !== chainId
             ) {
                 return
             }
@@ -792,13 +852,21 @@ export const useFactoryStore = defineStore({
                 )
             )
 
-            await this.multicall(selectorArray, false)
+            await this.multicall(selectorArray, chainId, false)
         },
-        async sendBrush(proxys: ProxySilo[], amount: bigint) {
+        async sendBrush(
+            proxys: ProxySilo[],
+            amount: bigint,
+            chainId: 250 | 146
+        ) {
             const coreStore = useCoreStore()
-            const brushAddress = coreStore.getAddress(Address.brush)
+            const brushAddress = coreStore.getAddress(Address.brush, chainId)
             const account = getAccount(config)
-            if (!brushAddress || !account.isConnected) {
+            if (
+                !brushAddress ||
+                !account.isConnected ||
+                account.chainId !== chainId
+            ) {
                 return
             }
 
@@ -812,6 +880,7 @@ export const useFactoryStore = defineStore({
                         abi: brushAbi as any,
                         functionName: "transfer",
                         args: [p.address, amount],
+                        chainId,
                     })
                     await waitForTransactionReceipt(config, { hash })
                 }
@@ -822,14 +891,23 @@ export const useFactoryStore = defineStore({
                 this.currentTransactionNumber = 0
             }
         },
-        async evolveHeroes(proxys: ProxySilo[]) {
+        async evolveHeroes(proxys: ProxySilo[], chainId: 250 | 146) {
             const coreStore = useCoreStore()
-            const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
+            const factoryAddress = coreStore.getAddress(
+                Address.factoryRegistry,
+                chainId
+            )
             const playerNFTAddress = coreStore.getAddress(
-                Address.estforPlayerNFT
+                Address.estforPlayerNFT,
+                chainId
             )
             const account = getAccount(config)
-            if (!factoryAddress || !playerNFTAddress || !account.isConnected) {
+            if (
+                !factoryAddress ||
+                !playerNFTAddress ||
+                !account.isConnected ||
+                account.chainId !== chainId
+            ) {
                 return
             }
 
@@ -859,13 +937,20 @@ export const useFactoryStore = defineStore({
                 )
             )
 
-            await this.multicall(selectorArray, false)
+            await this.multicall(selectorArray, chainId, false)
         },
-        async getAllProxyStates(proxys: ProxySilo[] = []) {
+        async getAllProxyStates(chainId: 250 | 146, proxys: ProxySilo[] = []) {
             const coreStore = useCoreStore()
-            const playerAddress = coreStore.getAddress(Address.estforPlayers)
+            const playerAddress = coreStore.getAddress(
+                Address.estforPlayers,
+                chainId
+            )
             const account = getAccount(config)
-            if (!playerAddress || !account.isConnected) {
+            if (
+                !playerAddress ||
+                !account.isConnected ||
+                account.chainId !== chainId
+            ) {
                 return
             }
 
@@ -887,7 +972,7 @@ export const useFactoryStore = defineStore({
                 const promises = await Promise.all(
                     this.proxys
                         .slice(i * chunks, (i + 1) * chunks)
-                        .map((p) => getPlayersByOwner(p.address))
+                        .map((p) => getPlayersByOwner(p.address, chainId))
                 )
                 playerPromises.push(...promises)
                 await sleep(200)
@@ -925,7 +1010,7 @@ export const useFactoryStore = defineStore({
                     const promises = await Promise.all(
                         playerIdsToGet
                             .slice(i * chunks, (i + 1) * chunks)
-                            .map((p) => searchQueuedActions(p))
+                            .map((p) => searchQueuedActions(p, chainId))
                     )
                     queuedActionPromises.push(...promises)
                     await sleep(200)
@@ -940,6 +1025,7 @@ export const useFactoryStore = defineStore({
                                 args: [],
                             }) as any
                     ),
+                    chainId,
                 })
 
                 const proxyPauseData = await multicall(config, {
@@ -952,6 +1038,7 @@ export const useFactoryStore = defineStore({
                                 args: [],
                             }) as any
                     ),
+                    chainId,
                 })
 
                 this.proxys = proxysWithPlayerId.map((p, i) => ({
@@ -977,14 +1064,17 @@ export const useFactoryStore = defineStore({
                 }))
             }
 
-            await this.getBankItems()
-            await this.getTransactionCharge()    
+            await this.getBankItems(chainId)
+            await this.getTransactionCharge(chainId)
             this.initialised = true
             this.initialisedAt = new Date()
         },
-        async getTransactionCharge() {
+        async getTransactionCharge(chainId: 250 | 146) {
             const coreStore = useCoreStore()
-            const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
+            const factoryAddress = coreStore.getAddress(
+                Address.factoryRegistry,
+                chainId
+            )
             if (!factoryAddress) {
                 return
             }
@@ -994,14 +1084,22 @@ export const useFactoryStore = defineStore({
                 abi: factoryAbi,
                 functionName: "transactionCharge",
                 args: [],
+                chainId,
             })
             this.transactionCharge = result as bigint
         },
-        async createProxy(proxyNumber: number) {
+        async createProxy(proxyNumber: number, chainId: 250 | 146) {
             const coreStore = useCoreStore()
-            const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
+            const factoryAddress = coreStore.getAddress(
+                Address.factoryRegistry,
+                chainId
+            )
             const account = getAccount(config)
-            if (!factoryAddress || !account.isConnected) {
+            if (
+                !factoryAddress ||
+                !account.isConnected ||
+                account.chainId !== chainId
+            ) {
                 return
             }
 
@@ -1015,7 +1113,7 @@ export const useFactoryStore = defineStore({
             const factoryContract = {
                 address: factoryAddress as `0x${string}`,
                 abi: factoryAbi,
-                chainId: fantom.id,
+                chainId,
             }
 
             const actualChunks = await getChunksForMulticall(
@@ -1039,6 +1137,7 @@ export const useFactoryStore = defineStore({
                             ),
                         ],
                         type: "legacy",
+                        chainId,
                     })
                     await waitForTransactionReceipt(config, { hash })
                 }
@@ -1110,7 +1209,7 @@ export const useFactoryStore = defineStore({
                 proxyToUpdate.queuedActions = queuedActions
             }
         },
-        async getProxys(force = true) {
+        async getProxys(chainId: 250 | 146, force = true) {
             if (
                 !force &&
                 this.initialised &&
@@ -1122,7 +1221,10 @@ export const useFactoryStore = defineStore({
             }
 
             const coreStore = useCoreStore()
-            const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
+            const factoryAddress = coreStore.getAddress(
+                Address.factoryRegistry,
+                chainId
+            )
             const account = getAccount(config)
             if (!factoryAddress || !account.isConnected) {
                 return
@@ -1131,7 +1233,7 @@ export const useFactoryStore = defineStore({
             const factoryContract = {
                 address: factoryAddress as `0x${string}`,
                 abi: factoryAbi,
-                chainId: fantom.id,
+                chainId,
             }
 
             const totalAddressCount: bigint = (await readContract(config, {
@@ -1176,20 +1278,32 @@ export const useFactoryStore = defineStore({
             body: number | undefined,
             arms: number | undefined,
             legs: number | undefined,
-            feet: number | undefined,   
-            ring: number | undefined,         
+            feet: number | undefined,
+            ring: number | undefined,
             rightHand: number | undefined,
-            leftHand: number | undefined,            
+            leftHand: number | undefined,
             food: number | undefined,
             combatStyle: CombatStyle,
-            actionQueueStatus: ActionQueueStatus,
-            activate: boolean
+            actionQueueStatus: ActionQueueStrategy,
+            activate: boolean,
+            chainId: 250 | 146
         ) {
             const coreStore = useCoreStore()
-            const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
-            const playersAddress = coreStore.getAddress(Address.estforPlayers)
+            const factoryAddress = coreStore.getAddress(
+                Address.factoryRegistry,
+                chainId
+            )
+            const playersAddress = coreStore.getAddress(
+                Address.estforPlayers,
+                chainId
+            )
             const account = getAccount(config)
-            if (!factoryAddress || !playersAddress || !account.isConnected) {
+            if (
+                !factoryAddress ||
+                !playersAddress ||
+                !account.isConnected ||
+                account.chainId !== chainId
+            ) {
                 return
             }
 
@@ -1247,7 +1361,7 @@ export const useFactoryStore = defineStore({
 
             const combined = [...pauseArray, ...selectorArray]
 
-            await this.multicall(combined, false, 40)
+            await this.multicall(combined, chainId, false, 40)
 
             // update savedTransactions and isPaused in state
             let i = 0
@@ -1286,12 +1400,23 @@ export const useFactoryStore = defineStore({
                 i++
             }
         },
-        async transferItemsFromBankToProxys(itemsNeeded: NeededItem[]) {
+        async transferItemsFromBankToProxys(
+            itemsNeeded: NeededItem[],
+            chainId: 250 | 146
+        ) {
             const coreStore = useCoreStore()
-            const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
-            const itemAddress = coreStore.getAddress(Address.itemNFT)
+            const factoryAddress = coreStore.getAddress(
+                Address.factoryRegistry,
+                chainId
+            )
+            const itemAddress = coreStore.getAddress(Address.itemNFT, chainId)
             const account = getAccount(config)
-            if (!factoryAddress || !itemAddress || !account.isConnected) {
+            if (
+                !factoryAddress ||
+                !itemAddress ||
+                !account.isConnected ||
+                account.chainId !== chainId
+            ) {
                 return
             }
             if (itemsNeeded.length > 0) {
@@ -1321,16 +1446,28 @@ export const useFactoryStore = defineStore({
                     )
                 )
 
-                await this.multicall(selectorArray, false, 40)
+                await this.multicall(selectorArray, chainId, false, 40)
             }
-            await this.getBankItems()
+            await this.getBankItems(chainId)
         },
-        async executeSavedTransactions(proxys: ProxySilo[], fastCall: boolean) {
+        async executeSavedTransactions(
+            proxys: ProxySilo[],
+            fastCall: boolean,
+            chainId: 250 | 146
+        ) {
             const coreStore = useCoreStore()
-            const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
-            const itemAddress = coreStore.getAddress(Address.itemNFT)
+            const factoryAddress = coreStore.getAddress(
+                Address.factoryRegistry,
+                chainId
+            )
+            const itemAddress = coreStore.getAddress(Address.itemNFT, chainId)
             const account = getAccount(config)
-            if (!factoryAddress || !itemAddress || !account.isConnected) {
+            if (
+                !factoryAddress ||
+                !itemAddress ||
+                !account.isConnected ||
+                account.chainId !== chainId
+            ) {
                 return
             }
 
@@ -1354,7 +1491,7 @@ export const useFactoryStore = defineStore({
                     )
                 )
 
-                await this.multicall(selectorArray, fastCall, 40)
+                await this.multicall(selectorArray, chainId, fastCall, 40)
             } else {
                 // execute one by one
                 this.totalTransactionNumber = proxys.length
@@ -1368,6 +1505,7 @@ export const useFactoryStore = defineStore({
                             args: [proxys[i].address],
                             type: "legacy",
                             value: this.transactionCharge,
+                            chainId,
                         })
                         await waitForTransactionReceipt(config, { hash })
                     }
@@ -1379,17 +1517,17 @@ export const useFactoryStore = defineStore({
                 }
             }
             await sleep(2000)
-            await this.getBankItems()
-            await this.updateQueuedActions()
+            await this.getBankItems(chainId)
+            await this.updateQueuedActions(chainId)
         },
-        async updateQueuedActions() {
+        async updateQueuedActions(chainId: 250 | 146) {
             const queuedActionPromises = await Promise.all(
                 this.proxys
                     .filter(
                         (p) =>
                             p.playerId !== "" && p.savedTransactions.length > 0
                     )
-                    .map((p) => searchQueuedActions(p.playerId))
+                    .map((p) => searchQueuedActions(p.playerId, chainId))
             )
             for (const proxy of this.proxys) {
                 if (
@@ -1409,12 +1547,20 @@ export const useFactoryStore = defineStore({
                         .flat() || []
             }
         },
-        async withdrawItems(items: any[]) {
+        async withdrawItems(items: any[], chainId: 250 | 146) {
             const coreStore = useCoreStore()
-            const itemAddress = coreStore.getAddress(Address.itemNFT)
-            const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
+            const itemAddress = coreStore.getAddress(Address.itemNFT, chainId)
+            const factoryAddress = coreStore.getAddress(
+                Address.factoryRegistry,
+                chainId
+            )
             const account = getAccount(config)
-            if (!factoryAddress || !itemAddress || !account.isConnected) {
+            if (
+                !factoryAddress ||
+                !itemAddress ||
+                !account.isConnected ||
+                account.chainId !== chainId
+            ) {
                 return
             }
 
@@ -1454,14 +1600,18 @@ export const useFactoryStore = defineStore({
                 functionName: "multicall",
                 args: [selectorArray],
                 type: "legacy",
+                chainId,
             })
             await waitForTransactionReceipt(config, { hash })
-            await this.getBankItems()
+            await this.getBankItems(chainId)
         },
-        async getRelevantItemsForProxies(proxys: ProxySilo[]) {
+        async getRelevantItemsForProxies(
+            proxys: ProxySilo[],
+            chainId: 250 | 146
+        ) {
             const itemResultPromises = proxys
                 .filter((p) => p.address !== this.bank?.address)
-                .map((p) => getUserItemNFTs(p.address, []))
+                .map((p) => getUserItemNFTs(p.address, [], chainId))
             const results = await Promise.all(itemResultPromises)
             const distinctItems: number[] = []
 
@@ -1477,10 +1627,9 @@ export const useFactoryStore = defineStore({
 
             const relevantTokenIds: number[] = []
             for (const proxy of proxys) {
-                const decoded = decode(
+                const decoded = safeDecode(
                     proxy.savedTransactions[0].data,
-                    "startActions",
-                    estforPlayerAbi
+                    "startActions"
                 )
                 const actionId = decoded?.[1]?.[0]?.[1] || BigInt(0)
                 const actionChoiceId = decoded?.[1]?.[0]?.[3] || BigInt(0)
@@ -1531,13 +1680,22 @@ export const useFactoryStore = defineStore({
         },
         async transferItemsToBank(
             relevantTokenIds: number[],
-            proxys: ProxySilo[]
+            proxys: ProxySilo[],
+            chainId: 250 | 146
         ) {
             const coreStore = useCoreStore()
-            const itemAddress = coreStore.getAddress(Address.itemNFT)
-            const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
+            const itemAddress = coreStore.getAddress(Address.itemNFT, chainId)
+            const factoryAddress = coreStore.getAddress(
+                Address.factoryRegistry,
+                chainId
+            )
             const account = getAccount(config)
-            if (!factoryAddress || !itemAddress || !account.isConnected) {
+            if (
+                !factoryAddress ||
+                !itemAddress ||
+                !account.isConnected ||
+                account.chainId !== chainId
+            ) {
                 return
             }
 
@@ -1548,7 +1706,7 @@ export const useFactoryStore = defineStore({
 
             const itemResultPromises = proxys
                 .filter((p) => p.address !== this.bank?.address)
-                .map((p) => getUserItemNFTs(p.address, []))
+                .map((p) => getUserItemNFTs(p.address, [], chainId))
             const results = await Promise.all(itemResultPromises)
 
             // match proxy on item result user address and work out the outputs from the decoded saved transaction
@@ -1563,9 +1721,9 @@ export const useFactoryStore = defineStore({
                     continue
                 }
 
-                for (const item of result.userItemNFTs.filter((i) =>
-                    relevantTokenIds.includes(i.tokenId)
-                ).filter((i) => !proxyNeedsItem(i, proxy))) {
+                for (const item of result.userItemNFTs
+                    .filter((i) => relevantTokenIds.includes(i.tokenId))
+                    .filter((i) => !proxyNeedsItem(i, proxy))) {
                     let d = deposits.find((d) => d.proxy === proxy.address)
                     if (!d) {
                         d = {
@@ -1604,21 +1762,30 @@ export const useFactoryStore = defineStore({
             )
 
             if (selectorArray.length > 0) {
-                await this.multicall(selectorArray, false, 50)
+                await this.multicall(selectorArray, chainId, false, 50)
             }
             await sleep(2000)
-            await this.getBankItems()
+            await this.getBankItems(chainId)
         },
         async transferItemsToAddress(
             siloAddress: string,
             toAddress: string,
-            items: TransferUserItemNFT[]
+            items: TransferUserItemNFT[],
+            chainId: 250 | 146
         ) {
             const coreStore = useCoreStore()
-            const itemAddress = coreStore.getAddress(Address.itemNFT)
-            const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
+            const itemAddress = coreStore.getAddress(Address.itemNFT, chainId)
+            const factoryAddress = coreStore.getAddress(
+                Address.factoryRegistry,
+                chainId
+            )
             const account = getAccount(config)
-            if (!factoryAddress || !itemAddress || !account.isConnected) {
+            if (
+                !factoryAddress ||
+                !itemAddress ||
+                !account.isConnected ||
+                account.chainId !== chainId
+            ) {
                 return
             }
 
@@ -1641,22 +1808,32 @@ export const useFactoryStore = defineStore({
                 functionName: "execute",
                 args: [siloAddress, itemAddress, data],
                 type: "legacy",
+                chainId,
             })
             await waitForTransactionReceipt(config, { hash })
-            await this.getBankItems()
+            await this.getBankItems(chainId)
         },
         async distributeItems(
             items: {
                 address: string
                 tokenId: number
                 amount: string
-            }[]
+            }[],
+            chainId: 250 | 146
         ) {
             const coreStore = useCoreStore()
-            const itemAddress = coreStore.getAddress(Address.itemNFT)
-            const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
+            const itemAddress = coreStore.getAddress(Address.itemNFT, chainId)
+            const factoryAddress = coreStore.getAddress(
+                Address.factoryRegistry,
+                chainId
+            )
             const account = getAccount(config)
-            if (!factoryAddress || !itemAddress || !account.isConnected) {
+            if (
+                !factoryAddress ||
+                !itemAddress ||
+                !account.isConnected ||
+                account.chainId !== chainId
+            ) {
                 return
             }
 
@@ -1686,13 +1863,17 @@ export const useFactoryStore = defineStore({
                 )
             )
 
-            await this.multicall(selectorArray, false, 40)
+            await this.multicall(selectorArray, chainId, false, 40)
             await sleep(2000)
-            await this.getBankItems()
+            await this.getBankItems(chainId)
         },
-        async getBankItems() {
+        async getBankItems(chainId: 250 | 146) {
             if (this.bank) {
-                const result = await getUserItemNFTs(this.bank.address, [])
+                const result = await getUserItemNFTs(
+                    this.bank.address,
+                    [],
+                    chainId
+                )
                 this.bankItems = result.userItemNFTs || []
             }
         },

@@ -28,9 +28,7 @@
                         :key="o.tokenId"
                         :value="o.tokenId"
                     >
-                        {{ itemNames[o.tokenId] || "" }} ({{
-                            o.amount
-                        }}
+                        {{ getItemName(o.tokenId) || "" }} ({{ o.amount }}
                         available)
                     </option>
                 </select>
@@ -49,7 +47,7 @@
                         <tr v-for="h in heroes" :key="h.address">
                             <td>{{ h.playerState.name }}</td>
                             <td>
-                                {{ itemNames[item] || "" }}
+                                {{ getItemName(item) || "" }}
                             </td>
                             <td class="text-right">
                                 <input
@@ -94,11 +92,8 @@
 <script setup lang="ts">
 import { ref } from "vue"
 import AssignedHeroGroupSelect from "../inputs/AssignedHeroGroupSelect.vue"
-import { itemNames } from "../../store/items"
-import {
-    decodeTransaction,
-    useFactoryStore,
-} from "../../store/factory"
+import { getItemName } from "../../store/items"
+import { decodeTransaction, useFactoryStore } from "../../store/factory"
 import { useAppStore } from "../../store/app"
 import { actionChoiceNames, actionNames } from "../../store/skills"
 import { AggregatedItem, ProxySilo } from "../../store/models/factory.models"
@@ -106,6 +101,10 @@ import { AggregatedItem, ProxySilo } from "../../store/models/factory.models"
 const props = defineProps({
     id: {
         type: String,
+        required: true,
+    },
+    chainId: {
+        type: Number,
         required: true,
     },
 })
@@ -168,7 +167,8 @@ const withdrawItems = async () => {
                     address: i.address,
                     tokenId: item.value,
                     amount: i.amountToDistribute.toString(),
-                }))
+                })),
+            props.chainId as 250 | 146
         )
         app.addToast(`Items distributed`, "alert-success", 5000)
         emits("withdrawn")

@@ -157,30 +157,39 @@
                                 :class="{
                                     'text-error':
                                         itemStore.getAggregatedCombatStats
-                                            .melee < 0,
+                                            .meleeAttack < 0,
                                 }"
                             >
-                                {{ itemStore.getAggregatedCombatStats.melee }}
+                                {{
+                                    itemStore.getAggregatedCombatStats
+                                        .meleeAttack
+                                }}
                             </td>
                             <td
                                 class="text-center"
                                 :class="{
                                     'text-error':
                                         itemStore.getAggregatedCombatStats
-                                            .ranged < 0,
+                                            .rangedAttack < 0,
                                 }"
                             >
-                                {{ itemStore.getAggregatedCombatStats.ranged }}
+                                {{
+                                    itemStore.getAggregatedCombatStats
+                                        .rangedAttack
+                                }}
                             </td>
                             <td
                                 class="text-center"
                                 :class="{
                                     'text-error':
                                         itemStore.getAggregatedCombatStats
-                                            .magic < 0,
+                                            .magicAttack < 0,
                                 }"
                             >
-                                {{ itemStore.getAggregatedCombatStats.magic }}
+                                {{
+                                    itemStore.getAggregatedCombatStats
+                                        .magicAttack
+                                }}
                             </td>
                             <td
                                 class="text-center"
@@ -239,29 +248,31 @@
                                 class="text-center"
                                 :class="{
                                     'text-error':
-                                        itemStore.getTotalCombatStats.melee < 0,
+                                        itemStore.getTotalCombatStats
+                                            .meleeAttack < 0,
                                 }"
                             >
-                                {{ itemStore.getTotalCombatStats.melee }}
+                                {{ itemStore.getTotalCombatStats.meleeAttack }}
                             </td>
                             <td
                                 class="text-center"
                                 :class="{
                                     'text-error':
-                                        itemStore.getTotalCombatStats.ranged <
-                                        0,
+                                        itemStore.getTotalCombatStats
+                                            .rangedAttack < 0,
                                 }"
                             >
-                                {{ itemStore.getTotalCombatStats.ranged }}
+                                {{ itemStore.getTotalCombatStats.rangedAttack }}
                             </td>
                             <td
                                 class="text-center"
                                 :class="{
                                     'text-error':
-                                        itemStore.getTotalCombatStats.magic < 0,
+                                        itemStore.getTotalCombatStats
+                                            .magicAttack < 0,
                                 }"
                             >
-                                {{ itemStore.getTotalCombatStats.magic }}
+                                {{ itemStore.getTotalCombatStats.magicAttack }}
                             </td>
                             <td
                                 class="text-center"

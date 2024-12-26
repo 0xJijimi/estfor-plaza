@@ -65,13 +65,21 @@
             </button>
         </div>
     </div>
-    <AssignHero ref="assignHeroRef" id="assign_hero_modal" />
+    <AssignHero
+        ref="assignHeroRef"
+        id="assign_hero_modal"
+        :chainId="props.chainId"
+    />
 </template>
 
 <script setup lang="ts">
 import { useFactoryStore } from "../../store/factory"
 import { computed, ref, watch } from "vue"
 import AssignHero from "../dialogs/AssignHero.vue"
+
+const props = defineProps<{
+    chainId: 250 | 146
+}>()
 
 const factoryStore = useFactoryStore()
 const assigningHeroes = ref(false)

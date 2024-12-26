@@ -102,7 +102,7 @@ const routes: Array<RouteRecordRaw> = [
                 meta: {
                     public: true,
                 },
-            }
+            },
         ],
     },
 ]

@@ -227,7 +227,7 @@
                                 :key="item.tokenId"
                             >
                                 <td>
-                                    <b>{{ itemNames[item.tokenId] }}</b>
+                                    <b>{{ getItemName(item.tokenId) }}</b>
                                 </td>
                                 <td>{{ item.amount }}</td>
                                 <td class="items-center text-right">
@@ -279,14 +279,19 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue"
-import {
-    useFactoryStore,
-} from "../../store/factory"
+import { useFactoryStore } from "../../store/factory"
 import { getUserItemNFTs } from "../../utils/api"
 import { getAccount } from "@wagmi/core"
-import { itemNames } from "../../store/items"
+import { getItemName } from "../../store/items"
 import { config } from "../../config"
-import { ProxySilo, TransferUserItemNFT } from "../../store/models/factory.models"
+import {
+    ProxySilo,
+    TransferUserItemNFT,
+} from "../../store/models/factory.models"
+
+const props = defineProps<{
+    chainId: 250 | 146
+}>()
 
 const factoryStore = useFactoryStore()
 const allSilos = computed(() =>
@@ -325,7 +330,8 @@ const showSilo = async (index: number) => {
         if (selectedSilo.value) {
             const itemResult = await getUserItemNFTs(
                 selectedSilo.value.address,
-                []
+                [],
+                props.chainId
             )
             selectedSiloItems.value = itemResult.userItemNFTs.map((i) => {
                 return {
@@ -401,7 +407,8 @@ const transferItems = async () => {
         await factoryStore.transferItemsToAddress(
             selectedSilo.value.address,
             itemToAddress.value,
-            selectedSiloItems.value.filter((i) => i.transferAmount > 0)
+            selectedSiloItems.value.filter((i) => i.transferAmount > 0),
+            props.chainId
         )
     } catch {
         // user declined tx

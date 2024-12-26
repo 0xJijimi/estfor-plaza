@@ -37,11 +37,12 @@
 
 <script setup lang="ts">
 import { computed } from "vue"
-import { useItemStore, itemNames } from "../store/items"
+import { useItemStore } from "../store/items"
+import { allItems } from "../data/items"
 
 const itemStore = useItemStore()
 
 const allItemNames = computed(() => {
-    return Object.values(itemNames)
+    return Object.values(allItems).map((x) => x.name)
 })
 </script>

@@ -51,9 +51,12 @@
                         silosWithActionChoicesOnly.length === 1 ? "" : "s"
                     }}
                 </button>
-                <label v-if="silosWithActionChoicesOnly.length > 0" class="label cursor-pointer">
+                <label
+                    v-if="silosWithActionChoicesOnly.length > 0"
+                    class="label cursor-pointer"
+                >
                     <span class="label-text text-xs mr-2 items-center flex">
-                        Override missing items and execute anyway                
+                        Override missing items and execute anyway
                     </span>
                     <input
                         type="checkbox"
@@ -64,7 +67,8 @@
                 </label>
                 <label class="label cursor-pointer">
                     <span class="label-text text-xs mr-2 items-center flex">
-                        Execute all transactions without waiting for confirmation (can cause issues with some wallets)        
+                        Execute all transactions without waiting for
+                        confirmation (can cause issues with some wallets)
                     </span>
                     <input
                         type="checkbox"
@@ -149,7 +153,7 @@
                             <span
                                 class="label-text mt-1 flex gap-2 items-center"
                             >
-                                {{ itemNames[token.tokenId] }}
+                                {{ getItemName(token.tokenId) }}
                             </span>
                         </label>
                     </div>
@@ -184,7 +188,7 @@ import { computed, ref } from "vue"
 import { useFactoryStore } from "../../store/factory"
 import { getUserItemNFTs } from "../../utils/api"
 import { useAppStore } from "../../store/app"
-import { itemNames, starterItems } from "../../store/items"
+import { getItemName, starterItems } from "../../store/items"
 import { allItems } from "../../data/items"
 import { allActions } from "../../data/actions"
 import { NeededItem, ProxySilo } from "../../store/models/factory.models"
@@ -194,6 +198,10 @@ import { useMonsterStore } from "../../store/monsters"
 const props = defineProps({
     id: {
         type: String,
+        required: true,
+    },
+    chainId: {
+        type: Number,
         required: true,
     },
 })
@@ -256,6 +264,7 @@ const executeSavedTransactions = async () => {
         await factoryStore.executeSavedTransactions(
             silosWithEmptyQueuesOrActionInputOnly.value,
             shouldFastCall.value,
+            props.chainId as 250 | 146
         )
         app.addToast(
             `${silosWithEmptyQueuesOrActionInputOnly.value.length} hero${
@@ -285,7 +294,8 @@ const goToTransferScreen = async () => {
     toggle.value = true
     try {
         const result = await factoryStore.getRelevantItemsForProxies(
-            silosToExecute.value
+            silosToExecute.value,
+            props.chainId as 250 | 146
         )
         relevantTokens.value = result.distinctItems
             .map((t) => ({
@@ -311,7 +321,8 @@ const transferItemsToBank = async () => {
             relevantTokens.value
                 .filter((t) => t.selected)
                 .map((t) => t.tokenId),
-            silosToExecute.value
+            silosToExecute.value,
+            props.chainId as 250 | 146
         )
         app.addToast(`Items transferred to Bank`, "alert-success", 5000)
         itemsTransferredToBank.value = true
@@ -331,7 +342,7 @@ const executeActionChoiceSavedTransactions = async () => {
     try {
         const userItemNFTPromises = await Promise.all(
             silosWithActionChoicesOnly.value.map((s) =>
-                getUserItemNFTs(s.address, [])
+                getUserItemNFTs(s.address, [], props.chainId as 250 | 146)
             )
         )
 
@@ -342,7 +353,7 @@ const executeActionChoiceSavedTransactions = async () => {
             )
             for (const action of proxy.queuedActions.filter(
                 (x) => x.choice !== null
-            )) {                
+            )) {
                 const now = Date.now() / 1000
                 if (action.skill === Skill.COMBAT) {
                     // work out the food needed
@@ -355,15 +366,24 @@ const executeActionChoiceSavedTransactions = async () => {
                         )
                     }
 
-                    const monster = allActions.find(x => x.actionId === action.actionId)
+                    const monster = allActions.find(
+                        (x) => x.actionId === action.actionId
+                    )
                     if (monster) {
-                        const { totalFoodRequired, itemsConsumed } = monsterStore.getKillsPerHourFromAction(elapsedHours, proxy, action, monster)
+                        const { totalFoodRequired, itemsConsumed } =
+                            monsterStore.getKillsPerHourFromAction(
+                                elapsedHours,
+                                proxy,
+                                action,
+                                monster
+                            )
 
                         // food
                         {
-                            const ownedItem = userItemNFTResult?.userItemNFTs.find(
-                                (t) => t.tokenId === action.regenerateId
-                            )
+                            const ownedItem =
+                                userItemNFTResult?.userItemNFTs.find(
+                                    (t) => t.tokenId === action.regenerateId
+                                )
                             if (
                                 !ownedItem ||
                                 Number(ownedItem.amount) < totalFoodRequired
@@ -373,7 +393,9 @@ const executeActionChoiceSavedTransactions = async () => {
                                 )
                                 const totalAmountRequired = Math.ceil(
                                     totalFoodRequired -
-                                        (ownedItem ? Number(ownedItem.amount) : 0)
+                                        (ownedItem
+                                            ? Number(ownedItem.amount)
+                                            : 0)
                                 )
                                 if (!proxyItemsNeeded) {
                                     itemsNeeded.push({
@@ -396,9 +418,10 @@ const executeActionChoiceSavedTransactions = async () => {
 
                         // consumables
                         for (const input of action.choice.inputTokenIds) {
-                            const ownedItem = userItemNFTResult?.userItemNFTs.find(
-                                (t) => t.tokenId === input
-                            )
+                            const ownedItem =
+                                userItemNFTResult?.userItemNFTs.find(
+                                    (t) => t.tokenId === input
+                                )
                             if (
                                 !ownedItem ||
                                 Number(ownedItem.amount) < itemsConsumed
@@ -408,7 +431,9 @@ const executeActionChoiceSavedTransactions = async () => {
                                 )
                                 const totalAmountRequired = Math.ceil(
                                     itemsConsumed -
-                                        (ownedItem ? Number(ownedItem.amount) : 0)
+                                        (ownedItem
+                                            ? Number(ownedItem.amount)
+                                            : 0)
                                 )
                                 if (!proxyItemsNeeded) {
                                     itemsNeeded.push({
@@ -435,7 +460,7 @@ const executeActionChoiceSavedTransactions = async () => {
                         const ownedItem = userItemNFTResult?.userItemNFTs.find(
                             (t) => t.tokenId === input
                         )
-                        
+
                         let amountRequired = 0
                         if (Number(action.startTime) + action.timespan < now) {
                             amountRequired =
@@ -490,7 +515,8 @@ const executeActionChoiceSavedTransactions = async () => {
         if (factoryStore.bank) {
             const itemResult = await getUserItemNFTs(
                 factoryStore.bank?.address,
-                []
+                [],
+                props.chainId as 250 | 146
             )
             const bankItems = itemResult.userItemNFTs
 
@@ -511,40 +537,58 @@ const executeActionChoiceSavedTransactions = async () => {
                 )
                 if (
                     (!ownedItem ||
-                    itemTotals[tokenId] > Number(ownedItem.amount)) &&
+                        itemTotals[tokenId] > Number(ownedItem.amount)) &&
                     itemTotals[tokenId] < Number.POSITIVE_INFINITY
                 ) {
                     if (executeComplexOverride.value) {
                         // get percentage of ownedItems vs itemTotals
-                        const percentage = Number(ownedItem?.amount || 0) / itemTotals[tokenId]
-                        
+                        const percentage =
+                            Number(ownedItem?.amount || 0) / itemTotals[tokenId]
+
                         // balance the item totals with the percentage
-                        for (const item of itemsNeeded.filter(x => x.items.some(y => y.tokenId === Number(tokenId)))) {
-                            for (const i of item.items.filter(x => x.tokenId === Number(tokenId))) {
+                        for (const item of itemsNeeded.filter((x) =>
+                            x.items.some((y) => y.tokenId === Number(tokenId))
+                        )) {
+                            for (const i of item.items.filter(
+                                (x) => x.tokenId === Number(tokenId)
+                            )) {
                                 i.amount = Math.floor(i.amount * percentage)
-                            }                      
+                            }
                         }
                     } else {
                         missingItems.value.push(
                             `${
-                                itemTotals[tokenId] - Number(ownedItem?.amount || 0)
-                            } ${
-                                itemNames[Number(tokenId)]
-                            } is missing from the Bank`
+                                itemTotals[tokenId] -
+                                Number(ownedItem?.amount || 0)
+                            } ${getItemName(
+                                Number(tokenId)
+                            )} is missing from the Bank`
                         )
                     }
                 }
             }
 
             if (missingItems.value.length === 0) {
-                if (itemsNeeded.filter(x => x.items.some(i => i.amount < Number.POSITIVE_INFINITY && i.tokenId > 0)).length > 0) {
+                if (
+                    itemsNeeded.filter((x) =>
+                        x.items.some(
+                            (i) =>
+                                i.amount < Number.POSITIVE_INFINITY &&
+                                i.tokenId > 0
+                        )
+                    ).length > 0
+                ) {
                     stage.value = "Transferring items to heroes (Part 1 of 2)"
-                    await factoryStore.transferItemsFromBankToProxys(itemsNeeded)
+                    await factoryStore.transferItemsFromBankToProxys(
+                        itemsNeeded,
+                        props.chainId as 250 | 146
+                    )
                 }
                 stage.value = "Executing actions (Part 2 of 2)"
                 await factoryStore.executeSavedTransactions(
                     silosWithActionChoicesOnly.value,
                     shouldFastCall.value,
+                    props.chainId as 250 | 146
                 )
                 stage.value = null
                 app.addToast(
@@ -556,7 +600,9 @@ const executeActionChoiceSavedTransactions = async () => {
                     "alert-success",
                     5000
                 )
-                await factoryStore.updateQueuedActions()
+                await factoryStore.updateQueuedActions(
+                    props.chainId as 250 | 146
+                )
                 const dialog = document.getElementById(
                     props.id
                 ) as HTMLDialogElement

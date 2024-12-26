@@ -313,7 +313,7 @@ import {
     ChevronDownIcon,
     ChevronUpIcon,
 } from "@heroicons/vue/24/solid"
-import { useItemStore, itemNames } from "../store/items"
+import { useItemStore, getItemName } from "../store/items"
 import { getLevel, useCoreStore } from "../store/core"
 import HourSelect from "./inputs/HourSelect.vue"
 import CombatStyleSelect from "./inputs/CombatStyleSelect.vue"
@@ -382,23 +382,22 @@ const monsterRankings = computed(() => {
             }
         })
     }
-    return storeRankings
-        .filter(
-            (x) =>
-                itemStore.itemSearch === "" ||
-                x.guaranteedRewards.some(
-                    (y) =>
-                        itemNames[y.itemTokenId]
-                            ?.toLowerCase()
-                            .includes(itemStore.itemSearch.toLowerCase())
-                ) ||
-                x.randomRewards.some(
-                    (y) =>
-                        itemNames[y.itemTokenId]
-                            ?.toLowerCase()
-                            .includes(itemStore.itemSearch.toLowerCase())
-                )
-        )
+    return storeRankings.filter(
+        (x) =>
+            itemStore.itemSearch === "" ||
+            x.guaranteedRewards.some(
+                (y) =>
+                    getItemName(y.itemTokenId)
+                        ?.toLowerCase()
+                        .includes(itemStore.itemSearch.toLowerCase())
+            ) ||
+            x.randomRewards.some(
+                (y) =>
+                    getItemName(y.itemTokenId)
+                        ?.toLowerCase()
+                        .includes(itemStore.itemSearch.toLowerCase())
+            )
+    )
 })
 
 const equippedFishName = computed(

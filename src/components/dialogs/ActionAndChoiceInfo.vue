@@ -1,5 +1,5 @@
 <template>
-    <dialog id="action_choice_modal" class="modal">
+    <dialog id="action_and_choice_modal" class="modal">
         <div
             class="modal-box bg-base-100 border-2 border-primary md:w-4/5 max-w-full"
         >
@@ -14,9 +14,89 @@
                 <table class="table md:table-md table-xs">
                     <thead>
                         <tr>
-                            <th class="text-left">Item</th>
-                            <th class="text-right">Level</th>
-                            <th class="text-right">XP (per hour)</th>
+                            <th class="text-left w-52">Action</th>
+                            <th class="text-right w-40">Level</th>
+                            <th class="text-right w-40">XP (per hour)</th>
+                            <th class="text-left">Item required</th>
+                            <th class="text-right">
+                                Guaranteed Loot (per hour)
+                            </th>
+                            <th class="text-right">Random Loot (per hour)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr
+                            v-for="a in actionInputs"
+                            :key="a.actionId"
+                            :class="{
+                                'text-gray-400': a.info.minXP > playerXp,
+                            }"
+                        >
+                            <td class="text-left">
+                                {{ actionNames[a.actionId] }}
+                            </td>
+                            <td class="text-right">
+                                {{ getLevel(a.info.minXP) }}
+                            </td>
+                            <td class="text-right">{{ a.info.xpPerHour }}</td>
+                            <td class="text-left">
+                                {{
+                                    getItemName(
+                                        a.info.handItemTokenIdRangeMin
+                                    ) || "None"
+                                }}
+                            </td>
+                            <td class="text-right cursor-pointer">
+                                <span
+                                    v-for="r in a.guaranteedRewards"
+                                    :key="r.itemTokenId"
+                                    class="text-xs flex justify-between"
+                                    @click.prevent="
+                                        itemStore.itemSearch = getItemName(
+                                            r.itemTokenId
+                                        )
+                                    "
+                                    ><span>{{
+                                        getItemName(r.itemTokenId)
+                                    }}</span
+                                    >{{ r.rate / 10 }}</span
+                                >
+                            </td>
+                            <td class="text-right cursor-pointer">
+                                <div
+                                    v-for="r in a.randomRewards"
+                                    :key="r.itemTokenId"
+                                    class="text-xs flex justify-between"
+                                    @click.prevent="
+                                        itemStore.itemSearch = getItemName(
+                                            r.itemTokenId
+                                        )
+                                    "
+                                >
+                                    <span>{{ getItemName(r.itemTokenId) }}</span
+                                    ><span
+                                        >{{ r.amount }} ({{
+                                            calculateChance(
+                                                r,
+                                                a,
+                                                playerXp
+                                            ).toFixed(2)
+                                        }}%)</span
+                                    >
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="overflow-x-auto mt-5">
+                <table class="table md:table-md table-xs">
+                    <thead>
+                        <tr>
+                            <th class="text-left w-52">Item</th>
+                            <th class="text-right w-40">Level</th>
+                            <th class="text-right w-40">XP (per hour)</th>
                             <th class="text-right">Inputs (per hour)</th>
                             <th class="text-right">Output (per hour)</th>
                         </tr>
@@ -99,7 +179,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue"
-import { skillNames, useSkillStore } from "../../store/skills"
+import { actionNames, skillNames, useSkillStore } from "../../store/skills"
 import {
     MEDIA_URL,
     getLevel,
@@ -109,6 +189,8 @@ import {
 import { getItemName, useItemStore } from "../../store/items"
 import { ActionChoiceInput, Skill } from "@paintswap/estfor-definitions/types"
 import { calculateActionChoiceSuccessPercent } from "../../store/factory"
+import { allActions } from "../../data/actions"
+import { calculateChance } from "../../utils/player"
 
 const coreStore = useCoreStore()
 const skillId = ref(0)
@@ -118,6 +200,39 @@ const itemStore = useItemStore()
 const playerXp = computed(() => {
     // @ts-ignore
     return coreStore.playerState[skillToXPMap[skillId.value]]
+})
+
+const actionInputs = computed(() => {
+    const a = [
+        ...allActions.filter(
+            (x) =>
+                x.info.skill === skillId.value &&
+                x.info.actionChoiceRequired === false
+        ),
+    ]
+    a.sort((a, b) => (a.info.minXP > b.info.minXP ? 1 : -1))
+    return a.filter(
+        (x) =>
+            itemStore.itemSearch === "" ||
+            x.guaranteedRewards.some(
+                (y) =>
+                    getItemName(y.itemTokenId)
+                        ?.toLowerCase()
+                        .includes(itemStore.itemSearch.toLowerCase())
+            ) ||
+            x.randomRewards.some(
+                (y) =>
+                    getItemName(y.itemTokenId)
+                        ?.toLowerCase()
+                        .includes(itemStore.itemSearch.toLowerCase())
+            ) ||
+            getItemName(x.info.handItemTokenIdRangeMax)
+                ?.toLowerCase()
+                .includes(itemStore.itemSearch.toLowerCase()) ||
+            getItemName(x.info.handItemTokenIdRangeMax)
+                ?.toLowerCase()
+                .includes(itemStore.itemSearch.toLowerCase())
+    )
 })
 
 const actions = computed(() => {
@@ -143,6 +258,13 @@ const actions = computed(() => {
             break
         case Skill.FLETCHING:
             a = [...skillStore.fletching]
+            break
+        case Skill.FARMING:
+            a = [
+                ...(skillStore.farming.filter(
+                    (x) => !("info" in x)
+                ) as ActionChoiceInput[]),
+            ]
             break
         default:
             return []
@@ -198,7 +320,7 @@ const imgSource = computed(() => {
 const openDialog = (_skillId: Skill) => {
     skillId.value = _skillId
     const dialog = document.getElementById(
-        "action_choice_modal"
+        "action_and_choice_modal"
     ) as HTMLDialogElement
     dialog.showModal()
 }

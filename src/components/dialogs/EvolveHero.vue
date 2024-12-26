@@ -64,11 +64,15 @@ import { ref } from "vue"
 import { useFactoryStore } from "../../store/factory"
 import { useAppStore } from "../../store/app"
 import { useCoreStore } from "../../store/core"
-import { ProxySilo } from "../../store/models/factory.models";
+import { ProxySilo } from "../../store/models/factory.models"
 
 const props = defineProps({
     id: {
         type: String,
+        required: true,
+    },
+    chainId: {
+        type: Number,
         required: true,
     },
 })
@@ -97,7 +101,8 @@ const approveBrush = async () => {
     try {
         await factoryStore.approveBrush(
             heroesToEvolve.value,
-            BigInt(cost.value)
+            BigInt(cost.value),
+            props.chainId as 250 | 146
         )
         approved.value = true
     } catch {
@@ -111,7 +116,11 @@ const approveBrush = async () => {
 const sendBrush = async () => {
     loading.value = true
     try {
-        await factoryStore.sendBrush(heroesToEvolve.value, BigInt(cost.value))
+        await factoryStore.sendBrush(
+            heroesToEvolve.value,
+            BigInt(cost.value),
+            props.chainId as 250 | 146
+        )
         sentBrush.value = true
     } catch {
         // console.log(e)
@@ -124,7 +133,10 @@ const sendBrush = async () => {
 const evolveHeroes = async () => {
     loading.value = true
     try {
-        await factoryStore.evolveHeroes(heroesToEvolve.value)
+        await factoryStore.evolveHeroes(
+            heroesToEvolve.value,
+            props.chainId as 250 | 146
+        )
 
         app.addToast(
             `${heroesToEvolve.value.length} hero${

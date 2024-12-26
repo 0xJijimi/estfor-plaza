@@ -12,3 +12,9 @@ app.use(createHead())
 app.use(router)
 
 app.mount("#app")
+
+// reset hero roster if switching to sonic
+if (!localStorage.getItem("sonic")) {
+    localStorage.setItem("sonic", "true")
+    localStorage.removeItem("heroRoster")
+}

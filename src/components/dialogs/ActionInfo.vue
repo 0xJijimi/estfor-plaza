@@ -18,7 +18,9 @@
                             <th class="text-right">Level</th>
                             <th class="text-right">XP (per hour)</th>
                             <th class="text-left">Item required</th>
-                            <th class="text-right">Guaranteed Loot (per hour)</th>
+                            <th class="text-right">
+                                Guaranteed Loot (per hour)
+                            </th>
                             <th class="text-right">Random Loot (per hour)</th>
                         </tr>
                     </thead>
@@ -39,38 +41,39 @@
                             <td class="text-right">{{ a.info.xpPerHour }}</td>
                             <td class="text-left">
                                 {{
-                                    itemNames[a.info.handItemTokenIdRangeMin] ||
-                                    "None"
+                                    getItemName(
+                                        a.info.handItemTokenIdRangeMin
+                                    ) || "None"
                                 }}
                             </td>
-                            <td
-                                class="text-right cursor-pointer"
-                            >
+                            <td class="text-right cursor-pointer">
                                 <span
                                     v-for="r in a.guaranteedRewards"
                                     :key="r.itemTokenId"
                                     class="text-xs flex justify-between"
                                     @click.prevent="
-                                        itemStore.itemSearch =
-                                            itemNames[r.itemTokenId]
+                                        itemStore.itemSearch = getItemName(
+                                            r.itemTokenId
+                                        )
                                     "
-                                    ><span>{{ itemNames[r.itemTokenId] }}</span
-                                        >{{ r.rate / 10 }}</span
+                                    ><span>{{
+                                        getItemName(r.itemTokenId)
+                                    }}</span
+                                    >{{ r.rate / 10 }}</span
                                 >
                             </td>
-                            <td
-                                class="text-right cursor-pointer"
-                            >
+                            <td class="text-right cursor-pointer">
                                 <div
                                     v-for="r in a.randomRewards"
                                     :key="r.itemTokenId"
                                     class="text-xs flex justify-between"
                                     @click.prevent="
-                                        itemStore.itemSearch =
-                                            itemNames[r.itemTokenId]
+                                        itemStore.itemSearch = getItemName(
+                                            r.itemTokenId
+                                        )
                                     "
                                 >
-                                    <span>{{ itemNames[r.itemTokenId] }}</span
+                                    <span>{{ getItemName(r.itemTokenId) }}</span
                                     ><span
                                         >{{ r.amount }} ({{
                                             calculateChance(
@@ -102,7 +105,7 @@ import {
     useCoreStore,
     skillToXPMap,
 } from "../../store/core"
-import { itemNames, useItemStore } from "../../store/items"
+import { getItemName, useItemStore } from "../../store/items"
 import { allActions } from "../../data/actions"
 import { Skill } from "@paintswap/estfor-definitions/types"
 import { calculateChance } from "../../utils/player"
@@ -124,20 +127,20 @@ const actions = computed(() => {
             itemStore.itemSearch === "" ||
             x.guaranteedRewards.some(
                 (y) =>
-                    itemNames[y.itemTokenId]
+                    getItemName(y.itemTokenId)
                         ?.toLowerCase()
                         .includes(itemStore.itemSearch.toLowerCase())
             ) ||
             x.randomRewards.some(
                 (y) =>
-                    itemNames[y.itemTokenId]
+                    getItemName(y.itemTokenId)
                         ?.toLowerCase()
                         .includes(itemStore.itemSearch.toLowerCase())
             ) ||
-            itemNames[x.info.handItemTokenIdRangeMax]
+            getItemName(x.info.handItemTokenIdRangeMax)
                 ?.toLowerCase()
                 .includes(itemStore.itemSearch.toLowerCase()) ||
-            itemNames[x.info.handItemTokenIdRangeMax]
+            getItemName(x.info.handItemTokenIdRangeMax)
                 ?.toLowerCase()
                 .includes(itemStore.itemSearch.toLowerCase())
     )

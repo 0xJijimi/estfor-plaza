@@ -316,7 +316,7 @@ export const useClanStore = defineStore({
         },
     },
     actions: {
-        async getAllClanInfo() {
+        async getAllClanInfo(chainId: 250 | 146) {
             if (
                 this.initialised &&
                 this.initialisedAt &&
@@ -329,7 +329,7 @@ export const useClanStore = defineStore({
             let moreToFetch = true
             let localClans: Clan[] = []
             while (moreToFetch) {
-                const clans = await getClans(numToSkip)
+                const clans = await getClans(numToSkip, chainId)
                 if (clans.clans.length === 0 || clans.clans.length < 100) {
                     localClans.push(...clans.clans)
                     moreToFetch = false
@@ -339,7 +339,7 @@ export const useClanStore = defineStore({
                 }
             }
             this.clans = localClans
-            this.territories = (await getTerritories()).territories
+            this.territories = (await getTerritories(chainId)).territories
             this.initialised = true
             this.initialisedAt = new Date()
         },

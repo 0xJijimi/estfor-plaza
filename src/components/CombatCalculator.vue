@@ -81,7 +81,7 @@
                     v-model="equippedItems.quiver"
                     :empty-equipment="false"
                 />
-                <PetSelect 
+                <PetSelect
                     :items="pets"
                     label="Pet"
                     v-model="equippedItems.pet"
@@ -95,7 +95,7 @@
                 />
                 <label class="label cursor-pointer">
                     <span class="label-text text-xs mr-2 items-center flex">
-                        Show Owned Pets Only                 
+                        Show Owned Pets Only
                     </span>
                     <input
                         type="checkbox"
@@ -193,14 +193,35 @@ const armItems = computed(() =>
 const ringItems = computed(() =>
     itemStore.getItemsForSlotAndXP(EquipPosition.RING)
 )
-const quiverItems = computed(() =>
-    itemStore.getRangedActionChoicesForXP
+const quiverItems = computed(() => itemStore.getRangedActionChoicesForXP)
+const magicBagItems = computed(() =>
+    itemStore.getMagicActionChoicesForXP(equippedItems.value.rightHand || 0)
 )
-const magicBagItems = computed(() => itemStore.getMagicActionChoicesForXP)
 const foodItems = computed(() =>
     itemStore.getItemsForSlotAndXP(EquipPosition.FOOD)
 )
-const pets = computed(() => itemStore.getOwnedAndBasicPets(ownedPetsOnly.value).filter(x => (isMelee.value ? x.basePet.enhancementType === PetEnhancementType.MELEE : isRanged.value ? x.basePet.enhancementType === PetEnhancementType.RANGED : isMagic.value ? x.basePet.enhancementType === PetEnhancementType.MAGIC : false) || x.basePet.enhancementType === PetEnhancementType.DEFENCE || x.basePet.enhancementType === PetEnhancementType.HEALTH || x.basePet.enhancementType === PetEnhancementType.MELEE_AND_DEFENCE || x.basePet.enhancementType === PetEnhancementType.MAGIC_AND_DEFENCE || x.basePet.enhancementType === PetEnhancementType.RANGED_AND_DEFENCE))
+const pets = computed(() =>
+    itemStore
+        .getOwnedAndBasicPets(ownedPetsOnly.value)
+        .filter(
+            (x) =>
+                (isMelee.value
+                    ? x.basePet.enhancementType === PetEnhancementType.MELEE
+                    : isRanged.value
+                      ? x.basePet.enhancementType === PetEnhancementType.RANGED
+                      : isMagic.value
+                        ? x.basePet.enhancementType === PetEnhancementType.MAGIC
+                        : false) ||
+                x.basePet.enhancementType === PetEnhancementType.DEFENCE ||
+                x.basePet.enhancementType === PetEnhancementType.HEALTH ||
+                x.basePet.enhancementType ===
+                    PetEnhancementType.MELEE_AND_DEFENCE ||
+                x.basePet.enhancementType ===
+                    PetEnhancementType.MAGIC_AND_DEFENCE ||
+                x.basePet.enhancementType ===
+                    PetEnhancementType.RANGED_AND_DEFENCE
+        )
+)
 
 const findLast = (arr: any[], criteria: any) => {
     for (let i = arr.length - 1; i >= 0; i--) {

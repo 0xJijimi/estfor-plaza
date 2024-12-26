@@ -155,7 +155,8 @@
                         :key="b.tokenId"
                         :value="b.tokenId"
                     >
-                        {{ boostVialNames[b.tokenId] }} (+{{ b.boostValue }}%
+                        {{ getItemName(b.tokenId) }} (+{{ getBoostValue(b) }}
+                        {{ b.boostType === BoostType.COMBAT_FIXED ? "" : "%" }}
                         {{ boostTypeNames[b.boostType] }})
                     </option>
                 </select>
@@ -216,10 +217,14 @@
 
 <script setup lang="ts">
 import { computed, nextTick, ref } from "vue"
-import { useCoreStore, boostVialNames, boostTypeNames } from "../store/core"
+import { useCoreStore, boostTypeNames } from "../store/core"
 import { getHoursBetweenDates } from "../utils/time"
-import { useItemStore } from "../store/items"
-import { BoostType, EquipPosition } from "@paintswap/estfor-definitions/types"
+import { getItemName, useItemStore } from "../store/items"
+import {
+    BoostType,
+    EquipPosition,
+    ItemInput,
+} from "@paintswap/estfor-definitions/types"
 import { EstforConstants } from "@paintswap/estfor-definitions"
 
 const coreStore = useCoreStore()
@@ -269,8 +274,26 @@ const hoursUntilClanBoostEnd = computed(() => {
 const boostOptions = computed(() => {
     return itemStore.items
         .filter((x) => x.equipPosition === EquipPosition.BOOST_VIAL)
-        .filter((x) => x.boostValue > 0)
+        .filter(
+            (x) => x.boostValue > 0 || x.boostType === BoostType.COMBAT_FIXED
+        )
+        .filter((x) => x.isAvailable)
 })
+
+const getBoostValue = (b: ItemInput) => {
+    if (b.boostType === BoostType.COMBAT_FIXED) {
+        return (
+            b.combatStats.meleeAttack ||
+            b.combatStats.magicAttack ||
+            b.combatStats.rangedAttack ||
+            b.combatStats.meleeDefence ||
+            b.combatStats.magicDefence ||
+            b.combatStats.rangedDefence ||
+            b.combatStats.health
+        )
+    }
+    return b.boostValue
+}
 
 const wishingWellBoost = computed(() => {
     return (

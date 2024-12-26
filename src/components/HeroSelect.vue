@@ -198,7 +198,7 @@ import EmeraldBroochPaywall from "./dialogs/EmeraldBroochPaywall.vue"
 import { Clan, Player } from "@paintswap/estfor-definitions/types"
 import { getDiceRolls, useClanStore } from "../store/clan"
 import ClanSearch from "./inputs/ClanSearch.vue"
-
+import { sonic } from "viem/chains"
 const app = useAppStore()
 const coreStore = useCoreStore()
 const clanStore = useClanStore()
@@ -220,7 +220,7 @@ watchDebounced(
         }
         loading.value = true
         try {
-            const players = await getPlayers(heroSearch.value)
+            const players = await getPlayers(heroSearch.value, sonic.id)
             heroSearchResults.value = players.players
         } catch (e) {
             console.error(`Failed to search ${heroSearch.value}`, e)
@@ -269,7 +269,8 @@ const addClanToRoster = async () => {
         loading.value = true
         try {
             const clanMembersResult = await getClanMembers(
-                selectedClan.value.id
+                selectedClan.value.id,
+                sonic.id
             )
             heroSearchResults.value = clanMembersResult.clanMembers.map(
                 (x) => x.player
@@ -348,7 +349,7 @@ const clearRoster = async () => {
 const init = async () => {
     loading.value = true
     try {
-        await clanStore.getAllClanInfo()
+        await clanStore.getAllClanInfo(sonic.id)
         await coreStore.refreshHeroRoster()
     } finally {
         loading.value = false

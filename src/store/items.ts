@@ -18,9 +18,15 @@ import {
 } from "../data/actionChoices"
 import { getLevel, useCoreStore } from "./core"
 import { EstforConstants } from "@paintswap/estfor-definitions"
-import { calculateExtraXPForHeroActionChoiceInput, calculateExtraXPForHeroActionInput } from "./factory"
+import {
+    calculateExtraXPForHeroActionChoiceInput,
+    calculateExtraXPForHeroActionInput,
+} from "./factory"
 import { EquippedItems, ProxySilo } from "./models/factory.models"
-import { allActionChoiceIdsMagic, allActionChoiceIdsRanged } from "../data/actionChoiceIds"
+import {
+    allActionChoiceIdsMagic,
+    allActionChoiceIdsRanged,
+} from "../data/actionChoiceIds"
 import { allBasePets } from "../data/pets"
 
 const magicSpellNames = [
@@ -35,403 +41,26 @@ const magicSpellNames = [
     "FURY FISTS",
     "CONCUSSION BEAMS",
     "ICE SPIKES",
+    "SUMMON EMBER FIEND",
+    "SHATTERFROST BOMB",
+    "METEOR STORM",
+    "GLACIAL COMET",
+    "SHADOW BOLT",
+    "RAZOR LEAVES",
+    "HEX",
+    "TORRENT SURGE",
+    "HYDRO BURST",
+    "VOID WAVE",
+    "RAISE DEAD",
+    "TORNADO",
+    "SUMMON WIND FAMILIAR",
+    "ARCANE NOVA",
+    "FROST BREATH",
+    "LIFE DRAIN",
+    "BLIZZARD",
+    "STARFALL",
+    "CHRONO FREEZE",
 ]
-
-export const itemNames = {
-    // taken from the outputTokenId in each object from  ../data/actionChoices
-    [EstforConstants.ASH]: "Ash",
-    [EstforConstants.BRONZE_BAR]: "Bronze Bar",
-    [EstforConstants.BRONZE_HELMET]: "Bronze Helmet",
-    [EstforConstants.BRONZE_ARMOR]: "Bronze Armor",
-    [EstforConstants.BRONZE_GAUNTLETS]: "Bronze Gauntlets",
-    [EstforConstants.BRONZE_TASSETS]: "Bronze Tassets",
-    [EstforConstants.BRONZE_BOOTS]: "Bronze Boots",
-    [EstforConstants.BRONZE_SWORD]: "Bronze Sword",
-    [EstforConstants.BRONZE_SHIELD]: "Bronze Shield",
-    [EstforConstants.BRONZE_ARROW_HEAD]: "Bronze Arrow Head",
-    [EstforConstants.BRONZE_ARROW]: "Bronze Arrow",
-    [EstforConstants.BRONZE_AXE]: "Bronze Axe",
-    [EstforConstants.BRONZE_PICKAXE]: "Bronze Pickaxe",
-
-    [EstforConstants.IRON_BAR]: "Iron Bar",
-    [EstforConstants.IRON_HELMET]: "Iron Helmet",
-    [EstforConstants.IRON_ARMOR]: "Iron Armor",
-    [EstforConstants.IRON_GAUNTLETS]: "Iron Gauntlets",
-    [EstforConstants.IRON_TASSETS]: "Iron Tassets",
-    [EstforConstants.IRON_BOOTS]: "Iron Boots",
-    [EstforConstants.IRON_SWORD]: "Iron Sword",
-    [EstforConstants.IRON_SHIELD]: "Iron Shield",
-    [EstforConstants.IRON_ARROW_HEAD]: "Iron Arrow Head",
-    [EstforConstants.IRON_ARROW]: "Iron Arrow",
-    [EstforConstants.IRON_AXE]: "Iron Axe",
-    [EstforConstants.IRON_PICKAXE]: "Iron Pickaxe",
-
-    [EstforConstants.MITHRIL_BAR]: "Mithril Bar",
-    [EstforConstants.MITHRIL_HELMET]: "Mithril Helmet",
-    [EstforConstants.MITHRIL_ARMOR]: "Mithril Armor",
-    [EstforConstants.MITHRIL_GAUNTLETS]: "Mithril Gauntlets",
-    [EstforConstants.MITHRIL_TASSETS]: "Mithril Tassets",
-    [EstforConstants.MITHRIL_BOOTS]: "Mithril Boots",
-    [EstforConstants.MITHRIL_SWORD]: "Mithril Sword",
-    [EstforConstants.MITHRIL_SHIELD]: "Mithril Shield",
-    [EstforConstants.MITHRIL_ARROW_HEAD]: "Mithril Arrow Head",
-    [EstforConstants.MITHRIL_ARROW]: "Mithril Arrow",
-    [EstforConstants.MITHRIL_AXE]: "Mithril Axe",
-    [EstforConstants.MITHRIL_PICKAXE]: "Mithril Pickaxe",
-
-    [EstforConstants.ADAMANTINE_BAR]: "Adamantine Bar",
-    [EstforConstants.ADAMANTINE_HELMET]: "Adamantine Helmet",
-    [EstforConstants.ADAMANTINE_ARMOR]: "Adamantine Armor",
-    [EstforConstants.ADAMANTINE_GAUNTLETS]: "Adamantine Gauntlets",
-    [EstforConstants.ADAMANTINE_TASSETS]: "Adamantine Tassets",
-    [EstforConstants.ADAMANTINE_BOOTS]: "Adamantine Boots",
-    [EstforConstants.ADAMANTINE_SWORD]: "Adamantine Sword",
-    [EstforConstants.ADAMANTINE_SHIELD]: "Adamantine Shield",
-    [EstforConstants.ADAMANTINE_ARROW_HEAD]: "Adamantine Arrow Head",
-    [EstforConstants.ADAMANTINE_ARROW]: "Adamantine Arrow",
-    [EstforConstants.ADAMANTINE_AXE]: "Adamantine Axe",
-    [EstforConstants.ADAMANTINE_PICKAXE]: "Adamantine Pickaxe",
-
-    [EstforConstants.RUNITE_BAR]: "Runite Bar",
-    [EstforConstants.RUNITE_HELMET]: "Runite Helmet",
-    [EstforConstants.RUNITE_ARMOR]: "Runite Armor",
-    [EstforConstants.RUNITE_GAUNTLETS]: "Runite Gauntlets",
-    [EstforConstants.RUNITE_TASSETS]: "Runite Tassets",
-    [EstforConstants.RUNITE_BOOTS]: "Runite Boots",
-    [EstforConstants.RUNITE_SWORD]: "Runite Sword",
-    [EstforConstants.RUNITE_SHIELD]: "Runite Shield",
-    [EstforConstants.RUNITE_ARROW_HEAD]: "Runite Arrow Head",
-    [EstforConstants.RUNITE_ARROW]: "Runite Arrow",
-    [EstforConstants.RUNITE_AXE]: "Runite Axe",
-    [EstforConstants.RUNITE_PICKAXE]: "Runite Pickaxe",
-
-    [EstforConstants.TITANIUM_BAR]: "Titanium Bar",
-    [EstforConstants.TITANIUM_HELMET]: "Titanium Helmet",
-    [EstforConstants.TITANIUM_ARMOR]: "Titanium Armor",
-    [EstforConstants.TITANIUM_GAUNTLETS]: "Titanium Gauntlets",
-    [EstforConstants.TITANIUM_TASSETS]: "Titanium Tassets",
-    [EstforConstants.TITANIUM_BOOTS]: "Titanium Boots",
-    [EstforConstants.TITANIUM_SWORD]: "Titanium Sword",
-    [EstforConstants.TITANIUM_SHIELD]: "Titanium Shield",
-    [EstforConstants.TITANIUM_ARROW_HEAD]: "Titanium Arrow Head",
-    [EstforConstants.TITANIUM_ARROW]: "Titanium Arrow",
-    [EstforConstants.TITANIUM_AXE]: "Titanium Axe",
-    [EstforConstants.TITANIUM_PICKAXE]: "Titanium Pickaxe",
-
-    [EstforConstants.ORICHALCUM_BAR]: "Oricalcum Bar",
-    [EstforConstants.ORICHALCUM_HELMET]: "Oricalcum Helmet",
-    [EstforConstants.ORICHALCUM_ARMOR]: "Oricalcum Armor",
-    [EstforConstants.ORICHALCUM_GAUNTLETS]: "Oricalcum Gauntlets",
-    [EstforConstants.ORICHALCUM_TASSETS]: "Oricalcum Tassets",
-    [EstforConstants.ORICHALCUM_BOOTS]: "Oricalcum Boots",
-    [EstforConstants.ORICHALCUM_SWORD]: "Oricalcum Sword",
-    [EstforConstants.ORICHALCUM_SHIELD]: "Oricalcum Shield",
-    [EstforConstants.ORICHALCUM_ARROW_HEAD]: "Oricalcum Arrow Head",
-    [EstforConstants.ORICHALCUM_ARROW]: "Oricalcum Arrow",
-    [EstforConstants.ORICHALCUM_AXE]: "Oricalcum Axe",
-    [EstforConstants.ORICHALCUM_PICKAXE]: "Oricalcum Pickaxe",
-
-    [EstforConstants.COOKED_MINNUS]: "Cooked Minnus",
-    [EstforConstants.COOKED_BLEKK]: "Cooked Blekk",
-    [EstforConstants.COOKED_SKRIMP]: "Cooked Skrimp",
-    [EstforConstants.COOKED_FEOLA]: "Cooked Feola",
-    [EstforConstants.COOKED_ANCHO]: "Cooked Ancho",
-    [EstforConstants.COOKED_TROUT]: "Cooked Trout",
-    [EstforConstants.COOKED_ROJJA]: "Cooked Rojja",
-    [EstforConstants.COOKED_BOWFISH]: "Cooked Bowfish",
-    [EstforConstants.COOKED_GOLDFISH]: "Cooked Goldfish",
-    [EstforConstants.COOKED_MYSTY_BLUE]: "Cooked Mysty Blue",
-    [EstforConstants.COOKED_FLITFISH]: "Cooked Flitfish",
-    [EstforConstants.COOKED_RAZORFISH]: "Cooked Razorfish",
-    [EstforConstants.COOKED_QUAFFER]: "Cooked Quaffer",
-    [EstforConstants.COOKED_ROXA]: "Cooked Roxa",
-    [EstforConstants.COOKED_AZACUDDA]: "Cooked Azacudda",
-    [EstforConstants.COOKED_STONECLAW]: "Cooked Stoneclaw",
-    [EstforConstants.COOKED_CRUSKAN]: "Cooked Cruskan",
-    [EstforConstants.COOKED_CHODFISH]: "Cooked Chodfish",
-    [EstforConstants.COOKED_DOUBTFISH]: "Cooked Doubtfish",
-    [EstforConstants.COOKED_ROSEFIN]: "Cooked Rosefin",
-
-    [EstforConstants.ARROW_SHAFT]: "Arrow Shaft",
-    [EstforConstants.BASIC_BOW]: "Basic Bow",
-    [EstforConstants.BONE_BOW]: "Bone Bow",
-    [EstforConstants.EXPERT_BOW]: "Expert Bow",
-    [EstforConstants.SPECTRAL_BOW]: "Spectral Bow",
-    [EstforConstants.ICY_BOW]: "Icy Bow",
-    [EstforConstants.GLITTERING_BOW]: "Glittering Bow",
-
-    [EstforConstants.TINY_ELIXIUM]: "Tiny Elixium",
-    [EstforConstants.SMALL_ELIXIUM]: "Small Elixium",
-    [EstforConstants.EXTRA_LARGE_ELIXIUM]: "Extra Large Elixium",
-    [EstforConstants.MEDIUM_ELIXIUM]: "Medium Elixium",
-    [EstforConstants.LARGE_ELIXIUM]: "Large Elixium",
-
-    [EstforConstants.PAPER]: "Paper",
-    [EstforConstants.SHADOW_SCROLL]: "Shadow Scroll",
-    [EstforConstants.NATURE_SCROLL]: "Nature Scroll",
-    [EstforConstants.AQUA_SCROLL]: "Aqua Scroll",
-    [EstforConstants.HELL_SCROLL]: "Hell Scroll",
-    [EstforConstants.AIR_SCROLL]: "Air Scroll",
-    [EstforConstants.BARRAGE_SCROLL]: "Barrage Scroll",
-    [EstforConstants.FREEZE_SCROLL]: "Freeze Scroll",
-    [EstforConstants.ANCIENT_SCROLL]: "Ancient Scroll",
-
-    [EstforConstants.BONEMEAL]: "Bonemeal",
-    [EstforConstants.ROPE]: "Rope",
-    [EstforConstants.ACORN_PATCH]: "Acorn Patch",
-    [EstforConstants.BAT_WING_PATCH]: "Bat Wing Patch",
-    [EstforConstants.NATUOW_LEATHER]: "Natuow Leather",
-    [EstforConstants.NATUOW_BODY]: "Natuow Body",
-    [EstforConstants.NATUOW_BRACERS]: "Natuow Bracers",
-    [EstforConstants.NATUOW_BOOTS]: "Natuow Boots",
-    [EstforConstants.NATUOW_HOOD]: "Natuow Hood",
-    [EstforConstants.NATUOW_TASSETS]: "Natuow Tassets",
-
-    [EstforConstants.BAT_WING_BODY]: "Bat Wing Body",
-    [EstforConstants.BAT_WING_BRACERS]: "Bat Wing Bracers",
-    [EstforConstants.BAT_WING_HAT]: "Bat Wing Hat",
-    [EstforConstants.BAT_WING_BOOTS]: "Bat Wing Boots",
-    [EstforConstants.BAT_WING_TROUSERS]: "Bat Wing Trousers",
-
-    [EstforConstants.NATURE_BODY]: "Nature Body",
-    [EstforConstants.NATURE_BRACERS]: "Nature Bracers",
-    [EstforConstants.NATURE_MASK]: "Nature Mask",
-    [EstforConstants.NATURE_BOOTS]: "Nature Boots",
-    [EstforConstants.NATURE_TROUSERS]: "Nature Trousers",
-
-    [EstforConstants.TOTEM_STAFF]: "Totem Staff",
-    [EstforConstants.SAPPHIRE_STAFF]: "Sapphire Staff",
-    [EstforConstants.EMERALD_STAFF]: "Emerald Staff",
-    [EstforConstants.RUBY_STAFF]: "Ruby Staff",
-    [EstforConstants.DIAMOND_STAFF]: "Diamond Staff",
-    [EstforConstants.AMETHYST_STAFF]: "Amethyst Staff",
-
-    [EstforConstants.SAPPHIRE_AMULET]: "Sapphire Amulet",
-    [EstforConstants.EMERALD_AMULET]: "Emerald Amulet",
-    [EstforConstants.RUBY_AMULET]: "Ruby Amulet",
-    [EstforConstants.DIAMOND_AMULET]: "Diamond Amulet",
-    [EstforConstants.AMETHYST_AMULET]: "Amethyst Amulet",
-    [EstforConstants.DRAGONSTONE_AMULET]: "Dragonstone Amulet",
-    [EstforConstants.DRAGONSTONE]: "Dragonstone",
-
-    [EstforConstants.APPRENTICE_BODY]: "Apprentice Body",
-    [EstforConstants.APPRENTICE_GAUNTLETS]: "Apprentice Gauntlets",
-    [EstforConstants.APPRENTICE_HAT]: "Apprentice Hat",
-    [EstforConstants.APPRENTICE_BOOTS]: "Apprentice Boots",
-    [EstforConstants.APPRENTICE_TROUSERS]: "Apprentice Trousers",
-
-    [EstforConstants.MAGE_BODY]: "Mage Body",
-    [EstforConstants.MAGE_BRACERS]: "Mage Bracers",
-    [EstforConstants.MAGE_HOOD]: "Mage Hood",
-    [EstforConstants.MAGE_BOOTS]: "Mage Boots",
-    [EstforConstants.MAGE_TROUSERS]: "Mage Trousers",
-
-    [EstforConstants.SHAMAN_BODY]: "Shaman Body",
-    [EstforConstants.SHAMAN_GAUNTLETS]: "Shaman Gauntlets",
-    [EstforConstants.SHAMAN_HOOD]: "Shaman Hood",
-    [EstforConstants.SHAMAN_BOOTS]: "Shaman Boots",
-    [EstforConstants.SHAMAN_TROUSERS]: "Shaman Trousers",
-
-    [EstforConstants.SEERS_BODY]: "Seers Body",
-    [EstforConstants.SEERS_BRACERS]: "Seers Bracers",
-    [EstforConstants.SEERS_HOOD]: "Seers Hood",
-    [EstforConstants.SEERS_BOOTS]: "Seers Boots",
-    [EstforConstants.SEERS_TROUSERS]: "Seers Trousers",
-
-    [EstforConstants.SORCERER_BODY]: "Sorcerer Body",
-    [EstforConstants.SORCERER_GAUNTLETS]: "Sorcerer Gauntlets",
-    [EstforConstants.SORCERER_HAT]: "Sorcerer Hat",
-    [EstforConstants.SORCERER_BOOTS]: "Sorcerer Boots",
-    [EstforConstants.SORCERER_TROUSERS]: "Sorcerer Trousers",
-
-    [EstforConstants.MASTER_BODY]: "Master Body",
-    [EstforConstants.MASTER_BRACERS]: "Master Bracers",
-    [EstforConstants.MASTER_HAT]: "Master Hat",
-    [EstforConstants.MASTER_BOOTS]: "Master Boots",
-    [EstforConstants.MASTER_TROUSERS]: "Master Trousers",
-
-    [EstforConstants.AZAMITE_BODY]: "Azamite Body",
-    [EstforConstants.AZAMITE_BRACERS]: "Azamite Bracers",
-    [EstforConstants.AZAMITE_CHAPS]: "Azamite Chaps",
-    [EstforConstants.AZAMITE_BOOTS]: "Azamite Boots",
-    [EstforConstants.AZAMITE_COWL]: "Azamite Cowl",
-
-    [EstforConstants.HAUBERK_BODY]: "Hauberk Body",
-    [EstforConstants.HAUBERK_BRACERS]: "Hauberk Bracers",
-    [EstforConstants.HAUBERK_CHAPS]: "Hauberk Chaps",
-    [EstforConstants.HAUBERK_BOOTS]: "Hauberk Boots",
-    [EstforConstants.HAUBERK_COWL]: "Hauberk Cowl",
-
-    [EstforConstants.GARAGOS_BODY]: "Garagos Body",
-    [EstforConstants.GARAGOS_BRACERS]: "Garagos Bracers",
-    [EstforConstants.GARAGOS_CHAPS]: "Garagos Chaps",
-    [EstforConstants.GARAGOS_BOOTS]: "Garagos Boots",
-    [EstforConstants.GARAGOS_COWL]: "Garagos Cowl",
-
-    [EstforConstants.ETERNAL_BODY]: "Eternal Body",
-    [EstforConstants.ETERNAL_BRACERS]: "Eternal Bracers",
-    [EstforConstants.ETERNAL_CHAPS]: "Eternal Chaps",
-    [EstforConstants.ETERNAL_BOOTS]: "Eternal Boots",
-    [EstforConstants.ETERNAL_COWL]: "Eternal Cowl",
-
-    [EstforConstants.REAVER_BODY]: "Reaver Body",
-    [EstforConstants.REAVER_BRACERS]: "Reaver Bracers",
-    [EstforConstants.REAVER_CHAPS]: "Reaver Chaps",
-    [EstforConstants.REAVER_BOOTS]: "Reaver Boots",
-    [EstforConstants.REAVER_COWL]: "Reaver Cowl",
-
-    [EstforConstants.SMALL_BONE]: "Small Bone",
-    [EstforConstants.MEDIUM_BONE]: "Medium Bone",
-    [EstforConstants.LARGE_BONE]: "Large Bone",
-    [EstforConstants.DRAGON_BONE]: "Dragon Bone",
-
-    [EstforConstants.AQUA_KEY]: "Aqua Key",
-    [EstforConstants.BONE_KEY]: "Bone Key",
-    [EstforConstants.DRAGON_KEY]: "Dragon Key",
-    [EstforConstants.NATURE_KEY]: "Nature Key",
-
-    [EstforConstants.STRING]: "String",
-    [EstforConstants.FLIXORA]: "Flixora",
-    [EstforConstants.RUFARUM]: "Rufarum",
-    [EstforConstants.POISON]: "Poison",
-    [EstforConstants.VENOM_POUCH]: "Venom Pouch",
-    [EstforConstants.NATUOW_HIDE]: "Natuow Hide",
-    [EstforConstants.LEAF_FRAGMENTS]: "Leaf Fragments",
-    [EstforConstants.QUARTZ_INFUSED_FEATHER]: "Quartz Infused Feather",
-    [EstforConstants.FEATHER]: "Feather",
-    [EstforConstants.PAPER]: "Paper",
-    [EstforConstants.BAT_WING]: "Bat Wing",
-    [EstforConstants.ACORN_PATCH]: "Acorn Patch",
-    [EstforConstants.BECARA_GRASS]: "Becara Grass",
-    [EstforConstants.BLUECANAR]: "Bluecanar",
-    [EstforConstants.DRAGON_TEETH]: "Dragon Teeth",
-    [EstforConstants.HURA_ROOT]: "Hura Root",
-    [EstforConstants.BARK_CHUNK]: "Bark Chunk",
-    [EstforConstants.ANURGAT]: "Anurgat",
-    [EstforConstants.LOSSUTH_SCALE]: "Lossuth Scale",
-    [EstforConstants.LOSSUTH_TEETH]: "Lossuth Teeth",
-    [EstforConstants.RIGOB_CLOTH]: "Rigob Cloth",
-    [EstforConstants.FLUX]: "Flux",
-    [EstforConstants.QUAVA_SILK]: "Quava Silk",
-    [EstforConstants.ENCHANTED_ACORN]: "Enchanted Acorn",
-    [EstforConstants.WHITE_DEATH_SPORE]: "White Death Spore",
-    [EstforConstants.DRAGON_SCALE]: "Dragon Scale",
-
-    [EstforConstants.SCORCHING_BODY]: "Scorching Body",
-    [EstforConstants.SCORCHING_BRACERS]: "Scorching Bracers",
-    [EstforConstants.SCORCHING_COWL]: "Scorching Cowl",
-    [EstforConstants.SCORCHING_BOOTS]: "Scorching Boots",
-    [EstforConstants.SCORCHING_CHAPS]: "Scorching Chaps",
-
-    [EstforConstants.GODLY_BOW]: "Godly Bow",
-    [EstforConstants.DRAGONSTONE_STAFF]: "Dragonstone Staff",
-    [EstforConstants.LOG]: "Log",
-    [EstforConstants.OAK_LOG]: "Oak Log",
-    [EstforConstants.MAPLE_LOG]: "Maple Log",
-    [EstforConstants.ENCHANTED_LOG]: "Enchanted Log",
-    [EstforConstants.ASH_LOG]: "Ash Log",
-    [EstforConstants.REDWOOD_LOG]: "Redwood Log",
-    [EstforConstants.LIVING_LOG]: "Living Log",
-    [EstforConstants.WILLOW_LOG]: "Willow Log",
-    [EstforConstants.MAGICAL_LOG]: "Magical Log",
-
-    [EstforConstants.IRON_ORE]: "Iron Ore",
-    [EstforConstants.COPPER_ORE]: "Copper Ore",
-    [EstforConstants.TIN_ORE]: "Tin Ore",
-    [EstforConstants.MITHRIL_ORE]: "Mithril Ore",
-    [EstforConstants.ADAMANTINE_ORE]: "Adamantine Ore",
-    [EstforConstants.RUNITE_ORE]: "Runite Ore",
-    [EstforConstants.TITANIUM_ORE]: "Titanium Ore",
-    [EstforConstants.ORICHALCUM_ORE]: "Oricalcum Ore",
-    [EstforConstants.RUBY]: "Ruby",
-    [EstforConstants.EMERALD]: "Emerald",
-    [EstforConstants.SAPPHIRE]: "Sapphire",
-    [EstforConstants.DIAMOND]: "Diamond",
-    [EstforConstants.AMETHYST]: "Amethyst",
-    [EstforConstants.COAL_ORE]: "Coal Ore",
-
-    [EstforConstants.WOOD_FISHING_ROD]: "Wood Fishing Rod",
-    [EstforConstants.NET_STICK]: "Net with Stick",
-    [EstforConstants.MEDIUM_NET]: "Medium Net",
-    [EstforConstants.LARGE_NET]: "Large Net",
-    [EstforConstants.CAGE]: "Cage",
-    [EstforConstants.HARPOON]: "Harpoon",
-
-    [EstforConstants.RAW_MINNUS]: "Raw Minnus",
-    [EstforConstants.RAW_BLEKK]: "Raw Blekk",
-    [EstforConstants.RAW_SKRIMP]: "Raw Skrimp",
-    [EstforConstants.RAW_FEOLA]: "Raw Feola",
-    [EstforConstants.RAW_ANCHO]: "Raw Ancho",
-    [EstforConstants.RAW_TROUT]: "Raw Trout",
-    [EstforConstants.RAW_ROJJA]: "Raw Rojja",
-    [EstforConstants.RAW_BOWFISH]: "Raw Bowfish",
-    [EstforConstants.RAW_GOLDFISH]: "Raw Goldfish",
-    [EstforConstants.RAW_MYSTY_BLUE]: "Raw Mysty Blue",
-    [EstforConstants.RAW_FLITFISH]: "Raw Flitfish",
-    [EstforConstants.RAW_RAZORFISH]: "Raw Razorfish",
-    [EstforConstants.RAW_QUAFFER]: "Raw Quaffer",
-    [EstforConstants.RAW_ROXA]: "Raw Roxa",
-    [EstforConstants.RAW_AZACUDDA]: "Raw Azacudda",
-    [EstforConstants.RAW_STONECLAW]: "Raw Stoneclaw",
-    [EstforConstants.RAW_CRUSKAN]: "Raw Cruskan",
-    [EstforConstants.RAW_CHODFISH]: "Raw Chodfish",
-    [EstforConstants.RAW_DOUBTFISH]: "Raw Doubtfish",
-    [EstforConstants.RAW_ROSEFIN]: "Raw Rosefin",
-
-    [EstforConstants.MAGIC_FIRE_STARTER]: "Magic Fire Starter",
-    [EstforConstants.XP_BOOST]: "XP Boost",
-    [EstforConstants.SKILL_BOOST]: "Skill Boost",
-    [EstforConstants.COMBAT_BOOST]: "Combat Boost",
-    [EstforConstants.GATHERING_BOOST]: "Gathering Boost",
-
-    [EstforConstants.INFUSED_DRAGONSTONE_AMULET]: "Infused Dragonstone Amulet",
-    [EstforConstants.INFUSED_DRAGONSTONE_STAFF]: "Infused Dragonstone Staff",
-    [EstforConstants.INFUSED_GODLY_BOW]: "Infused Godly Bow",
-    [EstforConstants.INFUSED_MASTER_BODY]: "Infused Master Body",
-    [EstforConstants.INFUSED_MASTER_BRACERS]: "Infused Master Bracers",
-    [EstforConstants.INFUSED_MASTER_HAT]: "Infused Master Hat",
-    [EstforConstants.INFUSED_MASTER_BOOTS]: "Infused Master Boots",
-    [EstforConstants.INFUSED_MASTER_TROUSERS]: "Infused Master Trousers",
-    [EstforConstants.INFUSED_ORICHALCUM_ARMOR]: "Infused Oricalcum Armor",
-    [EstforConstants.INFUSED_ORICHALCUM_BOOTS]: "Infused Oricalcum Boots",
-    [EstforConstants.INFUSED_ORICHALCUM_HELMET]: "Infused Oricalcum Helmet",
-    [EstforConstants.INFUSED_ORICHALCUM_TASSETS]: "Infused Oricalcum Tassets",
-    [EstforConstants.INFUSED_ORICHALCUM_GAUNTLETS]:
-        "Infused Oricalcum Gauntlets",
-    [EstforConstants.INFUSED_ORICHALCUM_SHIELD]: "Infused Oricalcum Shield",
-    [EstforConstants.INFUSED_ORICHALCUM_SWORD]: "Infused Oricalcum Sword",
-    [EstforConstants.INFUSED_SCORCHING_BODY]: "Infused Scorching Body",
-    [EstforConstants.INFUSED_SCORCHING_BRACERS]: "Infused Scorching Bracers",
-    [EstforConstants.INFUSED_SCORCHING_COWL]: "Infused Scorching Cowl",
-    [EstforConstants.INFUSED_SCORCHING_BOOTS]: "Infused Scorching Boots",
-    [EstforConstants.INFUSED_SCORCHING_CHAPS]: "Infused Scorching Chaps",
-
-    [EstforConstants.BRIMSTONE]: "Brimstone",
-    [EstforConstants.PANGSTEN_RING]: "Pangsten Ring",
-    [EstforConstants.CANVITE_RING]: "Canvite Ring",
-    [EstforConstants.ETCHED_RING]: "Etched Ring",
-    [EstforConstants.PRIMDIAT_RING]: "Primdiat Ring",
-    [EstforConstants.OCULITE_RING]: "Oculite Ring",
-    [EstforConstants.NOVIAN_RING]: "Novian Ring",
-    [EstforConstants.COIN]: "Coin",
-    [EstforConstants.BONE_CHEST]: "Bone Chest",
-    [EstforConstants.DRAGON_CHEST]: "Dragon Chest",
-    [EstforConstants.MINING_CHEST_1]: "Mining Chest 1",
-    [EstforConstants.MINING_CHEST_2]: "Mining Chest 2",
-    [EstforConstants.MINING_CHEST_3]: "Mining Chest 3",
-    [EstforConstants.MINING_CHEST_4]: "Mining Chest 4",
-    [EstforConstants.MINING_CHEST_5]: "Mining Chest 5",
-    [EstforConstants.WOODCUTTING_CHEST_1]: "Woodcutting Chest 1",
-    [EstforConstants.WOODCUTTING_CHEST_2]: "Woodcutting Chest 2",
-    [EstforConstants.WOODCUTTING_CHEST_3]: "Woodcutting Chest 3",
-    [EstforConstants.WOODCUTTING_CHEST_4]: "Woodcutting Chest 4",
-    [EstforConstants.WOODCUTTING_CHEST_5]: "Woodcutting Chest 5",
-    [EstforConstants.FISHING_CHEST_1]: "Fishing Chest 1",
-    [EstforConstants.FISHING_CHEST_2]: "Fishing Chest 2",
-    [EstforConstants.FISHING_CHEST_3]: "Fishing Chest 3",
-    [EstforConstants.FISHING_CHEST_4]: "Fishing Chest 4",
-    [EstforConstants.FISHING_CHEST_5]: "Fishing Chest 5",
-}
 
 export const starterItems = [
     allItems.find((x) => x.tokenId === EstforConstants.BRONZE_SWORD)?.tokenId,
@@ -451,58 +80,192 @@ export const rangedItemToActionChoice = (rightHand: number, arrow: number) => {
                 return EstforConstants.ACTIONCHOICE_RANGED_BASIC_BOW_POISON
             } else if (arrow === EstforConstants.BRIMSTONE) {
                 return EstforConstants.ACTIONCHOICE_RANGED_BASIC_BOW_FIRE
+            } else if (arrow === EstforConstants.FOOLS_BERRY_EXTRACT) {
+                return EstforConstants.ACTIONCHOICE_RANGED_BASIC_BOW_FOOLS_BERRY_EXTRACT
+            } else if (arrow === EstforConstants.LUMELILA_TOXIN) {
+                return EstforConstants.ACTIONCHOICE_RANGED_BASIC_BOW_LUMELILA_TOXIN
             } else {
-                return EstforConstants.ACTIONCHOICE_RANGED_BASIC_BOW            
+                return EstforConstants.ACTIONCHOICE_RANGED_BASIC_BOW
             }
         case EstforConstants.BONE_BOW:
             if (arrow === EstforConstants.POISON) {
                 return EstforConstants.ACTIONCHOICE_RANGED_BONE_BOW_POISON
             } else if (arrow === EstforConstants.BRIMSTONE) {
                 return EstforConstants.ACTIONCHOICE_RANGED_BONE_BOW_FIRE
+            } else if (arrow === EstforConstants.FOOLS_BERRY_EXTRACT) {
+                return EstforConstants.ACTIONCHOICE_RANGED_BONE_BOW_FOOLS_BERRY_EXTRACT
+            } else if (arrow === EstforConstants.LUMELILA_TOXIN) {
+                return EstforConstants.ACTIONCHOICE_RANGED_BONE_BOW_LUMELILA_TOXIN
             } else {
-                return EstforConstants.ACTIONCHOICE_RANGED_BONE_BOW            
+                return EstforConstants.ACTIONCHOICE_RANGED_BONE_BOW
             }
         case EstforConstants.EXPERT_BOW:
             if (arrow === EstforConstants.POISON) {
                 return EstforConstants.ACTIONCHOICE_RANGED_EXPERT_BOW_POISON
             } else if (arrow === EstforConstants.BRIMSTONE) {
                 return EstforConstants.ACTIONCHOICE_RANGED_EXPERT_BOW_FIRE
+            } else if (arrow === EstforConstants.FOOLS_BERRY_EXTRACT) {
+                return EstforConstants.ACTIONCHOICE_RANGED_EXPERT_BOW_FOOLS_BERRY_EXTRACT
+            } else if (arrow === EstforConstants.LUMELILA_TOXIN) {
+                return EstforConstants.ACTIONCHOICE_RANGED_EXPERT_BOW_LUMELILA_TOXIN
             } else {
-                return EstforConstants.ACTIONCHOICE_RANGED_EXPERT_BOW            
+                return EstforConstants.ACTIONCHOICE_RANGED_EXPERT_BOW
             }
         case EstforConstants.SPECTRAL_BOW:
             if (arrow === EstforConstants.POISON) {
                 return EstforConstants.ACTIONCHOICE_RANGED_SPECTRAL_BOW_POISON
             } else if (arrow === EstforConstants.BRIMSTONE) {
                 return EstforConstants.ACTIONCHOICE_RANGED_SPECTRAL_BOW_FIRE
+            } else if (arrow === EstforConstants.FOOLS_BERRY_EXTRACT) {
+                return EstforConstants.ACTIONCHOICE_RANGED_SPECTRAL_BOW_FOOLS_BERRY_EXTRACT
+            } else if (arrow === EstforConstants.LUMELILA_TOXIN) {
+                return EstforConstants.ACTIONCHOICE_RANGED_SPECTRAL_BOW_LUMELILA_TOXIN
             } else {
-                return EstforConstants.ACTIONCHOICE_RANGED_SPECTRAL_BOW            
+                return EstforConstants.ACTIONCHOICE_RANGED_SPECTRAL_BOW
             }
         case EstforConstants.ICY_BOW:
             if (arrow === EstforConstants.POISON) {
                 return EstforConstants.ACTIONCHOICE_RANGED_ICY_BOW_POISON
             } else if (arrow === EstforConstants.BRIMSTONE) {
                 return EstforConstants.ACTIONCHOICE_RANGED_ICY_BOW_FIRE
+            } else if (arrow === EstforConstants.FOOLS_BERRY_EXTRACT) {
+                return EstforConstants.ACTIONCHOICE_RANGED_ICY_BOW_FOOLS_BERRY_EXTRACT
+            } else if (arrow === EstforConstants.LUMELILA_TOXIN) {
+                return EstforConstants.ACTIONCHOICE_RANGED_ICY_BOW_LUMELILA_TOXIN
             } else {
-                return EstforConstants.ACTIONCHOICE_RANGED_ICY_BOW            
+                return EstforConstants.ACTIONCHOICE_RANGED_ICY_BOW
             }
         case EstforConstants.GLITTERING_BOW:
             if (arrow === EstforConstants.POISON) {
                 return EstforConstants.ACTIONCHOICE_RANGED_GLITTERING_BOW_POISON
             } else if (arrow === EstforConstants.BRIMSTONE) {
                 return EstforConstants.ACTIONCHOICE_RANGED_GLITTERING_BOW_FIRE
+            } else if (arrow === EstforConstants.FOOLS_BERRY_EXTRACT) {
+                return EstforConstants.ACTIONCHOICE_RANGED_GLITTER_BOW_FOOLS_BERRY_EXTRACT
+            } else if (arrow === EstforConstants.LUMELILA_TOXIN) {
+                return EstforConstants.ACTIONCHOICE_RANGED_GLITTER_BOW_LUMELILA_TOXIN
             } else {
-                return EstforConstants.ACTIONCHOICE_RANGED_GLITTERING_BOW            
+                return EstforConstants.ACTIONCHOICE_RANGED_GLITTERING_BOW
+            }
+        case EstforConstants.GODLY_BOW:
+        case EstforConstants.GODLY_BOW_1:
+        case EstforConstants.GODLY_BOW_2:
+        case EstforConstants.GODLY_BOW_3:
+        case EstforConstants.GODLY_BOW_4:
+        case EstforConstants.GODLY_BOW_5:
+            if (arrow === EstforConstants.POISON) {
+                return EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW_POISON
+            } else if (arrow === EstforConstants.BRIMSTONE) {
+                return EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW_FIRE
+            } else if (arrow === EstforConstants.FOOLS_BERRY_EXTRACT) {
+                return EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW_FOOLS_BERRY_EXTRACT
+            } else if (arrow === EstforConstants.LUMELILA_TOXIN) {
+                return EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW_LUMELILA_TOXIN
+            } else {
+                return EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW
+            }
+        case EstforConstants.CROSSBOW_001_BRONZE:
+            if (arrow === EstforConstants.POISON) {
+                return EstforConstants.ACTIONCHOICE_RANGED_EFFYD_KIEL_POISON
+            } else if (arrow === EstforConstants.BRIMSTONE) {
+                return EstforConstants.ACTIONCHOICE_RANGED_EFFYD_KIEL_FIRE
+            } else if (arrow === EstforConstants.FOOLS_BERRY_EXTRACT) {
+                return EstforConstants.ACTIONCHOICE_RANGED_EFFYD_KIEL_FOOLS_BERRY_EXTRACT
+            } else if (arrow === EstforConstants.LUMELILA_TOXIN) {
+                return EstforConstants.ACTIONCHOICE_RANGED_EFFYD_KIEL_LUMELILA_TOXIN
+            } else {
+                return EstforConstants.ACTIONCHOICE_RANGED_EFFYD_KIEL
+            }
+        case EstforConstants.CROSSBOW_002_IRON:
+            if (arrow === EstforConstants.POISON) {
+                return EstforConstants.ACTIONCHOICE_RANGED_HAEARN_KIEL_POISON
+            } else if (arrow === EstforConstants.BRIMSTONE) {
+                return EstforConstants.ACTIONCHOICE_RANGED_HAEARN_KIEL_FIRE
+            } else if (arrow === EstforConstants.FOOLS_BERRY_EXTRACT) {
+                return EstforConstants.ACTIONCHOICE_RANGED_HAEARN_KIEL_FOOLS_BERRY_EXTRACT
+            } else if (arrow === EstforConstants.LUMELILA_TOXIN) {
+                return EstforConstants.ACTIONCHOICE_RANGED_HAEARN_KIEL_LUMELILA_TOXIN
+            } else {
+                return EstforConstants.ACTIONCHOICE_RANGED_HAEARN_KIEL
+            }
+        case EstforConstants.CROSSBOW_003_MITHRIL:
+            if (arrow === EstforConstants.POISON) {
+                return EstforConstants.ACTIONCHOICE_RANGED_ITHRITH_KIEL_POISON
+            } else if (arrow === EstforConstants.BRIMSTONE) {
+                return EstforConstants.ACTIONCHOICE_RANGED_ITHRITH_KIEL_FIRE
+            } else if (arrow === EstforConstants.FOOLS_BERRY_EXTRACT) {
+                return EstforConstants.ACTIONCHOICE_RANGED_ITHRITH_KIEL_FOOLS_BERRY_EXTRACT
+            } else if (arrow === EstforConstants.LUMELILA_TOXIN) {
+                return EstforConstants.ACTIONCHOICE_RANGED_ITHRITH_KIEL_LUMELILA_TOXIN
+            } else {
+                return EstforConstants.ACTIONCHOICE_RANGED_ITHRITH_KIEL
+            }
+        case EstforConstants.CROSSBOW_004_ADAMANTINE:
+            if (arrow === EstforConstants.POISON) {
+                return EstforConstants.ACTIONCHOICE_RANGED_ADAMA_KIEL_POISON
+            } else if (arrow === EstforConstants.BRIMSTONE) {
+                return EstforConstants.ACTIONCHOICE_RANGED_ADAMA_KIEL_FIRE
+            } else if (arrow === EstforConstants.FOOLS_BERRY_EXTRACT) {
+                return EstforConstants.ACTIONCHOICE_RANGED_ADAMA_KIEL_FOOLS_BERRY_EXTRACT
+            } else if (arrow === EstforConstants.LUMELILA_TOXIN) {
+                return EstforConstants.ACTIONCHOICE_RANGED_ADAMA_KIEL_LUMELILA_TOXIN
+            } else {
+                return EstforConstants.ACTIONCHOICE_RANGED_ADAMA_KIEL
+            }
+        case EstforConstants.CROSSBOW_005_RUNITE:
+            if (arrow === EstforConstants.POISON) {
+                return EstforConstants.ACTIONCHOICE_RANGED_RHUN_KIEL_POISON
+            } else if (arrow === EstforConstants.BRIMSTONE) {
+                return EstforConstants.ACTIONCHOICE_RANGED_RHUN_KIEL_FIRE
+            } else if (arrow === EstforConstants.FOOLS_BERRY_EXTRACT) {
+                return EstforConstants.ACTIONCHOICE_RANGED_RHUN_KIEL_FOOLS_BERRY_EXTRACT
+            } else if (arrow === EstforConstants.LUMELILA_TOXIN) {
+                return EstforConstants.ACTIONCHOICE_RANGED_RHUN_KIEL_LUMELILA_TOXIN
+            } else {
+                return EstforConstants.ACTIONCHOICE_RANGED_RHUN_KIEL
+            }
+        case EstforConstants.CROSSBOW_006_TITANIUM:
+            if (arrow === EstforConstants.POISON) {
+                return EstforConstants.ACTIONCHOICE_RANGED_VINGET_KIEL_POISON
+            } else if (arrow === EstforConstants.BRIMSTONE) {
+                return EstforConstants.ACTIONCHOICE_RANGED_VINGET_KIEL_FIRE
+            } else if (arrow === EstforConstants.FOOLS_BERRY_EXTRACT) {
+                return EstforConstants.ACTIONCHOICE_RANGED_VINGET_KIEL_FOOLS_BERRY_EXTRACT
+            } else if (arrow === EstforConstants.LUMELILA_TOXIN) {
+                return EstforConstants.ACTIONCHOICE_RANGED_VINGET_KIEL_LUMELILA_TOXIN
+            } else {
+                return EstforConstants.ACTIONCHOICE_RANGED_VINGET_KIEL
+            }
+        case EstforConstants.CROSSBOW_007_ORICHALCUM:
+        case EstforConstants.CROSSBOW_007_ORICHALCUM_1:
+        case EstforConstants.CROSSBOW_007_ORICHALCUM_2:
+        case EstforConstants.CROSSBOW_007_ORICHALCUM_3:
+        case EstforConstants.CROSSBOW_007_ORICHALCUM_4:
+        case EstforConstants.CROSSBOW_007_ORICHALCUM_5:
+            if (arrow === EstforConstants.POISON) {
+                return EstforConstants.ACTIONCHOICE_RANGED_DEUION_KIEL_POISON
+            } else if (arrow === EstforConstants.BRIMSTONE) {
+                return EstforConstants.ACTIONCHOICE_RANGED_DEUION_KIEL_FIRE
+            } else if (arrow === EstforConstants.FOOLS_BERRY_EXTRACT) {
+                return EstforConstants.ACTIONCHOICE_RANGED_DEUION_KIEL_FOOLS_BERRY_EXTRACT
+            } else if (arrow === EstforConstants.LUMELILA_TOXIN) {
+                return EstforConstants.ACTIONCHOICE_RANGED_DEUION_KIEL_LUMELILA_TOXIN
+            } else {
+                return EstforConstants.ACTIONCHOICE_RANGED_DEUION_KIEL
             }
         default:
             if (arrow === EstforConstants.POISON) {
                 return EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW_POISON
             } else if (arrow === EstforConstants.BRIMSTONE) {
                 return EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW_FIRE
+            } else if (arrow === EstforConstants.FOOLS_BERRY_EXTRACT) {
+                return EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW_FOOLS_BERRY_EXTRACT
+            } else if (arrow === EstforConstants.LUMELILA_TOXIN) {
+                return EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW_LUMELILA_TOXIN
             } else {
-                return EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW            
+                return EstforConstants.ACTIONCHOICE_RANGED_GODLY_BOW
             }
-        }
+    }
 }
 
 export const petEnhancementTypeToName = {
@@ -516,42 +279,151 @@ export const petEnhancementTypeToName = {
     [PetEnhancementType.RANGED_AND_DEFENCE]: "Ranged and Defence",
 }
 
-const getMagicBag = (state: ItemState, magicXp: number) => {
+export const getItemName = (tokenId: number): string => {
+    return allItems.find((x) => x.tokenId === tokenId)?.name || ""
+}
+
+const getMagicBag = (state: ItemState, magicXp: number, rightHand: number) => {
     return state.magicActionChoices
-                .filter((x) => x.minXPs.every((y) => y <= magicXp))
-                .map((x, i) => ({
-                    ...x,
-                    tokenId: x.skillDiff,
-                    name: magicSpellNames[i]
-                        .split(" ")
-                        .map(
-                            (w) =>
-                                w[0].toUpperCase() +
-                                w.substring(1).toLowerCase()
-                        )
-                        .join(" "),
-                }))
+        .map((x, i) => ({
+            ...x,
+            tokenId:
+                x.skillDiffs[x.skills.findIndex((d) => d === Skill.MAGIC)] || 0,
+            name: magicSpellNames[i]
+                .split(" ")
+                .map((w) => w[0].toUpperCase() + w.substring(1).toLowerCase())
+                .join(" "),
+            equipPosition: EquipPosition.MAGIC_BAG,
+            combatStats: {
+                magicAttack:
+                    x.skillDiffs[
+                        x.skills.findIndex((d) => d === Skill.MAGIC)
+                    ] || 0,
+            },
+        }))
+        .filter((x) => x.skillMinXPs.every((y) => y <= magicXp))
+        .filter((x) => x.isAvailable)
+        .filter((x) =>
+            rightHand === 0
+                ? true
+                : x.handItemTokenIdRangeMin <= rightHand &&
+                  x.handItemTokenIdRangeMax >= rightHand
+        )
 }
 
-const getQuiverOptions = (state: ItemState, rangedXp: number, fletchingXp : number) => {
+const getQuiverOptions = (
+    state: ItemState,
+    rangedXp: number,
+    fletchingXp: number
+) => {
     return state.rangedActionChoices
-                .filter((x) => x.minXPs.every((y, i) => i === 0 ? y <= rangedXp : y <= fletchingXp))
-                .map((x) => ({
-                    ...x,
-                    tokenId: x.inputTokenIds.indexOf(EstforConstants.BRIMSTONE) !== -1 ? EstforConstants.BRIMSTONE : x.inputTokenIds.indexOf(EstforConstants.POISON) !== -1 ? EstforConstants.POISON : x.inputTokenIds[0],
-                    name: (x.inputTokenIds.indexOf(EstforConstants.BRIMSTONE) !== -1 ? "Fire " : x.inputTokenIds.indexOf(EstforConstants.POISON) !== -1 ? "Poison " : "") + itemNames[x.inputTokenIds[0]],
-                }))
+        .filter((x) =>
+            x.skillMinXPs.every((y, i) =>
+                i === 0 ? y <= rangedXp : y <= fletchingXp
+            )
+        )
+        .filter((x) => x.isAvailable)
+        .map((x) => ({
+            ...x,
+            tokenId:
+                x.inputTokenIds.indexOf(EstforConstants.BRIMSTONE) !== -1
+                    ? EstforConstants.BRIMSTONE
+                    : x.inputTokenIds.indexOf(EstforConstants.POISON) !== -1
+                      ? EstforConstants.POISON
+                      : x.inputTokenIds.indexOf(
+                              EstforConstants.FOOLS_BERRY_EXTRACT
+                          ) !== -1
+                        ? EstforConstants.FOOLS_BERRY_EXTRACT
+                        : x.inputTokenIds.indexOf(
+                                EstforConstants.LUMELILA_TOXIN
+                            ) !== -1
+                          ? EstforConstants.LUMELILA_TOXIN
+                          : x.inputTokenIds[0],
+            name:
+                (x.inputTokenIds.indexOf(EstforConstants.BRIMSTONE) !== -1
+                    ? "Fire "
+                    : x.inputTokenIds.indexOf(EstforConstants.POISON) !== -1
+                      ? "Poison "
+                      : x.inputTokenIds.indexOf(
+                              EstforConstants.FOOLS_BERRY_EXTRACT
+                          ) !== -1
+                        ? "Fools Berry Extract "
+                        : x.inputTokenIds.indexOf(
+                                EstforConstants.LUMELILA_TOXIN
+                            ) !== -1
+                          ? "Lumelila Toxin "
+                          : "") + getItemName(x.inputTokenIds[0]),
+        }))
 }
 
-const getQuiverOptionsForRightHand = (state: ItemState, rangedXp: number, fletchingXp : number, rightHand: number) => {
+const getQuiverOptionsForRightHand = (
+    state: ItemState,
+    rangedXp: number,
+    fletchingXp: number,
+    rightHand: number
+) => {
     return state.rangedActionChoices
-                .filter((x) => x.minXPs.every((y, i) => i === 0 ? y <= rangedXp : y <= fletchingXp))
-                .filter((x) => x.handItemTokenIdRangeMin >= rightHand && x.handItemTokenIdRangeMax <= rightHand)
-                .map((x) => ({
-                    ...x,
-                    tokenId: x.inputTokenIds.indexOf(EstforConstants.BRIMSTONE) !== -1 ? EstforConstants.BRIMSTONE : x.inputTokenIds.indexOf(EstforConstants.POISON) !== -1 ? EstforConstants.POISON : x.inputTokenIds[0],
-                    name: (x.inputTokenIds.indexOf(EstforConstants.BRIMSTONE) !== -1 ? "Fire " : x.inputTokenIds.indexOf(EstforConstants.POISON) !== -1 ? "Poison " : "") + itemNames[x.inputTokenIds[0]],
-                }))
+        .filter((x) =>
+            x.skillMinXPs.every((y, i) =>
+                i === 0 ? y <= rangedXp : y <= fletchingXp
+            )
+        )
+        .filter((x) => x.isAvailable)
+        .filter(
+            (x) =>
+                x.handItemTokenIdRangeMin <= rightHand &&
+                x.handItemTokenIdRangeMax >= rightHand
+        )
+        .map((x) => ({
+            ...x,
+            tokenId:
+                x.inputTokenIds.indexOf(EstforConstants.BRIMSTONE) !== -1
+                    ? EstforConstants.BRIMSTONE
+                    : x.inputTokenIds.indexOf(EstforConstants.POISON) !== -1
+                      ? EstforConstants.POISON
+                      : x.inputTokenIds.indexOf(
+                              EstforConstants.FOOLS_BERRY_EXTRACT
+                          ) !== -1
+                        ? EstforConstants.FOOLS_BERRY_EXTRACT
+                        : x.inputTokenIds.indexOf(
+                                EstforConstants.LUMELILA_TOXIN
+                            ) !== -1
+                          ? EstforConstants.LUMELILA_TOXIN
+                          : x.inputTokenIds[0],
+            name:
+                (x.inputTokenIds.indexOf(EstforConstants.BRIMSTONE) !== -1
+                    ? "Fire "
+                    : x.inputTokenIds.indexOf(EstforConstants.POISON) !== -1
+                      ? "Poison "
+                      : x.inputTokenIds.indexOf(
+                              EstforConstants.FOOLS_BERRY_EXTRACT
+                          ) !== -1
+                        ? "Fools Berry Extract "
+                        : x.inputTokenIds.indexOf(
+                                EstforConstants.LUMELILA_TOXIN
+                            ) !== -1
+                          ? "Lumelila Toxin "
+                          : "") + getItemName(x.inputTokenIds[0]),
+            equipPosition: EquipPosition.QUIVER,
+            combatStats: {
+                rangedAttack:
+                    x.skillDiffs[
+                        x.skills.findIndex((d) => d === Skill.RANGED)
+                    ] || 0,
+            },
+        }))
+}
+
+const hasCombatStats = (item: ItemInput) => {
+    return (
+        item.combatStats.meleeAttack > 0 ||
+        item.combatStats.magicAttack > 0 ||
+        item.combatStats.rangedAttack > 0 ||
+        item.combatStats.meleeDefence > 0 ||
+        item.combatStats.magicDefence > 0 ||
+        item.combatStats.rangedDefence > 0 ||
+        item.combatStats.health > 0
+    )
 }
 
 export interface ItemState {
@@ -592,7 +464,9 @@ export const useItemStore = defineStore({
                 const pets = [...coreStore.pets]
 
                 if (!ownedOnly) {
-                    for (const p of allBasePets.filter(x => x.skin === PetSkin.DEFAULT)) {
+                    for (const p of allBasePets.filter(
+                        (x) => x.skin === PetSkin.DEFAULT
+                    )) {
                         let i = 0
                         let hasLevel = true
                         for (const m of p.skillMinLevels) {
@@ -632,7 +506,7 @@ export const useItemStore = defineStore({
                                 tier: p.tier,
                                 enhancementType: p.enhancementType,
                                 skillEnhancements: p.skillEnhancements,
-                            } as BasePet
+                            } as BasePet,
                         } as Pet)
                         pets.push({
                             // @ts-ignore
@@ -644,7 +518,7 @@ export const useItemStore = defineStore({
                                 tier: p.tier,
                                 enhancementType: p.enhancementType,
                                 skillEnhancements: p.skillEnhancements,
-                            } as BasePet
+                            } as BasePet,
                         } as Pet)
                     }
                 }
@@ -656,44 +530,63 @@ export const useItemStore = defineStore({
                 const coreStore = useCoreStore()
                 const playerState = coreStore.playerState
 
-                return state.items.filter(
-                    (x) =>
-                        x.equipPosition === position &&
-                        ((x.skill == Skill.DEFENCE &&
-                            x.minXP <= playerState.defenceXP) ||
-                            (x.skill == Skill.MELEE &&
-                                x.minXP <= playerState.meleeXP) ||
-                            (x.skill == Skill.RANGED &&
-                                x.minXP <= playerState.rangedXP) ||
-                            (x.skill == Skill.MAGIC &&
-                                x.minXP <= playerState.magicXP) ||
-                            (x.skill == Skill.NONE &&
-                                (playerState.isFullMode
-                                    ? true
-                                    : !x.isFullModeOnly)))
-                )
+                return state.items
+                    .filter(
+                        (x) =>
+                            x.equipPosition === position &&
+                            ((x.skill == Skill.DEFENCE &&
+                                x.minXP <= playerState.defenceXP) ||
+                                (x.skill == Skill.MELEE &&
+                                    x.minXP <= playerState.meleeXP) ||
+                                (x.skill == Skill.RANGED &&
+                                    x.minXP <= playerState.rangedXP) ||
+                                (x.skill == Skill.MAGIC &&
+                                    x.minXP <= playerState.magicXP) ||
+                                (x.skill == Skill.NONE &&
+                                    (hasCombatStats(x) ||
+                                        position === EquipPosition.FOOD) &&
+                                    (playerState.isFullMode
+                                        ? true
+                                        : !x.isFullModeOnly)))
+                    )
+                    .filter((x) => x.isAvailable)
             }
         },
         getItemsForSlotAndHeroes: (state: ItemState) => {
             return (position: EquipPosition, heroes: ProxySilo[]) => {
-
                 let minDefenceXp = 0
                 let minMeleeXp = 0
                 let minRangedXp = 0
                 let minMagicXp = 0
                 let minFullMode = true
                 for (const h of heroes) {
-                    const { defenceXP, meleeXP, magicXP, rangedXP } = calculateExtraXPForHeroActionInput(h, Skill.COMBAT)
-                    if (Number(h.playerState.defenceXP) + defenceXP < minDefenceXp || minDefenceXp === 0) {
-                        minDefenceXp = Number(h.playerState.defenceXP) + defenceXP
+                    const { defenceXP, meleeXP, magicXP, rangedXP } =
+                        calculateExtraXPForHeroActionInput(h, Skill.COMBAT)
+                    if (
+                        Number(h.playerState.defenceXP) + defenceXP <
+                            minDefenceXp ||
+                        minDefenceXp === 0
+                    ) {
+                        minDefenceXp =
+                            Number(h.playerState.defenceXP) + defenceXP
                     }
-                    if (Number(h.playerState.meleeXP) + meleeXP < minMeleeXp || minMeleeXp === 0) {
+                    if (
+                        Number(h.playerState.meleeXP) + meleeXP < minMeleeXp ||
+                        minMeleeXp === 0
+                    ) {
                         minMeleeXp = Number(h.playerState.meleeXP) + meleeXP
                     }
-                    if (Number(h.playerState.rangedXP) + rangedXP < minRangedXp || minRangedXp === 0) {
+                    if (
+                        Number(h.playerState.rangedXP) + rangedXP <
+                            minRangedXp ||
+                        minRangedXp === 0
+                    ) {
                         minRangedXp = Number(h.playerState.rangedXP) + rangedXP
                     }
-                    if (Number(h.playerState.magicXP) + magicXP < minMagicXp || minMagicXp === 0) {
+                    if (
+                        Number(h.playerState.magicXP) + magicXP < minMagicXp ||
+                        minMagicXp === 0
+                    ) {
                         minMagicXp = Number(h.playerState.magicXP) + magicXP
                     }
                     if (h.playerState.isFullMode === false) {
@@ -706,33 +599,42 @@ export const useItemStore = defineStore({
                         x.equipPosition === position &&
                         ((x.skill == Skill.DEFENCE &&
                             x.minXP <= minDefenceXp) ||
-                            (x.skill == Skill.MELEE &&
-                                x.minXP <= minMeleeXp) ||
+                            (x.skill == Skill.MELEE && x.minXP <= minMeleeXp) ||
                             (x.skill == Skill.RANGED &&
                                 x.minXP <= minRangedXp) ||
-                            (x.skill == Skill.MAGIC &&
-                                x.minXP <= minMagicXp) ||
+                            (x.skill == Skill.MAGIC && x.minXP <= minMagicXp) ||
                             (x.skill == Skill.NONE &&
-                                (minFullMode
-                                    ? true
-                                    : !x.isFullModeOnly)))
+                                (minFullMode ? true : !x.isFullModeOnly)))
                 )
             }
         },
         getRangedActionChoicesForHeroes(state: ItemState) {
             return (heroes: ProxySilo[]) => {
-                
                 let minRangedXp = 0
                 let minFletchingXp = 0
 
                 for (const h of heroes) {
-                    const { rangedXP } = calculateExtraXPForHeroActionInput(h, Skill.COMBAT)
-                    if (Number(h.playerState.rangedXP) + rangedXP > minRangedXp) {
+                    const { rangedXP } = calculateExtraXPForHeroActionInput(
+                        h,
+                        Skill.COMBAT
+                    )
+                    if (
+                        Number(h.playerState.rangedXP) + rangedXP >
+                        minRangedXp
+                    ) {
                         minRangedXp = Number(h.playerState.rangedXP) + rangedXP
                     }
-                    const fletchingXP = calculateExtraXPForHeroActionChoiceInput(h, Skill.FLETCHING)
-                    if (Number(h.playerState.fletchingXP) + fletchingXP > minFletchingXp) {
-                        minFletchingXp = Number(h.playerState.fletchingXP) + fletchingXP
+                    const fletchingXP =
+                        calculateExtraXPForHeroActionChoiceInput(
+                            h,
+                            Skill.FLETCHING
+                        )
+                    if (
+                        Number(h.playerState.fletchingXP) + fletchingXP >
+                        minFletchingXp
+                    ) {
+                        minFletchingXp =
+                            Number(h.playerState.fletchingXP) + fletchingXP
                     }
                 }
 
@@ -741,31 +643,44 @@ export const useItemStore = defineStore({
         },
         getMagicActionChoicesForHeroes(state: ItemState) {
             return (heroes: ProxySilo[]) => {
-
                 let minMagicXp = 0
                 for (const h of heroes) {
-                    const { magicXP } = calculateExtraXPForHeroActionInput(h, Skill.COMBAT)
+                    const { magicXP } = calculateExtraXPForHeroActionInput(
+                        h,
+                        Skill.COMBAT
+                    )
                     if (Number(h.playerState.magicXP) + magicXP > minMagicXp) {
                         minMagicXp = Number(h.playerState.magicXP) + magicXP
                     }
                 }
 
-                return getMagicBag(state, minMagicXp)
+                return getMagicBag(state, minMagicXp, 0)
             }
         },
         getMagicActionChoicesForXP(state: ItemState) {
-            const coreStore = useCoreStore()
-            const playerState = coreStore.playerState
+            return (rightHand: number) => {
+                const coreStore = useCoreStore()
+                const playerState = coreStore.playerState
 
-            return getMagicBag(state, Number(playerState.magicXP))
-        },        
+                return getMagicBag(
+                    state,
+                    Number(playerState.magicXP),
+                    rightHand
+                )
+            }
+        },
         getRangedActionChoicesForXP(state: ItemState) {
             const coreStore = useCoreStore()
             const playerState = coreStore.playerState
 
-            return getQuiverOptionsForRightHand(state, Number(playerState.rangedXP), Number(playerState.fletchingXP), state.equippedItems.find(
-                (x) => x.playerId === Number(playerState.id)
-            )?.rightHand || 0)
+            return getQuiverOptionsForRightHand(
+                state,
+                Number(playerState.rangedXP),
+                Number(playerState.fletchingXP),
+                state.equippedItems.find(
+                    (x) => x.playerId === Number(playerState.id)
+                )?.rightHand || 0
+            )
         },
         getAggregatedCombatStats(state: ItemState) {
             const coreStore = useCoreStore()
@@ -777,15 +692,20 @@ export const useItemStore = defineStore({
                     (x) => x.playerId === Number(playerState.id)
                 ) as any) || {}
             Object.keys(localEquippedItems).forEach((key) => {
-                if (key !== "magicBag" && key !== "playerId" && key !== "pet" && key !== "quiver") {
+                if (
+                    key !== "magicBag" &&
+                    key !== "playerId" &&
+                    key !== "pet" &&
+                    key !== "quiver"
+                ) {
                     // skip magic bag as they require special calculations
                     const item = state.items.find(
                         (x) => x.tokenId === localEquippedItems[key]
                     )
                     if (item) {
-                        stats.melee += item.combatStats.melee
-                        stats.magic += item.combatStats.magic
-                        stats.ranged += item.combatStats.ranged
+                        stats.meleeAttack += item.combatStats.meleeAttack
+                        stats.magicAttack += item.combatStats.magicAttack
+                        stats.rangedAttack += item.combatStats.rangedAttack
                         stats.meleeDefence += item.combatStats.meleeDefence
                         stats.magicDefence += item.combatStats.magicDefence
                         stats.rangedDefence += item.combatStats.rangedDefence
@@ -795,49 +715,207 @@ export const useItemStore = defineStore({
             })
 
             if (localEquippedItems.magicBag) {
-                stats.magic += localEquippedItems.magicBag
-            }            
+                stats.magicAttack += localEquippedItems.magicBag
+            }
             if (localEquippedItems.quiver) {
-                stats.ranged += allActionChoicesRanged[allActionChoiceIdsRanged.findIndex(x => x === rangedItemToActionChoice(Number(localEquippedItems.rightHand), Number(localEquippedItems.quiver)))]?.skillDiff || 0
+                stats.rangedAttack +=
+                    allActionChoicesRanged[
+                        allActionChoiceIdsRanged.findIndex(
+                            (x) =>
+                                x ===
+                                rangedItemToActionChoice(
+                                    Number(localEquippedItems.rightHand),
+                                    Number(localEquippedItems.quiver)
+                                )
+                        )
+                    ]?.skillDiffs[0] || 0
             }
 
             if (localEquippedItems.pet) {
                 switch (localEquippedItems.pet.basePet.enhancementType) {
                     case PetEnhancementType.DEFENCE:
-                        stats.meleeDefence += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
-                        stats.magicDefence += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
-                        stats.rangedDefence += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
+                        stats.meleeDefence +=
+                            localEquippedItems.pet.skillFixedEnhancements[0] +
+                            Math.floor(
+                                getLevel(playerState.defenceXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[0] /
+                                        100)
+                            )
+                        stats.magicDefence +=
+                            localEquippedItems.pet.skillFixedEnhancements[0] +
+                            Math.floor(
+                                getLevel(playerState.defenceXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[0] /
+                                        100)
+                            )
+                        stats.rangedDefence +=
+                            localEquippedItems.pet.skillFixedEnhancements[0] +
+                            Math.floor(
+                                getLevel(playerState.defenceXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[0] /
+                                        100)
+                            )
                         break
                     case PetEnhancementType.MELEE:
-                        stats.melee += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.meleeXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
+                        stats.meleeAttack +=
+                            localEquippedItems.pet.skillFixedEnhancements[0] +
+                            Math.floor(
+                                getLevel(playerState.meleeXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[0] /
+                                        100)
+                            )
                         break
                     case PetEnhancementType.RANGED:
-                        stats.ranged += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.rangedXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
+                        stats.rangedAttack +=
+                            localEquippedItems.pet.skillFixedEnhancements[0] +
+                            Math.floor(
+                                getLevel(playerState.rangedXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[0] /
+                                        100)
+                            )
                         break
                     case PetEnhancementType.MAGIC:
-                        stats.magic += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.magicXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
+                        stats.magicAttack +=
+                            localEquippedItems.pet.skillFixedEnhancements[0] +
+                            Math.floor(
+                                getLevel(playerState.magicXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[0] /
+                                        100)
+                            )
                         break
                     case PetEnhancementType.HEALTH:
-                        stats.health += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.healthXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
+                        stats.health +=
+                            localEquippedItems.pet.skillFixedEnhancements[0] +
+                            Math.floor(
+                                getLevel(playerState.healthXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[0] /
+                                        100)
+                            )
                         break
                     case PetEnhancementType.MAGIC_AND_DEFENCE:
-                        stats.magic += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.magicXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
-                        stats.meleeDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
-                        stats.magicDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
-                        stats.rangedDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
+                        stats.magicAttack +=
+                            localEquippedItems.pet.skillFixedEnhancements[0] +
+                            Math.floor(
+                                getLevel(playerState.magicXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[0] /
+                                        100)
+                            )
+                        stats.meleeDefence +=
+                            localEquippedItems.pet.skillFixedEnhancements[1] +
+                            Math.floor(
+                                getLevel(playerState.defenceXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[1] /
+                                        100)
+                            )
+                        stats.magicDefence +=
+                            localEquippedItems.pet.skillFixedEnhancements[1] +
+                            Math.floor(
+                                getLevel(playerState.defenceXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[1] /
+                                        100)
+                            )
+                        stats.rangedDefence +=
+                            localEquippedItems.pet.skillFixedEnhancements[1] +
+                            Math.floor(
+                                getLevel(playerState.defenceXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[1] /
+                                        100)
+                            )
                         break
                     case PetEnhancementType.MELEE_AND_DEFENCE:
-                        stats.melee += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.meleeXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
-                        stats.meleeDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
-                        stats.magicDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
-                        stats.rangedDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
+                        stats.meleeAttack +=
+                            localEquippedItems.pet.skillFixedEnhancements[0] +
+                            Math.floor(
+                                getLevel(playerState.meleeXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[0] /
+                                        100)
+                            )
+                        stats.meleeDefence +=
+                            localEquippedItems.pet.skillFixedEnhancements[1] +
+                            Math.floor(
+                                getLevel(playerState.defenceXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[1] /
+                                        100)
+                            )
+                        stats.magicDefence +=
+                            localEquippedItems.pet.skillFixedEnhancements[1] +
+                            Math.floor(
+                                getLevel(playerState.defenceXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[1] /
+                                        100)
+                            )
+                        stats.rangedDefence +=
+                            localEquippedItems.pet.skillFixedEnhancements[1] +
+                            Math.floor(
+                                getLevel(playerState.defenceXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[1] /
+                                        100)
+                            )
                         break
                     case PetEnhancementType.RANGED_AND_DEFENCE:
-                        stats.ranged += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.rangedXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
-                        stats.meleeDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
-                        stats.magicDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
-                        stats.rangedDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
+                        stats.rangedAttack +=
+                            localEquippedItems.pet.skillFixedEnhancements[0] +
+                            Math.floor(
+                                getLevel(playerState.rangedXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[0] /
+                                        100)
+                            )
+                        stats.meleeDefence +=
+                            localEquippedItems.pet.skillFixedEnhancements[1] +
+                            Math.floor(
+                                getLevel(playerState.defenceXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[1] /
+                                        100)
+                            )
+                        stats.magicDefence +=
+                            localEquippedItems.pet.skillFixedEnhancements[1] +
+                            Math.floor(
+                                getLevel(playerState.defenceXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[1] /
+                                        100)
+                            )
+                        stats.rangedDefence +=
+                            localEquippedItems.pet.skillFixedEnhancements[1] +
+                            Math.floor(
+                                getLevel(playerState.defenceXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[1] /
+                                        100)
+                            )
                         break
+                }
+            }
+
+            if (coreStore.individualBoost && coreStore.applyBoost) {
+                const vial = state.items.find(
+                    (x) => x.tokenId === coreStore.individualBoost
+                )
+                if (vial) {
+                    stats.meleeAttack += vial.combatStats.meleeAttack
+                    stats.magicAttack += vial.combatStats.magicAttack
+                    stats.rangedAttack += vial.combatStats.rangedAttack
+                    stats.meleeDefence += vial.combatStats.meleeDefence
+                    stats.magicDefence += vial.combatStats.magicDefence
+                    stats.rangedDefence += vial.combatStats.rangedDefence
+                    stats.health += vial.combatStats.health
                 }
             }
 
@@ -846,6 +924,7 @@ export const useItemStore = defineStore({
         getTotalCombatStats(state: ItemState) {
             const coreStore = useCoreStore()
             const playerState = coreStore.playerState
+            coreStore.individualBoost
 
             const stats = new CombatStats()
             const localEquippedItems =
@@ -853,15 +932,20 @@ export const useItemStore = defineStore({
                     (x) => x.playerId === Number(playerState.id)
                 ) as any) || {}
             Object.keys(localEquippedItems).forEach((key) => {
-                if (key !== "magicBag" && key !== "playerId" && key !== "pet" && key !== "quiver") {
+                if (
+                    key !== "magicBag" &&
+                    key !== "playerId" &&
+                    key !== "pet" &&
+                    key !== "quiver"
+                ) {
                     // skip magic bag as they require special calculations
                     const item = state.items.find(
                         (x) => x.tokenId === localEquippedItems[key]
                     )
                     if (item) {
-                        stats.melee += item.combatStats.melee
-                        stats.magic += item.combatStats.magic
-                        stats.ranged += item.combatStats.ranged
+                        stats.meleeAttack += item.combatStats.meleeAttack
+                        stats.magicAttack += item.combatStats.magicAttack
+                        stats.rangedAttack += item.combatStats.rangedAttack
                         stats.meleeDefence += item.combatStats.meleeDefence
                         stats.magicDefence += item.combatStats.magicDefence
                         stats.rangedDefence += item.combatStats.rangedDefence
@@ -871,59 +955,217 @@ export const useItemStore = defineStore({
             })
 
             if (localEquippedItems.magicBag) {
-                stats.magic += localEquippedItems.magicBag
+                stats.magicAttack += localEquippedItems.magicBag
             }
             if (localEquippedItems.quiver) {
-                stats.ranged += allActionChoicesRanged[allActionChoiceIdsRanged.findIndex(x => x === rangedItemToActionChoice(Number(localEquippedItems.rightHand), Number(localEquippedItems.quiver)))]?.skillDiff || 0
+                stats.rangedAttack +=
+                    allActionChoicesRanged[
+                        allActionChoiceIdsRanged.findIndex(
+                            (x) =>
+                                x ===
+                                rangedItemToActionChoice(
+                                    Number(localEquippedItems.rightHand),
+                                    Number(localEquippedItems.quiver)
+                                )
+                        )
+                    ]?.skillDiffs[0] || 0
             }
 
             if (localEquippedItems.pet) {
                 switch (localEquippedItems.pet.basePet.enhancementType) {
                     case PetEnhancementType.DEFENCE:
-                        stats.meleeDefence += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
-                        stats.magicDefence += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
-                        stats.rangedDefence += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
+                        stats.meleeDefence +=
+                            localEquippedItems.pet.skillFixedEnhancements[0] +
+                            Math.floor(
+                                getLevel(playerState.defenceXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[0] /
+                                        100)
+                            )
+                        stats.magicDefence +=
+                            localEquippedItems.pet.skillFixedEnhancements[0] +
+                            Math.floor(
+                                getLevel(playerState.defenceXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[0] /
+                                        100)
+                            )
+                        stats.rangedDefence +=
+                            localEquippedItems.pet.skillFixedEnhancements[0] +
+                            Math.floor(
+                                getLevel(playerState.defenceXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[0] /
+                                        100)
+                            )
                         break
                     case PetEnhancementType.MELEE:
-                        stats.melee += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.meleeXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
+                        stats.meleeAttack +=
+                            localEquippedItems.pet.skillFixedEnhancements[0] +
+                            Math.floor(
+                                getLevel(playerState.meleeXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[0] /
+                                        100)
+                            )
                         break
                     case PetEnhancementType.RANGED:
-                        stats.ranged += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.rangedXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
+                        stats.rangedAttack +=
+                            localEquippedItems.pet.skillFixedEnhancements[0] +
+                            Math.floor(
+                                getLevel(playerState.rangedXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[0] /
+                                        100)
+                            )
                         break
                     case PetEnhancementType.MAGIC:
-                        stats.magic += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.magicXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
+                        stats.magicAttack +=
+                            localEquippedItems.pet.skillFixedEnhancements[0] +
+                            Math.floor(
+                                getLevel(playerState.magicXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[0] /
+                                        100)
+                            )
                         break
                     case PetEnhancementType.HEALTH:
-                        stats.health += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.healthXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
+                        stats.health +=
+                            localEquippedItems.pet.skillFixedEnhancements[0] +
+                            Math.floor(
+                                getLevel(playerState.healthXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[0] /
+                                        100)
+                            )
                         break
                     case PetEnhancementType.MAGIC_AND_DEFENCE:
-                        stats.magic += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.magicXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
-                        stats.meleeDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
-                        stats.magicDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
-                        stats.rangedDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
+                        stats.magicAttack +=
+                            localEquippedItems.pet.skillFixedEnhancements[0] +
+                            Math.floor(
+                                getLevel(playerState.magicXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[0] /
+                                        100)
+                            )
+                        stats.meleeDefence +=
+                            localEquippedItems.pet.skillFixedEnhancements[1] +
+                            Math.floor(
+                                getLevel(playerState.defenceXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[1] /
+                                        100)
+                            )
+                        stats.magicDefence +=
+                            localEquippedItems.pet.skillFixedEnhancements[1] +
+                            Math.floor(
+                                getLevel(playerState.defenceXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[1] /
+                                        100)
+                            )
+                        stats.rangedDefence +=
+                            localEquippedItems.pet.skillFixedEnhancements[1] +
+                            Math.floor(
+                                getLevel(playerState.defenceXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[1] /
+                                        100)
+                            )
                         break
                     case PetEnhancementType.MELEE_AND_DEFENCE:
-                        stats.melee += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.meleeXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
-                        stats.meleeDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
-                        stats.magicDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
-                        stats.rangedDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
+                        stats.meleeAttack +=
+                            localEquippedItems.pet.skillFixedEnhancements[0] +
+                            Math.floor(
+                                getLevel(playerState.meleeXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[0] /
+                                        100)
+                            )
+                        stats.meleeDefence +=
+                            localEquippedItems.pet.skillFixedEnhancements[1] +
+                            Math.floor(
+                                getLevel(playerState.defenceXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[1] /
+                                        100)
+                            )
+                        stats.magicDefence +=
+                            localEquippedItems.pet.skillFixedEnhancements[1] +
+                            Math.floor(
+                                getLevel(playerState.defenceXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[1] /
+                                        100)
+                            )
+                        stats.rangedDefence +=
+                            localEquippedItems.pet.skillFixedEnhancements[1] +
+                            Math.floor(
+                                getLevel(playerState.defenceXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[1] /
+                                        100)
+                            )
                         break
                     case PetEnhancementType.RANGED_AND_DEFENCE:
-                        stats.ranged += localEquippedItems.pet.skillFixedEnhancements[0] + Math.floor((getLevel(playerState.rangedXP) * ((localEquippedItems.pet.skillPercentageEnhancements[0] / 100))))
-                        stats.meleeDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
-                        stats.magicDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
-                        stats.rangedDefence += localEquippedItems.pet.skillFixedEnhancements[1] + Math.floor((getLevel(playerState.defenceXP) * ((localEquippedItems.pet.skillPercentageEnhancements[1] / 100))))
+                        stats.rangedAttack +=
+                            localEquippedItems.pet.skillFixedEnhancements[0] +
+                            Math.floor(
+                                getLevel(playerState.rangedXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[0] /
+                                        100)
+                            )
+                        stats.meleeDefence +=
+                            localEquippedItems.pet.skillFixedEnhancements[1] +
+                            Math.floor(
+                                getLevel(playerState.defenceXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[1] /
+                                        100)
+                            )
+                        stats.magicDefence +=
+                            localEquippedItems.pet.skillFixedEnhancements[1] +
+                            Math.floor(
+                                getLevel(playerState.defenceXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[1] /
+                                        100)
+                            )
+                        stats.rangedDefence +=
+                            localEquippedItems.pet.skillFixedEnhancements[1] +
+                            Math.floor(
+                                getLevel(playerState.defenceXP) *
+                                    (localEquippedItems.pet
+                                        .skillPercentageEnhancements[1] /
+                                        100)
+                            )
                         break
                 }
             }
 
-            stats.melee += getLevel(playerState.meleeXP)
-            stats.magic += getLevel(playerState.magicXP)
-            stats.ranged += getLevel(playerState.rangedXP)
+            stats.meleeAttack += getLevel(playerState.meleeXP)
+            stats.magicAttack += getLevel(playerState.magicXP)
+            stats.rangedAttack += getLevel(playerState.rangedXP)
             stats.meleeDefence += getLevel(playerState.defenceXP)
             stats.magicDefence += getLevel(playerState.defenceXP)
             stats.rangedDefence += getLevel(playerState.defenceXP)
             stats.health += getLevel(playerState.healthXP)
+
+            if (coreStore.individualBoost && coreStore.applyBoost) {
+                const vial = state.items.find(
+                    (x) => x.tokenId === coreStore.individualBoost
+                )
+                if (vial) {
+                    stats.meleeAttack += vial.combatStats.meleeAttack
+                    stats.magicAttack += vial.combatStats.magicAttack
+                    stats.rangedAttack += vial.combatStats.rangedAttack
+                    stats.meleeDefence += vial.combatStats.meleeDefence
+                    stats.magicDefence += vial.combatStats.magicDefence
+                    stats.rangedDefence += vial.combatStats.rangedDefence
+                    stats.health += vial.combatStats.health
+                }
+            }
 
             return stats
         },
@@ -932,34 +1174,55 @@ export const useItemStore = defineStore({
                 const stats = new CombatStats()
 
                 Object.keys(equippedItems).forEach((key) => {
-                    if (key !== "magicBag" && key !== "playerId" && key !== "pet" && key !== "quiver") {
+                    if (
+                        key !== "magicBag" &&
+                        key !== "playerId" &&
+                        key !== "pet" &&
+                        key !== "quiver"
+                    ) {
                         // skip magic bag as they require special calculations
                         const item = state.items.find(
                             // @ts-ignore
                             (x) => x.tokenId === Number(equippedItems[key])
                         )
                         if (item) {
-                            stats.melee += item.combatStats.melee
-                            stats.magic += item.combatStats.magic
-                            stats.ranged += item.combatStats.ranged
+                            stats.meleeAttack += item.combatStats.meleeAttack
+                            stats.magicAttack += item.combatStats.magicAttack
+                            stats.rangedAttack += item.combatStats.rangedAttack
                             stats.meleeDefence += item.combatStats.meleeDefence
                             stats.magicDefence += item.combatStats.magicDefence
-                            stats.rangedDefence += item.combatStats.rangedDefence
+                            stats.rangedDefence +=
+                                item.combatStats.rangedDefence
                             stats.health += item.combatStats.health
                         }
                     }
                 })
 
                 if (equippedItems.magicBag) {
-                    stats.magic += allActionChoicesMagic[allActionChoiceIdsMagic.findIndex(x => x === Number(equippedItems.magicBag))]?.skillDiff || 0
+                    stats.magicAttack +=
+                        allActionChoicesMagic[
+                            allActionChoiceIdsMagic.findIndex(
+                                (x) => x === Number(equippedItems.magicBag)
+                            )
+                        ]?.skillDiffs.find((d) => d.skill === Skill.MAGIC) || 0
                 }
                 if (equippedItems.quiver) {
-                    stats.ranged += allActionChoicesRanged[allActionChoiceIdsRanged.findIndex(x => x === rangedItemToActionChoice(Number(equippedItems.rightHand), Number(equippedItems.quiver)))]?.skillDiff || 0
+                    stats.rangedAttack +=
+                        allActionChoicesRanged[
+                            allActionChoiceIdsRanged.findIndex(
+                                (x) =>
+                                    x ===
+                                    rangedItemToActionChoice(
+                                        Number(equippedItems.rightHand),
+                                        Number(equippedItems.quiver)
+                                    )
+                            )
+                        ]?.skillDiffs.find((d) => d.skill === Skill.RANGED) || 0
                 }
- 
-                stats.melee += getLevel(hero.playerState.meleeXP)
-                stats.magic += getLevel(hero.playerState.magicXP)
-                stats.ranged += getLevel(hero.playerState.rangedXP)
+
+                stats.meleeAttack += getLevel(hero.playerState.meleeXP)
+                stats.magicAttack += getLevel(hero.playerState.magicXP)
+                stats.rangedAttack += getLevel(hero.playerState.rangedXP)
                 stats.meleeDefence += getLevel(hero.playerState.defenceXP)
                 stats.magicDefence += getLevel(hero.playerState.defenceXP)
                 stats.rangedDefence += getLevel(hero.playerState.defenceXP)

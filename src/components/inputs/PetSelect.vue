@@ -9,11 +9,7 @@
             {{ props.label }}
             <span v-if="props.emptyEquipment">(No Pet)</span>
         </option>
-        <option
-            v-for="(item, i) in props.items"
-            :key="i"
-            :value="item"
-        >
+        <option v-for="(item, i) in props.items" :key="i" :value="item">
             {{ item.name }}
         </option>
     </select>

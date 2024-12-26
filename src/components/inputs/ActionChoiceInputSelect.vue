@@ -20,11 +20,9 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import { actionChoiceNames, useSkillStore } from "../../store/skills"
-import {
-    calculateExtraXPForHeroActionChoiceInput,
-} from "../../store/factory"
+import { calculateExtraXPForHeroActionChoiceInput } from "../../store/factory"
 import { getLevel, skillToXPMap } from "../../store/core"
-import { ProxySilo } from "../../store/models/factory.models";
+import { ProxySilo } from "../../store/models/factory.models"
 
 const skillStore = useSkillStore()
 
@@ -74,8 +72,8 @@ const options = computed(() => {
         .filter((_, i) => {
             const action = skillStore.getActionChoicesForSkill(props.skillId)[i]
             return (
-                action.minXPs.length === 0 ||
-                action.minXPs[action.minSkills.indexOf(props.skillId)] <=
+                action.skillMinXPs.length === 0 ||
+                action.skillMinXPs[action.skills.indexOf(props.skillId)] <=
                     minHeroXPForSkill.value
             )
         })

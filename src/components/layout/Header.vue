@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue"
 import { getAccount } from "@wagmi/core"
-import { useItemStore, itemNames } from "../../store/items"
+import { useItemStore } from "../../store/items"
 import Donate from "../dialogs/Donate.vue"
 import RubyBroochPaywall from "../dialogs/RubyBroochPaywall.vue"
 import { useRoute } from "vue-router"
 import { useBroochStore } from "../../store/brooch"
 import { config } from "../../config"
+import { allItems } from "../../data/items"
 
 const itemStore = useItemStore()
 const broochStore = useBroochStore()
@@ -46,7 +47,7 @@ const showBrooch = (tokenId: number) => {
 }
 
 const allItemNames = computed(() => {
-    return Object.values(itemNames)
+    return Object.values(allItems).map((x) => x.name)
 })
 
 const removeFocus = () => {

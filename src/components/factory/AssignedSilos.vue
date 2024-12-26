@@ -5,10 +5,14 @@
         <div class="card-body">
             <h2 class="text-2xl font-bold text-center">Assigned Heroes</h2>
             <div class="flex items-center justify-between">
-                <button type="button" class="btn btn-primary btn-sm" @click="selectAllReady">
+                <button
+                    type="button"
+                    class="btn btn-primary btn-sm"
+                    @click="selectAllReady"
+                >
                     Select Only Ready
                 </button>
-            
+
                 <div class="flex items-center justify-end">
                     <div class="join items-center justify-end">
                         <svg
@@ -170,19 +174,41 @@
             </div>
             <div class="flex items-center">
                 <div class="dropdown dropdown-top">
-                    <div tabindex="0" role="button" class="btn btn-primary mt-5 me-2">Additional Actions</div>
-                    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 w-52 rounded-box shadow bg-base-100-50">
+                    <div
+                        tabindex="0"
+                        role="button"
+                        class="btn btn-primary mt-5 me-2"
+                    >
+                        Additional Actions
+                    </div>
+                    <ul
+                        tabindex="0"
+                        class="dropdown-content z-[1] menu p-2 w-52 rounded-box shadow bg-base-100-50"
+                    >
                         <li>
-                            <button type="button" class="btn btn-primary btn-sm mb-2" @click="assignHeroes"
-                        :disabled="executing || !selectedSilos.length">Reassign {{ selectedSilos.length }} Hero{{
-                        selectedSilos.length !== 1 ? "es" : ""
-                    }}</button>                   
+                            <button
+                                type="button"
+                                class="btn btn-primary btn-sm mb-2"
+                                @click="assignHeroes"
+                                :disabled="executing || !selectedSilos.length"
+                            >
+                                Reassign {{ selectedSilos.length }} Hero{{
+                                    selectedSilos.length !== 1 ? "es" : ""
+                                }}
+                            </button>
                         </li>
                         <li>
-                    <button type="button"  class="btn btn-primary btn-sm" @click="evolveHeroes"
-                    :disabled="executing || !selectedSilos.length">                    Evolve {{ selectedSilos.length }} Hero{{
-                        selectedSilos.length !== 1 ? "es" : ""
-                    }}</button></li>
+                            <button
+                                type="button"
+                                class="btn btn-primary btn-sm"
+                                @click="evolveHeroes"
+                                :disabled="executing || !selectedSilos.length"
+                            >
+                                Evolve {{ selectedSilos.length }} Hero{{
+                                    selectedSilos.length !== 1 ? "es" : ""
+                                }}
+                            </button>
+                        </li>
                     </ul>
                 </div>
 
@@ -199,13 +225,29 @@
             </div>
         </div>
     </div>
-    <AssignHero ref="assignHeroRef" id="reassign_hero_modal" />
-    <EvolveHero ref="evolveHeroRef" id="evolve_hero_modal" />
-    <ExecuteSiloActions ref="executeActionsRef" id="execute_actions_modal" />
+    <AssignHero
+        ref="assignHeroRef"
+        id="reassign_hero_modal"
+        :chainId="props.chainId"
+    />
+    <EvolveHero
+        ref="evolveHeroRef"
+        id="evolve_hero_modal"
+        :chainId="props.chainId"
+    />
+    <ExecuteSiloActions
+        ref="executeActionsRef"
+        id="execute_actions_modal"
+        :chainId="props.chainId"
+    />
 </template>
 
 <script setup lang="ts">
-import { decodeSkillFromTransaction, decodeTransaction, useFactoryStore } from "../../store/factory"
+import {
+    decodeSkillFromTransaction,
+    decodeTransaction,
+    useFactoryStore,
+} from "../../store/factory"
 import { computed, ref, watch } from "vue"
 import AssignHero from "../dialogs/AssignHero.vue"
 import { QueuedAction, Skill } from "@paintswap/estfor-definitions/types"
@@ -214,6 +256,10 @@ import ExecuteSiloActions from "../dialogs/ExecuteSiloActions.vue"
 import AssignedHeroGroupSelect from "../inputs/AssignedHeroGroupSelect.vue"
 import AssignedHeroSkillSelect from "../inputs/AssignedHeroSkillSelect.vue"
 import EvolveHero from "../dialogs/EvolveHero.vue"
+
+const props = defineProps<{
+    chainId: 250 | 146
+}>()
 
 const factoryStore = useFactoryStore()
 const executing = ref(false)
@@ -267,12 +313,9 @@ const assignedSilos = computed(() => {
             (s) =>
                 selectedSkillGroup.value === Skill.NONE ||
                 decodeSkillFromTransaction(s.savedTransactions) ===
-                selectedSkillGroup.value ||
+                    selectedSkillGroup.value ||
                 s.queuedActions
-                    .map(
-                        (a) =>
-                            a.skill
-                    )
+                    .map((a) => a.skill)
                     .includes(selectedSkillGroup.value)
         )
     assignedProxys.sort((a, b) => {

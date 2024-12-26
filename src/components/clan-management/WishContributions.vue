@@ -92,6 +92,7 @@ import {
     ChevronUpIcon,
 } from "@heroicons/vue/24/solid"
 import { formatDate } from "../../utils/time"
+import { sonic } from "viem/chains"
 
 const date = ref(7)
 const raffleEntries = ref<RaffleEntry[]>([])
@@ -149,7 +150,7 @@ const onDateUpdate = async () => {
             let moreToFetch = true
             const raffleResults: RaffleEntry[] = []
             while (moreToFetch) {
-                const results = await getRaffleEntries(numToSkip)
+                const results = await getRaffleEntries(numToSkip, sonic.id)
                 raffleResults.push(...results.raffleEntries)
                 if (results.raffleEntries.length < 1000) {
                     moreToFetch = false

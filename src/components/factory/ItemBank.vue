@@ -12,7 +12,14 @@
                 them.
             </div>
 
-            <div v-if="aggregatedItems?.filter(x => !starterItems.includes(x.tokenId)).length > 0" class="overflow-x-auto mt-5">
+            <div
+                v-if="
+                    aggregatedItems?.filter(
+                        (x) => !starterItems.includes(x.tokenId)
+                    ).length > 0
+                "
+                class="overflow-x-auto mt-5"
+            >
                 <table class="table md:table-md table-xs">
                     <thead>
                         <tr>
@@ -23,9 +30,14 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="item in aggregatedItems.filter(x => !starterItems.includes(x.tokenId))" :key="item.tokenId">
+                        <tr
+                            v-for="item in aggregatedItems.filter(
+                                (x) => !starterItems.includes(x.tokenId)
+                            )"
+                            :key="item.tokenId"
+                        >
                             <td>
-                                {{ itemNames[item.tokenId] || item.tokenId }}
+                                {{ getItemName(item.tokenId) || item.tokenId }}
                             </td>
                             <td class="text-right">{{ item.amount }}</td>
                             <td class="text-success text-right">
@@ -57,10 +69,15 @@
             </div>
         </div>
     </div>
-    <WithdrawFromBank ref="withdrawFromBankRef" id="withdraw_from_bank_modal" />
+    <WithdrawFromBank
+        ref="withdrawFromBankRef"
+        id="withdraw_from_bank_modal"
+        :chainId="props.chainId"
+    />
     <DistributeItemsFromBank
         ref="distributeItemsFromBank"
         id="distribute_items_from_bank_modal"
+        :chainId="props.chainId"
     />
 </template>
 
@@ -71,12 +88,16 @@ import {
     useFactoryStore,
 } from "../../store/factory"
 import { ComputedRef, computed, ref } from "vue"
-import { itemNames, starterItems } from "../../store/items"
+import { getItemName, starterItems } from "../../store/items"
 import { UserItemNFT } from "@paintswap/estfor-definitions/types"
 import WithdrawFromBank from "../dialogs/WithdrawFromBank.vue"
 import DistributeItemsFromBank from "../dialogs/DistributeItemsFromBank.vue"
 import { allItems } from "../../data/items"
 import { AggregatedItem } from "../../store/models/factory.models"
+
+const props = defineProps<{
+    chainId: 250 | 146
+}>()
 
 const factoryStore = useFactoryStore()
 const period = ref(24)
@@ -154,8 +175,7 @@ const aggregatedItems: ComputedRef<AggregatedItem[]> = computed(() => {
     })
 
     return mergedItems.filter(
-        (i) =>
-            allItems.find((t) => t.tokenId === i.tokenId)?.isTransferable
+        (i) => allItems.find((t) => t.tokenId === i.tokenId)?.isTransferable
     )
 })
 

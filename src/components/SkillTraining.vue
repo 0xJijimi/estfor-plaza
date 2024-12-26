@@ -24,9 +24,16 @@
                         :alt="skillNames[action.skill]"
                         @click.prevent="
                             action.relevantAction.actionType ===
-                            ActionType.action
-                                ? actionInfoRef?.openDialog(action.skill)
-                                : actionChoiceInfoRef?.openDialog(action.skill)
+                            ActionType.actionAndChoice
+                                ? actionAndChoiceInfoRef?.openDialog(
+                                      action.skill
+                                  )
+                                : action.relevantAction.actionType ===
+                                    ActionType.action
+                                  ? actionInfoRef?.openDialog(action.skill)
+                                  : actionChoiceInfoRef?.openDialog(
+                                        action.skill
+                                    )
                         "
                     />
                 </figure>
@@ -212,6 +219,7 @@
     </div>
     <ActionInfo ref="actionInfoRef" />
     <ActionChoiceInfo ref="actionChoiceInfoRef" />
+    <ActionAndChoiceInfo ref="actionAndChoiceInfoRef" />
 </template>
 
 <script setup lang="ts">
@@ -235,6 +243,7 @@ import BoostPanel from "./BoostPanel.vue"
 import ItemSearch from "./ItemSearch.vue"
 import ActionInfo from "./dialogs/ActionInfo.vue"
 import ActionChoiceInfo from "./dialogs/ActionChoiceInfo.vue"
+import ActionAndChoiceInfo from "./dialogs/ActionAndChoiceInfo.vue"
 import { useItemStore } from "../store/items"
 
 const skillStore = useSkillStore()
@@ -242,6 +251,7 @@ const coreStore = useCoreStore()
 const itemStore = useItemStore()
 const actionInfoRef = ref<typeof ActionInfo>()
 const actionChoiceInfoRef = ref<typeof ActionChoiceInfo>()
+const actionAndChoiceInfoRef = ref<typeof ActionAndChoiceInfo>()
 
 const allActions = computed(() => {
     return [
@@ -309,6 +319,12 @@ const allActions = computed(() => {
             skill: Skill.ALCHEMY,
             relevantAction: skillStore.getCurrentAndNextActionForSkill(
                 Skill.ALCHEMY
+            ),
+        },
+        {
+            skill: Skill.FARMING,
+            relevantAction: skillStore.getCurrentAndNextActionForSkill(
+                Skill.FARMING
             ),
         },
     ]

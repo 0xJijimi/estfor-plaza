@@ -13,20 +13,20 @@
 
 <script setup lang="ts">
 import { computed } from "vue"
-import { ActionQueueStatus } from "@paintswap/estfor-definitions/types"
+import { ActionQueueStrategy } from "@paintswap/estfor-definitions/types"
 
 const emit = defineEmits(["update:modelValue"])
 
 const actionQueueStatusNames = {
-    [ActionQueueStatus.APPEND]: "Append",
-    [ActionQueueStatus.KEEP_LAST_IN_PROGRESS]: "Keep Last In Progress",
-    [ActionQueueStatus.NONE]: "Replace",
+    [ActionQueueStrategy.APPEND]: "Append",
+    [ActionQueueStrategy.KEEP_LAST_IN_PROGRESS]: "Keep Last In Progress",
+    [ActionQueueStrategy.OVERWRITE]: "Replace",
 }
 
 const options = [
     // ActionQueueStatus.APPEND, // think this was deprecated for KEEP_LAST_IN_PROGRESS
-    ActionQueueStatus.KEEP_LAST_IN_PROGRESS,
-    ActionQueueStatus.NONE,
+    ActionQueueStrategy.KEEP_LAST_IN_PROGRESS,
+    ActionQueueStrategy.OVERWRITE,
 ]
 
 const props = defineProps({

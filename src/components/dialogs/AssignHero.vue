@@ -148,8 +148,16 @@
                 v-if="skillId === Skill.COMBAT"
                 class="mt-5"
                 custom-class="select-md"
-                :skill="isMelee ? Skill.MELEE : isRanged ? Skill.RANGED : isMagic ? Skill.MAGIC : Skill.NONE"
-                v-model="combatStyle" 
+                :skill="
+                    isMelee
+                        ? Skill.MELEE
+                        : isRanged
+                          ? Skill.RANGED
+                          : isMagic
+                            ? Skill.MAGIC
+                            : Skill.NONE
+                "
+                v-model="combatStyle"
             />
 
             <ActionQueueStatusSelect class="mt-5" v-model="queueStatus" />
@@ -185,7 +193,7 @@
             </label>
             <label class="label cursor-pointer">
                 <span class="label-text text-xs mr-2 items-center flex">
-                    Check Heroes Have Items                  
+                    Check Heroes Have Items
                 </span>
                 <input
                     type="checkbox"
@@ -195,7 +203,11 @@
                 />
             </label>
             <ItemSelect
-                v-if="!checkItems && skillId !== Skill.COMBAT && rightHandOptions.length > 0"
+                v-if="
+                    !checkItems &&
+                    skillId !== Skill.COMBAT &&
+                    rightHandOptions.length > 0
+                "
                 :items="rightHandOptions"
                 class="mt-5"
                 custom-class="select-md"
@@ -224,8 +236,7 @@
                 class="btn btn-primary mt-5 w-full"
                 @click="assignHeroes"
                 :disabled="
-                    loading ||
-                    (actionId === 0 && actionChoiceOutputId === 0)
+                    loading || (actionId === 0 && actionChoiceOutputId === 0)
                 "
             >
                 Assign {{ heroesToAssign.length }} Hero{{
@@ -244,9 +255,18 @@
 <script setup lang="ts">
 import { computed, nextTick, ref } from "vue"
 import { actionNames, skillNames, useSkillStore } from "../../store/skills"
-import { itemNames, rangedItemToActionChoice, useItemStore } from "../../store/items"
+import {
+    getItemName,
+    rangedItemToActionChoice,
+    useItemStore,
+} from "../../store/items"
 import { allActions } from "../../data/actions"
-import { ActionQueueStatus, CombatStyle, EquipPosition, Skill } from "@paintswap/estfor-definitions/types"
+import {
+    ActionQueueStrategy,
+    CombatStyle,
+    EquipPosition,
+    Skill,
+} from "@paintswap/estfor-definitions/types"
 import {
     calculateExtraXPForHeroActionInput,
     useFactoryStore,
@@ -271,10 +291,14 @@ const props = defineProps({
         type: String,
         required: true,
     },
+    chainId: {
+        type: Number,
+        required: true,
+    },
 })
 
 const skillId = ref(Skill.NONE)
-const queueStatus = ref(ActionQueueStatus.KEEP_LAST_IN_PROGRESS)
+const queueStatus = ref(ActionQueueStrategy.KEEP_LAST_IN_PROGRESS)
 const actionId = ref(0)
 const actionChoiceOutputId = ref(0)
 const skillStore = useSkillStore()
@@ -332,8 +356,14 @@ const openDialog = (heroes: ProxySilo[]) => {
 }
 
 const combatRightHandItems = computed(() => [
-    ...itemStore.getItemsForSlotAndHeroes(EquipPosition.RIGHT_HAND, heroesToAssign.value),
-    ...itemStore.getItemsForSlotAndHeroes(EquipPosition.BOTH_HANDS, heroesToAssign.value),
+    ...itemStore.getItemsForSlotAndHeroes(
+        EquipPosition.RIGHT_HAND,
+        heroesToAssign.value
+    ),
+    ...itemStore.getItemsForSlotAndHeroes(
+        EquipPosition.BOTH_HANDS,
+        heroesToAssign.value
+    ),
 ])
 const headItems = computed(() =>
     itemStore.getItemsForSlotAndHeroes(EquipPosition.HEAD, heroesToAssign.value)
@@ -342,7 +372,10 @@ const neckItems = computed(() =>
     itemStore.getItemsForSlotAndHeroes(EquipPosition.NECK, heroesToAssign.value)
 )
 const leftHandItems = computed(() =>
-    itemStore.getItemsForSlotAndHeroes(EquipPosition.LEFT_HAND, heroesToAssign.value)
+    itemStore.getItemsForSlotAndHeroes(
+        EquipPosition.LEFT_HAND,
+        heroesToAssign.value
+    )
 )
 const bodyItems = computed(() =>
     itemStore.getItemsForSlotAndHeroes(EquipPosition.BODY, heroesToAssign.value)
@@ -362,7 +395,9 @@ const ringItems = computed(() =>
 const quiverItems = computed(() =>
     itemStore.getRangedActionChoicesForHeroes(heroesToAssign.value)
 )
-const magicBagItems = computed(() => itemStore.getMagicActionChoicesForHeroes(heroesToAssign.value))
+const magicBagItems = computed(() =>
+    itemStore.getMagicActionChoicesForHeroes(heroesToAssign.value)
+)
 const foodItems = computed(() =>
     itemStore.getItemsForSlotAndHeroes(EquipPosition.FOOD, heroesToAssign.value)
 )
@@ -473,7 +508,11 @@ const checkRequiredItems = async () => {
 
             if (requiredItems.some((x) => x > 0)) {
                 for (const h of heroesToAssign.value) {
-                    const userItemsResult = await getUserItemNFTs(h.address, [])
+                    const userItemsResult = await getUserItemNFTs(
+                        h.address,
+                        [],
+                        props.chainId as 250 | 146
+                    )
                     // filter out user items that are below minXP
                     const { extraXP } = calculateExtraXPForHeroActionInput(
                         h,
@@ -497,7 +536,9 @@ const checkRequiredItems = async () => {
                         )
                     ) {
                         missingItems.value.push(
-                            `${h.playerState.name} is missing ${itemNames[min]}`
+                            `${h.playerState.name} is missing ${getItemName(
+                                min
+                            )}`
                         )
                     }
                     // find first item in the requiredItems array that the user has
@@ -519,15 +560,27 @@ const checkCombatItems = async () => {
     checking.value = true
     try {
         if (actionId.value > 0) {
-            const requiredItems = [equippedItems.value.head, equippedItems.value.neck, equippedItems.value.body, equippedItems.value.arms, equippedItems.value.legs, equippedItems.value.feet, equippedItems.value.rightHand, equippedItems.value.leftHand, equippedItems.value.ring].filter(x => x !== undefined)
+            const requiredItems = [
+                equippedItems.value.head,
+                equippedItems.value.neck,
+                equippedItems.value.body,
+                equippedItems.value.arms,
+                equippedItems.value.legs,
+                equippedItems.value.feet,
+                equippedItems.value.rightHand,
+                equippedItems.value.leftHand,
+                equippedItems.value.ring,
+            ].filter((x) => x !== undefined)
 
             for (const h of heroesToAssign.value) {
-                const userItemsResult = await getUserItemNFTs(h.address, [])
-                // filter out user items that are below minXP
-                const { meleeXP, magicXP, rangedXP, defenceXP } = calculateExtraXPForHeroActionInput(
-                    h,
-                    skillId.value
+                const userItemsResult = await getUserItemNFTs(
+                    h.address,
+                    [],
+                    props.chainId as 250 | 146
                 )
+                // filter out user items that are below minXP
+                const { meleeXP, magicXP, rangedXP, defenceXP } =
+                    calculateExtraXPForHeroActionInput(h, skillId.value)
 
                 const filteredItems = userItemsResult.userItemNFTs.filter(
                     (x) => {
@@ -536,7 +589,15 @@ const checkCombatItems = async () => {
                                 ?.minXP <=
                             // @ts-ignore
                             Number(h.playerState[skillToXPMap[x.item.skill]] || 0) +
-                                (x.item.skill === Skill.MELEE ? meleeXP : x.item.skill === Skill.MAGIC ? magicXP : x.item.skill === Skill.RANGED ? rangedXP : x.item.skill === Skill.DEFENCE ? defenceXP : 0)
+                                (x.item.skill === Skill.MELEE
+                                    ? meleeXP
+                                    : x.item.skill === Skill.MAGIC
+                                      ? magicXP
+                                      : x.item.skill === Skill.RANGED
+                                        ? rangedXP
+                                        : x.item.skill === Skill.DEFENCE
+                                          ? defenceXP
+                                          : 0)
                         )
                     }
                 )
@@ -545,7 +606,9 @@ const checkCombatItems = async () => {
                     if (item) {
                         if (!filteredItems.some((x) => x.tokenId === item)) {
                             missingItems.value.push(
-                                `${h.playerState.name} is missing ${itemNames[item]}`
+                                `${h.playerState.name} is missing ${getItemName(
+                                    item
+                                )}`
                             )
                         }
                     }
@@ -575,7 +638,11 @@ const checkActionChoiceRequiredItems = async () => {
 
             if (requiredItems.some((x) => x > 0)) {
                 for (const h of heroesToAssign.value) {
-                    const userItemsResult = await getUserItemNFTs(h.address, [])
+                    const userItemsResult = await getUserItemNFTs(
+                        h.address,
+                        [],
+                        props.chainId as 250 | 146
+                    )
                     // filter out user items that are below minXP
                     const { extraXP } = calculateExtraXPForHeroActionInput(
                         h,
@@ -598,7 +665,9 @@ const checkActionChoiceRequiredItems = async () => {
                         )
                     ) {
                         missingItems.value.push(
-                            `${h.playerState.name} is missing ${itemNames[min]} (${h.address})`
+                            `${h.playerState.name} is missing ${getItemName(
+                                min
+                            )} (${h.address})`
                         )
                     }
                     // find first item in the requiredItems array that the user has
@@ -630,22 +699,28 @@ const assignHeroes = async () => {
                     missingItems.value.push("Right Hand is required")
                     return
                 }
-                if (isMagic.value && equippedItems.value.magicBag === undefined) {
+                if (
+                    isMagic.value &&
+                    equippedItems.value.magicBag === undefined
+                ) {
                     missingItems.value.push("Magic Bag is required")
                     return
                 }
             }
-            if (checkItems.value) { 
+            if (checkItems.value) {
                 if (skillId.value === Skill.COMBAT) {
                     await checkCombatItems()
                 } else {
                     await checkRequiredItems()
-                }                
+                }
                 if (missingItems.value.length > 0) {
                     return
                 }
             } else if (skillId.value !== Skill.COMBAT) {
-                if (!manualRightHand.value && rightHandOptions.value.length > 0) {
+                if (
+                    !manualRightHand.value &&
+                    rightHandOptions.value.length > 0
+                ) {
                     missingItems.value.push("Tool is required")
                     return
                 }
@@ -658,12 +733,23 @@ const assignHeroes = async () => {
             await factoryStore.assignActionToProxy(
                 heroesToAssign.value,
                 actionId.value,
-                skillId.value === Skill.COMBAT ? 
-                    isMelee.value ? 
-                        EstforConstants.ACTIONCHOICE_MELEE_MONSTER : 
-                    isRanged.value ? 
-                        rangedItemToActionChoice(equippedItems.value.rightHand || 0, equippedItems.value.quiver || 0) : 
-                        allActionChoiceIdsMagic[allActionChoicesMagic.findIndex(x => x.skillDiff === equippedItems.value.magicBag)] || 0 : 0,
+                skillId.value === Skill.COMBAT
+                    ? isMelee.value
+                        ? EstforConstants.ACTIONCHOICE_MELEE_MONSTER
+                        : isRanged.value
+                          ? rangedItemToActionChoice(
+                                equippedItems.value.rightHand || 0,
+                                equippedItems.value.quiver || 0
+                            )
+                          : allActionChoiceIdsMagic[
+                                allActionChoicesMagic.findIndex(
+                                    (x) =>
+                                        x.skillDiffs.find(
+                                            (d) => d.skill === Skill.MAGIC
+                                        ) === equippedItems.value.magicBag
+                                )
+                            ] || 0
+                    : 0,
                 equippedItems.value.head,
                 equippedItems.value.neck,
                 equippedItems.value.body,
@@ -671,12 +757,19 @@ const assignHeroes = async () => {
                 equippedItems.value.legs,
                 equippedItems.value.feet,
                 equippedItems.value.ring,
-                skillId.value === Skill.COMBAT ? equippedItems.value.rightHand : rightHandItems.value[0],
+                skillId.value === Skill.COMBAT
+                    ? equippedItems.value.rightHand
+                    : rightHandItems.value[0],
                 equippedItems.value.leftHand,
                 equippedItems.value.food,
-                skillId.value === Skill.COMBAT ? combatStyle.value === Skill.DEFENCE ? CombatStyle.DEFENCE : CombatStyle.ATTACK : CombatStyle.NONE,
+                skillId.value === Skill.COMBAT
+                    ? combatStyle.value === Skill.DEFENCE
+                        ? CombatStyle.DEFENCE
+                        : CombatStyle.ATTACK
+                    : CombatStyle.NONE,
                 queueStatus.value,
-                active.value
+                active.value,
+                props.chainId as 250 | 146
             )
         } else if (
             skillId.value > 0 &&
@@ -688,7 +781,10 @@ const assignHeroes = async () => {
                     return
                 }
             } else {
-                if (!manualRightHand.value && rightHandOptions.value.length > 0) {
+                if (
+                    !manualRightHand.value &&
+                    rightHandOptions.value.length > 0
+                ) {
                     missingItems.value.push("Tool is required")
                     return
                 }
@@ -715,7 +811,8 @@ const assignHeroes = async () => {
                 0,
                 CombatStyle.NONE,
                 queueStatus.value,
-                active.value
+                active.value,
+                props.chainId as 250 | 146
             )
         }
 

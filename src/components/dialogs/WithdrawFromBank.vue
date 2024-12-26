@@ -16,7 +16,7 @@
                     <tbody>
                         <tr v-for="item in bankItems" :key="item.tokenId">
                             <td>
-                                {{ itemNames[item.tokenId] || item.tokenId }}
+                                {{ getItemName(item.tokenId) || item.tokenId }}
                             </td>
                             <td class="text-right">{{ item.amount }}</td>
                             <td class="text-right">
@@ -67,14 +67,18 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue"
-import { itemNames } from "../../store/items"
+import { getItemName } from "../../store/items"
 import { useFactoryStore } from "../../store/factory"
 import { useAppStore } from "../../store/app"
-import { AggregatedItem } from "../../store/models/factory.models";
+import { AggregatedItem } from "../../store/models/factory.models"
 
 const props = defineProps({
     id: {
         type: String,
+        required: true,
+    },
+    chainId: {
+        type: Number,
         required: true,
     },
 })
@@ -114,7 +118,8 @@ const withdrawItems = async () => {
             itemsToWithdraw.value.map((i) => ({
                 tokenId: i.tokenId,
                 amount: i.amountToWithdraw.toString(),
-            }))
+            })),
+            props.chainId as 250 | 146
         )
         app.addToast(
             `${itemsToWithdraw.value.length} item${

@@ -12,7 +12,11 @@ import {
 } from "@paintswap/estfor-definitions/types"
 import { sleep } from "./time"
 
-const baseUrl = "https://api.estfor.com"
+const getBaseUrl = (chainId: 250 | 146) => {
+    return chainId === 250
+        ? "https://api-fantom.estfor.com"
+        : "https://api.estfor.com"
+}
 
 export interface ClanMember {
     id: string
@@ -96,111 +100,146 @@ const fetchRetry = async (url: string) => {
 }
 
 export const getPlayerState = async (
-    playerId: string
+    playerId: string,
+    chainId: 250 | 146
 ): Promise<ClanMemberResult> => {
-    return fetchRetry(`${baseUrl}/clan-members/${playerId}`)
+    return fetchRetry(`${getBaseUrl(chainId)}/clan-members/${playerId}`)
 }
 
-export const getGlobalData = async (): Promise<CoreDataResult> => {
-    return fetchRetry(`${baseUrl}/core-data`)
+export const getGlobalData = async (
+    chainId: 250 | 146
+): Promise<CoreDataResult> => {
+    return fetchRetry(`${getBaseUrl(chainId)}/core-data`)
 }
 
 export const getUserItemNFTs = async (
     user: string,
-    tokenIds: number[]
+    tokenIds: number[],
+    chainId: 250 | 146
 ): Promise<UserItemNFTResult> => {
     return fetchRetry(
-        `${baseUrl}/user-item-nfts/${user}?${tokenIds
+        `${getBaseUrl(chainId)}/user-item-nfts/${user}?${tokenIds
             .map((x) => `tokenIds[]=${x}`)
             .join("&")}`
     )
 }
 
 export const getPlayers = async (
-    searchTerm: string
+    searchTerm: string,
+    chainId: 250 | 146
 ): Promise<PlayerSearchResult> => {
-    return fetchRetry(`${baseUrl}/players?name=${searchTerm}`)
+    return fetchRetry(`${getBaseUrl(chainId)}/players?name=${searchTerm}`)
 }
 
 export const getPlayersByOwner = async (
-    address: string
+    address: string,
+    chainId: 250 | 146
 ): Promise<PlayerSearchResult> => {
-    return fetchRetry(`${baseUrl}/players?owner=${address}`)
+    return fetchRetry(`${getBaseUrl(chainId)}/players?owner=${address}`)
 }
 
 export const getExactPlayers = async (
-    searchTerm: string
+    searchTerm: string,
+    chainId: 250 | 146
 ): Promise<PlayerSearchResult> => {
-    return fetchRetry(`${baseUrl}/players?exactName=${searchTerm}`)
+    return fetchRetry(`${getBaseUrl(chainId)}/players?exactName=${searchTerm}`)
 }
 
 export const getPlayersByIds = async (
     ids: string[],
-    numToSkip: number = 0
+    numToSkip: number = 0,
+    chainId: 250 | 146
 ): Promise<PlayerSearchResult> => {
     return fetchRetry(
-        `${baseUrl}/players?numToSkip=${numToSkip}&${ids
+        `${getBaseUrl(chainId)}/players?numToSkip=${numToSkip}&${ids
             .map((x) => `tokenIds[]=${x}`)
             .join("&")}`
     )
 }
 
 export const getSoloPlayerState = async (
-    playerId: string
+    playerId: string,
+    chainId: 250 | 146
 ): Promise<PlayerResult> => {
-    return fetchRetry(`${baseUrl}/players/${playerId}`)
+    return fetchRetry(`${getBaseUrl(chainId)}/players/${playerId}`)
 }
 
 export const getLotteries = async (
-    numToSkip: number
+    numToSkip: number,
+    chainId: 250 | 146
 ): Promise<LotteriesResult> => {
-    return fetchRetry(`${baseUrl}/lotteries?numToSkip=${numToSkip}`)
+    return fetchRetry(`${getBaseUrl(chainId)}/lotteries?numToSkip=${numToSkip}`)
 }
 
 export const getRaffleEntries = async (
-    numToSkip: number
+    numToSkip: number,
+    chainId: 250 | 146
 ): Promise<RaffleEntryResult> => {
-    return fetchRetry(`${baseUrl}/raffle-entries?numToSkip=${numToSkip}`)
+    return fetchRetry(
+        `${getBaseUrl(chainId)}/raffle-entries?numToSkip=${numToSkip}`
+    )
 }
 
 export const getClanMembers = async (
-    clanId: string
+    clanId: string,
+    chainId: 250 | 146
 ): Promise<ClanMembersResult> => {
-    return fetchRetry(`${baseUrl}/clan-members?clanId=${clanId}`)
+    return fetchRetry(`${getBaseUrl(chainId)}/clan-members?clanId=${clanId}`)
 }
 
-export const getClans = async (numToSkip: number): Promise<ClansResult> => {
-    return fetchRetry(`${baseUrl}/clans?numToSkip=${numToSkip}&onlyHasVaults=true`)
+export const getClans = async (
+    numToSkip: number,
+    chainId: 250 | 146
+): Promise<ClansResult> => {
+    return fetchRetry(
+        `${getBaseUrl(chainId)}/clans?numToSkip=${numToSkip}&onlyHasVaults=true`
+    )
 }
 
-export const getClanByName = async (name: string): Promise<ClansResult> => {
-    return fetchRetry(`${baseUrl}/clans?name=${name}`)
+export const getClanByName = async (
+    name: string,
+    chainId: 250 | 146
+): Promise<ClansResult> => {
+    return fetchRetry(`${getBaseUrl(chainId)}/clans?name=${name}`)
 }
 
 export const searchQueuedActions = async (
-    playerId: string
+    playerId: string,
+    chainId: 250 | 146
 ): Promise<SearchQueuedActionsResult> => {
     return fetchRetry(
-        `${baseUrl}/queued-actions?playerId=${playerId}&isActive=true&orderDirection=asc`
+        `${getBaseUrl(
+            chainId
+        )}/queued-actions?playerId=${playerId}&isActive=true&orderDirection=asc`
     )
 }
 
-export const getTerritories = async (): Promise<TerritoriesResult> => {
-    return fetchRetry(`${baseUrl}/territories`)
+export const getTerritories = async (
+    chainId: 250 | 146
+): Promise<TerritoriesResult> => {
+    return fetchRetry(`${getBaseUrl(chainId)}/territories`)
 }
 
 export const getDonations = async (
-    numToSkip: number
+    numToSkip: number,
+    chainId: 250 | 146
 ): Promise<DonationsResult> => {
     return fetchRetry(
-        `${baseUrl}/donations?numToSkip=${numToSkip}&orderDirection=desc&orderBy=lastUpdatedTimestamp&useUsers=false`
+        `${getBaseUrl(
+            chainId
+        )}/donations?numToSkip=${numToSkip}&orderDirection=desc&orderBy=lastUpdatedTimestamp&useUsers=false`
     )
 }
 
-export const getAvatars = async (): Promise<AvatarSearchResult> => {
-    return fetchRetry(`${baseUrl}/avatars`)
+export const getAvatars = async (
+    chainId: 250 | 146
+): Promise<AvatarSearchResult> => {
+    return fetchRetry(`${getBaseUrl(chainId)}/avatars`)
 }
 
-export const getOwnedPets = async (address: string): Promise<PetsResult> => {
-    return fetchRetry(`${baseUrl}/pets?owner=${address}`)
+export const getOwnedPets = async (
+    address: string,
+    chainId: 250 | 146
+): Promise<PetsResult> => {
+    return fetchRetry(`${getBaseUrl(chainId)}/pets?owner=${address}`)
 }

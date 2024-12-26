@@ -12,6 +12,7 @@ import {
     allActionChoicesAlchemy,
     allActionChoicesCooking,
     allActionChoicesCrafting,
+    allActionChoicesFarming,
     allActionChoicesFiremaking,
     allActionChoicesFletching,
     allActionChoicesForging,
@@ -20,7 +21,7 @@ import {
     allActionChoicesRanged,
     allActionChoicesSmithing,
 } from "../data/actionChoices"
-import { itemNames, useItemStore } from "./items"
+import { getItemName, useItemStore } from "./items"
 import {
     allActionChoiceIdsAlchemy,
     allActionChoiceIdsCooking,
@@ -32,6 +33,7 @@ import {
     allActionChoiceIdsMelee,
     allActionChoiceIdsRanged,
     allActionChoiceIdsSmithing,
+    allActionChoiceIdsFarming,
 } from "../data/actionChoiceIds"
 
 export interface SkillState {
@@ -47,6 +49,7 @@ export interface SkillState {
     fletching: ActionChoiceInput[]
     thieving: ActionInput[]
     combat: ActionInput[]
+    farming: (ActionInput | ActionChoiceInput)[]
 }
 
 export const skillNames = {
@@ -72,7 +75,7 @@ export const skillNames = {
     [Skill.HUNTING]: "Hunting",
     [Skill.TRAVELING]: "Traveling",
     [Skill.RESERVED_COMBAT]: "Reserved Combat",
-    [Skill.RESERVED3]: "Reserved 3",
+    [Skill.FARMING]: "Farming",
     [Skill.RESERVED4]: "Reserved 4",
     [Skill.RESERVED5]: "Reserved 5",
     [Skill.RESERVED6]: "Reserved 6",
@@ -109,6 +112,11 @@ export const actionNames = {
     [EstforConstants.ACTION_WOODCUTTING_ENCHANTED_GROVE]: "Enchanted Grove",
     [EstforConstants.ACTION_WOODCUTTING_THE_WOODLANDS]: "The Woodlands",
     [EstforConstants.ACTION_WOODCUTTING_WHISPERING_WOODS]: "Whispering Woods",
+    [EstforConstants.ACTION_WOODCUTTING_BRAMBLED_THROAT]: "Brambled Throat",
+    [EstforConstants.ACTION_WOODCUTTING_CHOKING_HOLLOW]: "Choking Hollow",
+    [EstforConstants.ACTION_WOODCUTTING_RAZORVINE_THICKET]: "Razorvine Thicket",
+    [EstforConstants.ACTION_WOODCUTTING_THE_HEART]: "The Heart",
+    [EstforConstants.ACTION_WOODCUTTING_TANGLED_PASS]: "Tangled Pass",
 
     [EstforConstants.ACTION_MINING_COPPER]: "Copper",
     [EstforConstants.ACTION_MINING_TIN]: "Tin",
@@ -125,6 +133,11 @@ export const actionNames = {
     [EstforConstants.ACTION_MINING_RUNITE]: "Runite",
     [EstforConstants.ACTION_MINING_TITANIUM]: "Titanium",
     [EstforConstants.ACTION_MINING_ORICHALCUM]: "Orichalcum",
+    [EstforConstants.ACTION_MINING_GILDED_HALLS]: "Gilded Halls",
+    [EstforConstants.ACTION_MINING_PETRIFIED_GARDEN]: "Petrified Garden",
+    [EstforConstants.ACTION_MINING_THRONE_ROOM]: "Throne Room",
+    [EstforConstants.ACTION_MINING_GATE]: "Gate",
+    [EstforConstants.ACTION_MINING_BURIED_COURTYARD]: "Buried Courtyard",
 
     [EstforConstants.ACTION_FISHING_MINNUS]: "Minnus",
     [EstforConstants.ACTION_FISHING_BLEKK]: "Blekk",
@@ -152,6 +165,17 @@ export const actionNames = {
     [EstforConstants.ACTION_FISHING_UNDERGROUND_RIVER]: "Underground River",
     [EstforConstants.ACTION_FISHING_DEEP_SEA]: "Deep Sea",
     [EstforConstants.ACTION_FISHING_GRAN_SQUIN]: "Gran Squin",
+    [EstforConstants.ACTION_FISHING_LANCER]: "Lancer",
+    [EstforConstants.ACTION_FISHING_DRAGONFISH]: "Dragonfish",
+    [EstforConstants.ACTION_FISHING_OCTACLE]: "Octacle",
+    [EstforConstants.ACTION_FISHING_SHAW]: "Shaw",
+    [EstforConstants.ACTION_FISHING_VIPER_BASS]: "Viper Bass",
+    [EstforConstants.ACTION_FISHING_VANISHING_PERCH]: "Vanishing Perch",
+    [EstforConstants.ACTION_FISHING_YERESPATUM]: "Yerespatum",
+    [EstforConstants.ACTION_FISHING_WHISKFIN]: "Whiskfin",
+    [EstforConstants.ACTION_FISHING_WATER_SERPENT]: "Water Serpent",
+    [EstforConstants.ACTION_FISHING_MHARA]: "Mhara",
+    [EstforConstants.ACTION_FISHING_SPHINX_FISH]: "Sphinx Fish",
 
     [EstforConstants.ACTION_THIEVING_CHILD]: "Child",
     [EstforConstants.ACTION_THIEVING_MAN]: "Man",
@@ -168,6 +192,11 @@ export const actionNames = {
     [EstforConstants.ACTION_THIEVING_GEM_MERCHANT]: "Gem Merchant",
     [EstforConstants.ACTION_THIEVING_BANK]: "Bank",
     [EstforConstants.ACTION_THIEVING_MASTER_THIEF]: "Master Thief",
+    [EstforConstants.ACTION_THIEVING_CATACOMBS]: "Catacombs",
+    [EstforConstants.ACTION_THIEVING_ENDLESS_TUNNEL]: "Endless Tunnel",
+    [EstforConstants.ACTION_THIEVING_FORGOTTEN_QUARRY]: "Forgotten Quarry",
+    [EstforConstants.ACTION_THIEVING_LOST_SANCTUM]: "Lost Sanctum",
+    [EstforConstants.ACTION_THIEVING_VAULT]: "Vault",
 
     [EstforConstants.ACTION_COMBAT_ANCIENT_ENT]: "Ancient Ent",
     [EstforConstants.ACTION_COMBAT_ARCANE_DRAGON]: "Arcane Dragon",
@@ -189,16 +218,18 @@ export const actionNames = {
     [EstforConstants.ACTION_COMBAT_SNAPPER_BUG]: "Snapper Bug",
     [EstforConstants.ACTION_COMBAT_SNUFFLEQUARG]: "Snufflequarg",
     [EstforConstants.ACTION_COMBAT_SQUIGGLE_EGG]: "Squiggle Egg",
-    [EstforConstants.ACTION_COMBAT_UFFINCH]: "Uffinch",    
+    [EstforConstants.ACTION_COMBAT_UFFINCH]: "Uffinch",
     [EstforConstants.ACTION_COMBAT_BLAZING_MONTANITE]: "Blazing Montanite",
     [EstforConstants.ACTION_COMBAT_CAVE_FAIRY]: "Cave Fairy",
     [EstforConstants.ACTION_COMBAT_EMBER_WHELP]: "Ember Whelp",
     [EstforConstants.ACTION_COMBAT_ICE_TROLL]: "Ice Troll",
     [EstforConstants.ACTION_COMBAT_JUVENILE_CAVE_FAIRY]: "Juvenile Cave Fairy",
-    [EstforConstants.ACTION_COMBAT_MONTANITE_FIRE_TITAN]: "Montanite Fire Titan",
+    [EstforConstants.ACTION_COMBAT_MONTANITE_FIRE_TITAN]:
+        "Montanite Fire Titan",
     [EstforConstants.ACTION_COMBAT_MONTANITE_ICE_TITAN]: "Montanite Ice Titan",
 
-    [EstforConstants.ACTION_MINING_ADAMANTINE_MOTHERLODE]: "Adamantine Motherlode",
+    [EstforConstants.ACTION_MINING_ADAMANTINE_MOTHERLODE]:
+        "Adamantine Motherlode",
     [EstforConstants.ACTION_MINING_MITHRIL_MOTHERLODE]: "Mithril Motherlode",
     [EstforConstants.ACTION_MINING_RUNITE_MOTHERLODE]: "Runite Motherlode",
     [EstforConstants.ACTION_MINING_TIN_MOTHERLODE]: "Tin Motherlode",
@@ -209,6 +240,20 @@ export const actionNames = {
     [EstforConstants.ACTION_THIEVING_LAKE]: "Lake",
     [EstforConstants.ACTION_THIEVING_NEST]: "Nest",
     [EstforConstants.ACTION_THIEVING_HIDEOUT]: "Hideout",
+
+    [EstforConstants.ACTION_FARMING_BLUFF]: "Bluff",
+    [EstforConstants.ACTION_FARMING_CLIFFS]: "Cliffs",
+    [EstforConstants.ACTION_FARMING_FOREST]: "Forest",
+    [EstforConstants.ACTION_FARMING_GRASSLANDS]: "Grasslands",
+    [EstforConstants.ACTION_FARMING_ITEM]: "Item",
+    [EstforConstants.ACTION_FARMING_MARSHLANDS]: "Marshlands",
+    [EstforConstants.ACTION_FARMING_MEADOW]: "Meadow",
+    [EstforConstants.ACTION_FARMING_PLAINS]: "Plains",
+    [EstforConstants.ACTION_FARMING_PLATEAU]: "Plateau",
+    [EstforConstants.ACTION_FARMING_RIDGE]: "Ridge",
+    [EstforConstants.ACTION_FARMING_RIVERBANK]: "Riverbank",
+    [EstforConstants.ACTION_FARMING_RUINS]: "Ruins",
+    [EstforConstants.ACTION_FARMING_WETLANDS]: "Wetlands",
 }
 
 export const actionChoiceNames = {
@@ -537,6 +582,31 @@ export const actionChoiceNames = {
         "Merge Medium Elixium",
     [EstforConstants.ACTIONCHOICE_FORGING_MERGE_LARGE_ELIXIUM]:
         "Merge Large Elixium",
+
+    [EstforConstants.ACTIONCHOICE_FARMING_CULTIVATE_LARGE_ANCIENT_SEED]:
+        "Cultivate Large Ancient Seed",
+    [EstforConstants.ACTIONCHOICE_FARMING_CULTIVATE_LARGE_MYSTERIOUS_SEED]:
+        "Cultivate Large Mysterious Seed",
+    [EstforConstants.ACTIONCHOICE_FARMING_CULTIVATE_LARGE_OBSCURE_SEED]:
+        "Cultivate Large Obscure Seed",
+    [EstforConstants.ACTIONCHOICE_FARMING_CULTIVATE_LARGE_UNKNOWN_SEED]:
+        "Cultivate Large Unknown Seed",
+    [EstforConstants.ACTIONCHOICE_FARMING_CULTIVATE_LARGE_WILD_SEED]:
+        "Cultivate Large Wild Seed",
+    [EstforConstants.ACTIONCHOICE_FARMING_CULTIVATE_MEDIUM_MYSTERIOUS_SEED]:
+        "Cultivate Medium Mysterious Seed",
+    [EstforConstants.ACTIONCHOICE_FARMING_CULTIVATE_MEDIUM_OBSCURE_SEED]:
+        "Cultivate Medium Obscure Seed",
+    [EstforConstants.ACTIONCHOICE_FARMING_CULTIVATE_MEDIUM_UNKNOWN_SEED]:
+        "Cultivate Medium Unknown Seed",
+    [EstforConstants.ACTIONCHOICE_FARMING_CULTIVATE_MEDIUM_WILD_SEED]:
+        "Cultivate Medium Wild Seed",
+    [EstforConstants.ACTIONCHOICE_FARMING_CULTIVATE_SMALL_MYSTERIOUS_SEED]:
+        "Cultivate Small Mysterious Seed",
+    [EstforConstants.ACTIONCHOICE_FARMING_CULTIVATE_SMALL_UNKNOWN_SEED]:
+        "Cultivate Small Unknown Seed",
+    [EstforConstants.ACTIONCHOICE_FARMING_CULTIVATE_SMALL_WILD_SEED]:
+        "Cultivate Small Wild Seed",
 }
 
 export interface RelevantActionInput {
@@ -549,6 +619,7 @@ export interface RelevantActionInput {
 export enum ActionType {
     action,
     actionChoice,
+    actionAndChoice,
 }
 
 export interface RelevantAction {
@@ -593,6 +664,10 @@ export const getActionChoiceById = (
             return allActionChoicesFletching[
                 allActionChoiceIdsFletching.indexOf(choiceId)
             ]
+        case EstforConstants.ACTION_FARMING_ITEM:
+            return allActionChoicesFarming[
+                allActionChoiceIdsFarming.indexOf(choiceId)
+            ]
         default:
             return undefined
     }
@@ -601,11 +676,13 @@ export const getActionChoiceById = (
 export const getCombatActionChoiceById = (
     choiceId: number
 ): ActionChoiceInput | undefined => {
-    if (allActionChoiceIdsRanged.findIndex(x => x === choiceId) > -1) {
-        return allActionChoicesRanged[allActionChoiceIdsRanged.indexOf(choiceId)]
-    } else if (allActionChoiceIdsMagic.findIndex(x => x === choiceId) > -1) {
+    if (allActionChoiceIdsRanged.findIndex((x) => x === choiceId) > -1) {
+        return allActionChoicesRanged[
+            allActionChoiceIdsRanged.indexOf(choiceId)
+        ]
+    } else if (allActionChoiceIdsMagic.findIndex((x) => x === choiceId) > -1) {
         return allActionChoicesMagic[allActionChoiceIdsMagic.indexOf(choiceId)]
-    } else if (allActionChoiceIdsMelee.findIndex(x => x === choiceId) > -1) {
+    } else if (allActionChoiceIdsMelee.findIndex((x) => x === choiceId) > -1) {
         return allActionChoicesMelee[allActionChoiceIdsMelee.indexOf(choiceId)]
     }
 }
@@ -636,6 +713,10 @@ export const useSkillStore = defineStore({
             thieving: allActions.filter(
                 (x) => x.info.skill === Skill.THIEVING
             ) as ActionInput[],
+            farming: [
+                ...allActionChoicesFarming,
+                ...allActions.filter((x) => x.info.skill === Skill.FARMING),
+            ] as (ActionInput | ActionChoiceInput)[],
         }) as SkillState,
     getters: {
         getActionInputsForSkill: (state: SkillState) => {
@@ -651,6 +732,10 @@ export const useSkillStore = defineStore({
                         return state.thieving
                     case Skill.COMBAT:
                         return state.combat
+                    case Skill.FARMING:
+                        return state.farming.filter(
+                            (x) => "info" in x
+                        ) as ActionInput[]
                     default:
                         return []
                 }
@@ -673,6 +758,8 @@ export const useSkillStore = defineStore({
                         return [...allActionChoiceIdsForging]
                     case Skill.FLETCHING:
                         return [...allActionChoiceIdsFletching]
+                    case Skill.FARMING:
+                        return [...allActionChoiceIdsFarming]
                     default:
                         return []
                 }
@@ -704,7 +791,9 @@ export const useSkillStore = defineStore({
             return (skill: Skill): RelevantAction => {
                 let inputChoices: ActionChoiceInput[] = []
                 let inputs: ActionInput[] = []
+                let inputsAndChoices: (ActionInput | ActionChoiceInput)[] = []
                 let isActionChoice = false
+                let isInputAndChoice = false
                 const coreStore = useCoreStore()
                 const itemStore = useItemStore()
                 const playerState = coreStore.playerState
@@ -754,6 +843,11 @@ export const useSkillStore = defineStore({
                         currentXPForSkill = parseInt(playerState.alchemyXP, 10)
                         isActionChoice = true
                         break
+                    case Skill.FARMING:
+                        inputsAndChoices = state.farming
+                        currentXPForSkill = parseInt(playerState.farmingXP, 10)
+                        isInputAndChoice = true
+                        break
                     case Skill.FORGING:
                         inputChoices = state.forging
                         currentXPForSkill = parseInt(playerState.forgingXP, 10)
@@ -781,7 +875,12 @@ export const useSkillStore = defineStore({
                 }
                 let nextAction: RelevantActionInput | undefined
 
-                if (!isActionChoice) {
+                if (!isActionChoice || isInputAndChoice) {
+                    if (isInputAndChoice) {
+                        inputs = inputsAndChoices.filter(
+                            (x) => "info" in x
+                        ) as ActionInput[]
+                    }
                     inputs.sort((a, b) => {
                         if (b.info.xpPerHour > a.info.xpPerHour) return -1
                         if (b.info.xpPerHour < a.info.xpPerHour) return 1
@@ -838,7 +937,7 @@ export const useSkillStore = defineStore({
                             (x) =>
                                 x.guaranteedRewards.some(
                                     (y) =>
-                                        itemNames[y.itemTokenId]
+                                        getItemName(y.itemTokenId)
                                             ?.toLowerCase()
                                             .includes(
                                                 itemStore.itemSearch.toLowerCase()
@@ -846,18 +945,18 @@ export const useSkillStore = defineStore({
                                 ) ||
                                 x.randomRewards.some(
                                     (y) =>
-                                        itemNames[y.itemTokenId]
+                                        getItemName(y.itemTokenId)
                                             ?.toLowerCase()
                                             .includes(
                                                 itemStore.itemSearch.toLowerCase()
                                             )
                                 ) ||
-                                itemNames[x.info.handItemTokenIdRangeMax]
+                                getItemName(x.info.handItemTokenIdRangeMax)
                                     ?.toLowerCase()
                                     .includes(
                                         itemStore.itemSearch.toLowerCase()
                                     ) ||
-                                itemNames[x.info.handItemTokenIdRangeMax]
+                                getItemName(x.info.handItemTokenIdRangeMax)
                                     ?.toLowerCase()
                                     .includes(
                                         itemStore.itemSearch.toLowerCase()
@@ -866,36 +965,42 @@ export const useSkillStore = defineStore({
                     ) {
                         hasItemSearch = true
                     }
-                } else {
+                }
+
+                if (isActionChoice || isInputAndChoice) {
+                    if (isInputAndChoice) {
+                        inputChoices = inputsAndChoices.filter(
+                            (x) => !("info" in x)
+                        ) as ActionChoiceInput[]
+                    }
                     inputChoices.sort((a, b) => {
                         if (b.xpPerHour > a.xpPerHour) return -1
                         if (b.xpPerHour < a.xpPerHour) return 1
 
                         if (
-                            b.minXPs[b.minSkills.indexOf(skill)] >
-                            a.minXPs[b.minSkills.indexOf(skill)]
+                            b.skillMinXPs[b.skills.indexOf(skill)] >
+                            a.skillMinXPs[b.skills.indexOf(skill)]
                         )
                             return -1
                         if (
-                            b.minXPs[b.minSkills.indexOf(skill)] <
-                            a.minXPs[b.minSkills.indexOf(skill)]
+                            b.skillMinXPs[b.skills.indexOf(skill)] <
+                            a.skillMinXPs[b.skills.indexOf(skill)]
                         )
                             return 1
                         return 0
                     })
 
                     currentAction = {
-                        minXP: inputChoices[0].minXPs[0],
+                        minXP: inputChoices[0].skillMinXPs[0],
                         xpPerHour: inputChoices[0].xpPerHour,
                         actionId: inputChoices[0].outputTokenId,
-                        name: itemNames[inputChoices[0].outputTokenId],
+                        name: getItemName(inputChoices[0].outputTokenId),
                     }
 
                     const availableActionsToPlayer = inputChoices.filter((x) =>
-                        x.minXPs.every(
+                        x.skillMinXPs.every(
                             (y, i) =>
-                                y <= currentXPForSkill &&
-                                x.minSkills[i] === skill
+                                y <= currentXPForSkill && x.skills[i] === skill
                         )
                     )
                     if (availableActionsToPlayer.length > 0) {
@@ -904,34 +1009,36 @@ export const useSkillStore = defineStore({
                                 availableActionsToPlayer.length - 1
                             ]
                         currentAction.minXP =
-                            lastAction.minXPs[
-                                lastAction.minSkills.findIndex(
+                            lastAction.skillMinXPs[
+                                lastAction.skills.findIndex(
                                     (x) => x === lastAction.skill
                                 )
                             ] || 0
                         currentAction.xpPerHour = lastAction.xpPerHour
                         currentAction.actionId = lastAction.outputTokenId
-                        currentAction.name = itemNames[lastAction.outputTokenId]
+                        currentAction.name = getItemName(
+                            lastAction.outputTokenId
+                        )
                     }
                     const nextActions = inputChoices.filter(
                         (x) =>
-                            x.minXPs.some(
+                            x.skillMinXPs.some(
                                 (y, i) =>
                                     y >= currentAction.minXP &&
-                                    x.minSkills[i] === skill
+                                    x.skills[i] === skill
                             ) && x.xpPerHour > currentAction.xpPerHour
                     )
 
                     if (nextActions.length > 0) {
                         nextActions.sort((a, b) => {
                             if (
-                                b.minXPs[b.minSkills.indexOf(skill)] >
-                                a.minXPs[b.minSkills.indexOf(skill)]
+                                b.skillMinXPs[b.skills.indexOf(skill)] >
+                                a.skillMinXPs[b.skills.indexOf(skill)]
                             )
                                 return -1
                             if (
-                                b.minXPs[b.minSkills.indexOf(skill)] <
-                                a.minXPs[b.minSkills.indexOf(skill)]
+                                b.skillMinXPs[b.skills.indexOf(skill)] <
+                                a.skillMinXPs[b.skills.indexOf(skill)]
                             )
                                 return 1
 
@@ -941,14 +1048,14 @@ export const useSkillStore = defineStore({
                         })
                         nextAction = {
                             minXP:
-                                nextActions[0].minXPs[
-                                    nextActions[0].minSkills.findIndex(
+                                nextActions[0].skillMinXPs[
+                                    nextActions[0].skills.findIndex(
                                         (x) => x === skill
                                     )
                                 ] || 0,
                             xpPerHour: nextActions[0].xpPerHour,
                             actionId: nextActions[0].outputTokenId,
-                            name: itemNames[nextActions[0].outputTokenId],
+                            name: getItemName(nextActions[0].outputTokenId),
                         }
                     }
 
@@ -957,23 +1064,23 @@ export const useSkillStore = defineStore({
                             (x) =>
                                 x.inputTokenIds.some(
                                     (y) =>
-                                        itemNames[y]
+                                        getItemName(y)
                                             ?.toLowerCase()
                                             .includes(
                                                 itemStore.itemSearch.toLowerCase()
                                             )
                                 ) ||
-                                itemNames[x.outputTokenId]
+                                getItemName(x.outputTokenId)
                                     ?.toLowerCase()
                                     .includes(
                                         itemStore.itemSearch.toLowerCase()
                                     ) ||
-                                itemNames[x.handItemTokenIdRangeMax]
+                                getItemName(x.handItemTokenIdRangeMax)
                                     ?.toLowerCase()
                                     .includes(
                                         itemStore.itemSearch.toLowerCase()
                                     ) ||
-                                itemNames[x.handItemTokenIdRangeMax]
+                                getItemName(x.handItemTokenIdRangeMax)
                                     ?.toLowerCase()
                                     .includes(
                                         itemStore.itemSearch.toLowerCase()
@@ -988,9 +1095,11 @@ export const useSkillStore = defineStore({
                     nextAction,
                     currentXPForSkill,
                     skill,
-                    actionType: isActionChoice
-                        ? ActionType.actionChoice
-                        : ActionType.action,
+                    actionType: isInputAndChoice
+                        ? ActionType.actionAndChoice
+                        : isActionChoice
+                          ? ActionType.actionChoice
+                          : ActionType.action,
                     hasItemSearch,
                 }
             }

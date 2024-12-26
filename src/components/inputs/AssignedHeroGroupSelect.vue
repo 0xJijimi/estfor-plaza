@@ -18,9 +18,8 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import { actionChoiceNames, actionNames } from "../../store/skills"
-import { decode } from "../../utils/abi"
-import estforPlayerAbi from "../../abi/estforPlayer.json"
-import { ProxySilo } from "../../store/models/factory.models";
+import { ProxySilo } from "../../store/models/factory.models"
+import { safeDecode } from "../../store/core"
 
 const emit = defineEmits(["update:modelValue"])
 
@@ -56,10 +55,9 @@ const options = computed(() => {
     return [
         "",
         ...props.heroes.map((h) => {
-            const decoded = decode(
+            const decoded = safeDecode(
                 h.savedTransactions[0].data,
-                "startActions",
-                estforPlayerAbi
+                "startActions"
             )
             const actionId = decoded?.[1]?.[0]?.[1] || BigInt(0)
             const choiceId = decoded?.[1]?.[0]?.[3] || BigInt(0)

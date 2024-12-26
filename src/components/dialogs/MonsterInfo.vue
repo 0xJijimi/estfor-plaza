@@ -114,13 +114,13 @@
                     <tbody>
                         <tr>
                             <td class="text-center">
-                                {{ monster?.combatStats.melee }}
+                                {{ monster?.combatStats.meleeAttack }}
                             </td>
                             <td class="text-center">
-                                {{ monster?.combatStats.ranged }}
+                                {{ monster?.combatStats.rangedAttack }}
                             </td>
                             <td class="text-center">
-                                {{ monster?.combatStats.magic }}
+                                {{ monster?.combatStats.magicAttack }}
                             </td>
                             <td class="text-center">
                                 {{ monster?.combatStats.meleeDefence }}
@@ -153,11 +153,12 @@
                             <td
                                 class="text-left cursor-pointer"
                                 @click.prevent="
-                                    itemStore.itemSearch =
-                                        itemNames[i.itemTokenId]
+                                    itemStore.itemSearch = getItemName(
+                                        i.itemTokenId
+                                    )
                                 "
                             >
-                                {{ itemNames[i.itemTokenId] || "Unknown" }}
+                                {{ getItemName(i.itemTokenId) || "Unknown" }}
                             </td>
                             <td class="text-right">{{ i.rate / 10 }}</td>
                             <td class="text-right">100%</td>
@@ -166,11 +167,12 @@
                             <td
                                 class="text-left cursor-pointer"
                                 @click.prevent="
-                                    itemStore.itemSearch =
-                                        itemNames[i.itemTokenId]
+                                    itemStore.itemSearch = getItemName(
+                                        i.itemTokenId
+                                    )
                                 "
                             >
-                                {{ itemNames[i.itemTokenId] }}
+                                {{ getItemName(i.itemTokenId) }}
                             </td>
                             <td class="text-right">{{ i.amount }}</td>
                             <td class="text-right">
@@ -195,7 +197,7 @@ import {
     useMonsterStore,
 } from "../../store/monsters"
 import { MEDIA_URL } from "../../store/core"
-import { itemNames, useItemStore } from "../../store/items"
+import { getItemName, useItemStore } from "../../store/items"
 
 const monsterStore = useMonsterStore()
 const itemStore = useItemStore()

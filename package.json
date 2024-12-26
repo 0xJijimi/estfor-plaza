@@ -13,7 +13,7 @@
   "dependencies": {
     "@apollo/client": "^3.9.6",
     "@heroicons/vue": "^2.0.18",
-    "@paintswap/estfor-definitions": "^1.0.232",
+    "@paintswap/estfor-definitions": "^2.0.52",
     "@vue/apollo-composable": "^4.0.2",
     "@vueuse/core": "^10.7.0",
     "@vueuse/head": "^2.0.0",
@@ -24,7 +24,7 @@
     "graphql": "^16.8.1",
     "graphql-tag": "^2.12.6",
     "pinia": "^2.1.7",
-    "viem": "^2.9.23",
+    "viem": "^2.21.57",
     "vue": "^3.3.8",
     "vue-router": "^4.2.5"
   },
@@ -40,8 +40,8 @@
     "tailwindcss": "^3.3.5",
     "ts-node": "^10.9.1",
     "tsx": "^4.4.0",
-    "typescript": "^5.2.2",
-    "vite": "^5.0.0",
-    "vue-tsc": "^1.8.22"
+    "typescript": "^5.7.2",
+    "vite": "^6.0.6",
+    "vue-tsc": "^2.2.0"
   }
 }
