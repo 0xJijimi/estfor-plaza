@@ -21,7 +21,7 @@ export const config = createConfig({
                 http("https://rpc.fantom.network"),
                 http("https://fantom.drpc.org"),
                 http("https://fantom-pokt.nodies.app"),
-                http("https://fantom.blockpi.network/v1/rpc/public"),
+                // http("https://fantom.blockpi.network/v1/rpc/public"),
                 http("https://rpc.ankr.com/fantom"),
             ],
             { rank: { interval: 20_000 } }
