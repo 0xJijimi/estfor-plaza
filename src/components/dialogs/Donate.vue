@@ -50,7 +50,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue"
-import { getAccount, waitForTransactionReceipt } from "@wagmi/core"
+import { getAccount, waitForTransactionReceipt, switchChain } from "@wagmi/core"
 import { useAppStore } from "../../store/app"
 import { useBroochStore } from "../../store/brooch"
 import { config } from "../../config"
@@ -72,6 +72,10 @@ const init = async () => {
     try {
         const account = getAccount(config)
         if (account.isConnected) {
+            if (account.chainId !== 146) {
+                switchChain(config, { chainId: 146 })
+            }
+
             loading.value = true
             await broochStore.getBroochData(0, false)
             await broochStore.getBroochData(1, true)
@@ -104,7 +108,7 @@ const mintNFT = async () => {
     loading.value = true
     try {
         const hash = await broochStore.mintNFT(0)
-        await waitForTransactionReceipt(config, { hash })
+        await waitForTransactionReceipt(config, { hash, chainId: 146 })
         app.addToast("Thank you for your support!", "alert-success", 5000)
     } catch (error) {
         // app.addToast('Failed to mint brooch', 'alert-error', 50000)

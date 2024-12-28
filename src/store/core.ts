@@ -40,6 +40,7 @@ export enum Address {
     estforPlayerNFT,
     itemNFT,
     brush,
+    bridge,
 }
 
 export interface AddressMap {
@@ -221,6 +222,11 @@ export const useCoreStore = defineStore({
                             address:
                                 "0x85dec8c4B2680793661bCA91a8F129607571863d",
                         },
+                        {
+                            name: Address.bridge,
+                            address:
+                                "0x4381Ba70358b46e220B3E9188ACFef224e9F8a8f",
+                        },
                     ],
                 },
                 {
@@ -234,7 +240,7 @@ export const useCoreStore = defineStore({
                         {
                             name: Address.factoryRegistry,
                             address:
-                                "0xF9A66F8C569D23f1fA1A63950c3CA822Cf26355e",
+                                "0x32593D151D3Ba6E0c9dF933e522cC51F5ed50842",
                         },
                         {
                             name: Address.estforPlayerNFT,
@@ -244,7 +250,7 @@ export const useCoreStore = defineStore({
                         {
                             name: Address.itemNFT,
                             address:
-                                "0x8ee7d355f76fb5621ee89bca431ba0cd39fe14c5",
+                                "0x8970c63da309d5359a579c2f53bfd64f72b7b706",
                         },
                         {
                             name: Address.brush,

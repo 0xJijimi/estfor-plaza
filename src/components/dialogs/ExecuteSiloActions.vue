@@ -261,11 +261,19 @@ const executeSavedTransactions = async () => {
     loading.value = true
     error.value = null
     try {
-        await factoryStore.executeSavedTransactions(
-            silosWithEmptyQueuesOrActionInputOnly.value,
-            shouldFastCall.value,
-            props.chainId as 250 | 146
-        )
+        if (props.chainId === 250) {
+            await factoryStore.processActions(
+                silosWithEmptyQueuesOrActionInputOnly.value,
+                shouldFastCall.value,
+                props.chainId as 250 | 146
+            )
+        } else {
+            await factoryStore.executeSavedTransactions(
+                silosWithEmptyQueuesOrActionInputOnly.value,
+                shouldFastCall.value,
+                props.chainId as 250 | 146
+            )
+        }
         app.addToast(
             `${silosWithEmptyQueuesOrActionInputOnly.value.length} hero${
                 silosWithEmptyQueuesOrActionInputOnly.value.length !== 1
@@ -585,11 +593,20 @@ const executeActionChoiceSavedTransactions = async () => {
                     )
                 }
                 stage.value = "Executing actions (Part 2 of 2)"
-                await factoryStore.executeSavedTransactions(
-                    silosWithActionChoicesOnly.value,
-                    shouldFastCall.value,
-                    props.chainId as 250 | 146
-                )
+
+                if (props.chainId === 250) {
+                    await factoryStore.processActions(
+                        silosWithActionChoicesOnly.value,
+                        shouldFastCall.value,
+                        props.chainId as 250 | 146
+                    )
+                } else {
+                    await factoryStore.executeSavedTransactions(
+                        silosWithActionChoicesOnly.value,
+                        shouldFastCall.value,
+                        props.chainId as 250 | 146
+                    )
+                }
                 stage.value = null
                 app.addToast(
                     `${silosWithActionChoicesOnly.value.length} hero${

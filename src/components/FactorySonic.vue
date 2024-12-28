@@ -8,9 +8,30 @@
                 Estfor heroes and tell them to do things.
             </p>
             <p class="alert alert-warning my-5">
-                This Factory works only on Fantom Opera.
+                This is the Sonic Factory. If you want to use the Fantom Factory, click the button below.                
             </p>
-            <router-link to="/factory" class="btn btn-primary mb-5">Switch to Sonic Factory</router-link>
+            <router-link to="/factory-fantom" class="btn btn-primary mb-5">Switch to Fantom Factory</router-link>
+            <p v-if="!hasRubyBrooch" class="alert alert-warning my-5">
+                <img
+                    src="/src/assets/ruby_brooch_icon.png"
+                    class="rounded-lg w-[20px] inline cursor-pointer"
+                    alt="Ruby Brooch"
+                    @click.prevent="rubyBroochPaywallRef?.openDialog()"
+                />
+                <span
+                    >As you don't have a Ruby Brooch, you do not get the full
+                    benefits of the Factory - there is a
+                    {{
+                        Number(
+                            factoryStore.transactionCharge / BigInt(10 ** 15)
+                        ) / 1000 || "small"
+                    }}
+                    S charge per execution, and you cannot batch execute
+                    actions.<br />If you want to get a Ruby Brooch, first get an
+                    Emerald Brooch (click the tree icon in the top left), then
+                    click the Ruby brooch to the left of this message.</span
+                >
+            </p>
             <div v-if="loading">
                 Loading heroes...
                 <span
@@ -24,6 +45,9 @@
                         factoryStore.proxys.length
                     }}</span>
                     silos.
+                </p>
+                <p class="alert alert-warning my-5">
+                    Silo creation is currently extremely slow due to The Graph indexers being slow. It can take up to 15 minutes for your silos to appear. If the transaction was successful please wait for it to appear.
                 </p>
                 <div class="flex justify-start mt-5">
                     <label class="form-control w-full">
@@ -83,10 +107,14 @@
         />
     </div>
     <ViewSilos ref="viewSilosRef" :chainId="chainId" />
+    <RubyBroochPaywall
+        ref="rubyBroochPaywallRef"
+        id="factory_ruby_brooch_modal"
+    />
 </template>
 
 <script setup lang="ts">
-import { ref, onBeforeMount } from "vue"
+import { computed, ref, onBeforeMount } from "vue"
 import { useFactoryStore } from "../store/factory"
 import { useAppStore } from "../store/app"
 import { useQuery } from "@vue/apollo-composable"
@@ -98,22 +126,29 @@ import { getAccount, watchAccount, switchChain } from "@wagmi/core"
 import ItemBank from "./factory/ItemBank.vue"
 import ViewSilos from "./dialogs/ViewSilos.vue"
 import { config } from "../config"
+import { useBroochStore } from "../store/brooch"
+import RubyBroochPaywall from "./dialogs/RubyBroochPaywall.vue"
+import { sleep } from "../utils/time"
 
 const factoryStore = useFactoryStore()
 const app = useAppStore()
+const broochStore = useBroochStore()
 const loading = ref(factoryStore.initialised === false)
 const creating = ref(false)
 const silosToCreate = ref(5)
 const previousCount = ref(0)
-const chainId = ref<250 | 146>(250)
+const chainId = ref<250 | 146>(146)
 
 const viewSilosRef = ref<typeof ViewSilos>()
 
+const hasRubyBrooch = computed(() => broochStore.hasAccess(1))
 const factoryAccount = ref(getAccount(config))
+
+const rubyBroochPaywallRef = ref<typeof RubyBroochPaywall>()
 
 const { onError, refetch, fetchMore, onResult } = useQuery(
     gql`
-        query getProxys($offset: Int, $acc: String!) {
+        query getSonicProxys($offset: Int, $acc: String!) {
             factoryRegistryCreateds(skip: $offset, where: { owner: $acc }) {
                 sender
                 owner
@@ -124,10 +159,10 @@ const { onError, refetch, fetchMore, onResult } = useQuery(
     `,
     () => ({
         offset: 0,
-        acc: factoryAccount.value.address
+        acc: factoryAccount.value.address,
     }),
     {
-        clientId: "default",
+        clientId: "sonic",
     }
 )
 
@@ -195,6 +230,7 @@ const createSilos = async () => {
                 offset: 0,
                 acc: factoryAccount.value.address,
             })
+            await sleep(5000)
         }
     } catch {
         // user rejected tx
@@ -222,8 +258,8 @@ watchAccount(config, {
 onError(async () => {
     loading.value = true
     try {
-        await factoryStore.getProxys(chainId.value)
-        await factoryStore.getAllProxyStates(chainId.value)
+        // await factoryStore.getProxys(chainId.value)
+        // await factoryStore.getAllProxyStates(chainId.value)
     } catch (e) {
         console.error(e)
     } finally {
@@ -234,8 +270,8 @@ onError(async () => {
 onBeforeMount(() => {
     const account = getAccount(config)
     if (account.isConnected) {
-        if (account.chainId !== 250) {
-            switchChain(config, { chainId: 250 })
+        if (account.chainId !== 146) {
+            switchChain(config, { chainId: 146 })
         }
     }
     previousCount.value = 0

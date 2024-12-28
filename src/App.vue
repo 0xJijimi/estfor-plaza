@@ -10,7 +10,7 @@ import {
     createHttpLink,
     InMemoryCache,
 } from "@apollo/client/core"
-import { DefaultApolloClient } from "@vue/apollo-composable"
+import { ApolloClients } from "@vue/apollo-composable"
 
 const appStore = useAppStore()
 
@@ -45,6 +45,7 @@ const httpLink = createHttpLink({
 
 // Cache implementation
 const cache = new InMemoryCache()
+const sonicCache = new InMemoryCache()
 
 // Create the apollo client
 const apolloClient = new ApolloClient({
@@ -52,7 +53,19 @@ const apolloClient = new ApolloClient({
     cache,
 })
 
-provide(DefaultApolloClient, apolloClient)
+const sonicHttpLink = createHttpLink({
+    uri: import.meta.env.VITE_SONIC_SUBGRAPH_URL,
+})
+
+const sonicApolloClient = new ApolloClient({
+    link: sonicHttpLink,
+    cache: sonicCache,
+})
+
+provide(ApolloClients, {
+    default: apolloClient, 
+    sonic: sonicApolloClient,
+})
 </script>
 
 <template>

@@ -31,6 +31,7 @@ import {
 import estforPlayerAbi from "../abi/estforPlayer.json"
 import itemNFTAbi from "../abi/itemNFT.json"
 import estforPlayerNFTAbi from "../abi/estforPlayerNFT.json"
+import bridgeAbi from "../abi/bridge.json"
 import factoryAbi from "../abi/factoryRegistry.json"
 import epProxyAbi from "../abi/epProxy.json"
 import brushAbi from "../abi/brush.json"
@@ -379,7 +380,8 @@ const constructQueuedActions = (
             rightHand || 0, // weapon or tool
             leftHand || 0, // shield
             60 * 60 * 24, // 24 hours
-            combatStyle, // NONE / ATTACK / DEFENCE
+            combatStyle, // NONE / ATTACK / DEFENCE,
+            0, // petId
         ],
     ]
 }
@@ -532,7 +534,10 @@ const getChunksForMulticall = async (
     data: any[],
     to: string,
     contract: Interface,
-    chunks: number
+    chunks: number,
+    value: bigint,
+    chainId: 250 | 146,
+    gasLimit: bigint = BigInt(6660000)
 ) => {
     let attempts = 0
     let actualChunks = chunks
@@ -541,20 +546,26 @@ const getChunksForMulticall = async (
         try {
             const splits = Math.ceil(data.length / actualChunks)
             for (let i = 0; i < splits; i++) {
-                const result = await estimateGas(estimateConfig, {
+                const payload: any = {
                     account: getAccount(config).address,
                     to: to as `0x${string}`,
                     data: contract.encodeFunctionData("multicall", [
                         data.slice(i * actualChunks, (i + 1) * actualChunks),
                     ]) as `0x${string}`,
+                    chainId,
                     type: "legacy", // ftm is lame
-                })
-                if (result > 6660000) {
+                }
+                if (value > BigInt(0)) {
+                    payload.value = value
+                }
+                const result = await estimateGas(estimateConfig, payload)
+                if (result > gasLimit) {
                     throw new Error("Gas estimate too high")
                 }
             }
             success = true
-        } catch {
+        } catch (e) {
+            // console.log(e)
             if (actualChunks <= 8) {
                 actualChunks -= 1
             } else if (actualChunks <= 16) {
@@ -736,7 +747,9 @@ export const useFactoryStore = defineStore({
             data: any[],
             chainId: 250 | 146,
             fastCall: boolean,
-            chunks = 10
+            chunks = 10,
+            value: bigint = BigInt(0),
+            gasLimit: bigint = BigInt(6660000)
         ) {
             const coreStore = useCoreStore()
             const factoryAddress = coreStore.getAddress(
@@ -753,7 +766,10 @@ export const useFactoryStore = defineStore({
                 data,
                 factoryAddress,
                 factoryInterface,
-                chunks
+                chunks,
+                value,
+                chainId,
+                gasLimit
             )
             const splits = Math.ceil(data.length / actualChunks)
             this.totalTransactionNumber = splits
@@ -762,7 +778,7 @@ export const useFactoryStore = defineStore({
                     let latestHash
                     for (let i = 0; i < splits; i++) {
                         this.currentTransactionNumber = i + 1
-                        latestHash = await writeContract(config, {
+                        const payload: any = {
                             address: factoryAddress as `0x${string}`,
                             abi: factoryAbi,
                             functionName: "multicall",
@@ -774,7 +790,11 @@ export const useFactoryStore = defineStore({
                             ],
                             type: "legacy",
                             chainId,
-                        })
+                        }
+                        if (value > BigInt(0)) {
+                            payload.value = value
+                        }
+                        latestHash = await writeContract(config, payload)
                     }
                     if (latestHash) {
                         await waitForTransactionReceipt(config, {
@@ -784,7 +804,7 @@ export const useFactoryStore = defineStore({
                 } else {
                     for (let i = 0; i < splits; i++) {
                         this.currentTransactionNumber = i + 1
-                        const hash = await writeContract(config, {
+                        const payload: any = {
                             address: factoryAddress as `0x${string}`,
                             abi: factoryAbi,
                             functionName: "multicall",
@@ -796,7 +816,11 @@ export const useFactoryStore = defineStore({
                             ],
                             type: "legacy",
                             chainId,
-                        })
+                        }
+                        if (value > BigInt(0)) {
+                            payload.value = value
+                        }
+                        const hash = await writeContract(config, payload)
                         await waitForTransactionReceipt(config, { hash })
                     }
                 }
@@ -1120,7 +1144,9 @@ export const useFactoryStore = defineStore({
                 selectorArray,
                 factoryAddress,
                 factoryInterface,
-                15
+                15,
+                BigInt(0),
+                chainId
             )
             const splits = Math.ceil(proxyNumber / actualChunks)
             this.totalTransactionNumber = splits
@@ -1450,6 +1476,112 @@ export const useFactoryStore = defineStore({
             }
             await this.getBankItems(chainId)
         },
+        async processActions(
+            proxys: ProxySilo[],
+            fastCall: boolean,
+            chainId: 250 | 146
+        ) {
+            const coreStore = useCoreStore()
+            const factoryAddress = coreStore.getAddress(
+                Address.factoryRegistry,
+                chainId
+            )
+            const playersAddress = coreStore.getAddress(Address.estforPlayers, chainId)
+            const account = getAccount(config)
+            if (
+                !factoryAddress ||
+                !playersAddress ||
+                !account.isConnected ||
+                account.chainId !== chainId
+            ) {
+                return
+            }
+
+            const factoryInterface = new Interface(factoryAbi)
+            const playersInterface = new Interface(estforPlayerAbi)
+
+            const selectorArray = proxys.map((h) =>
+                solidityPacked(
+                    ["bytes"],
+                    [
+                        factoryInterface.encodeFunctionData(
+                            "execute",
+                            [
+                                h.address,
+                                playersAddress,
+                                playersInterface.encodeFunctionData(
+                                    "processActions",
+                                    [
+                                        h.playerId
+                                    ]
+                                )
+                            ]
+                        ),
+                    ]
+                )
+            )
+
+            await this.multicall(selectorArray, chainId, fastCall, 40)
+
+            await sleep(2000)
+            await this.getBankItems(chainId)
+            await this.updateQueuedActions(chainId)
+        },
+        async bridgeHeroes(
+            proxys: ProxySilo[],
+            chainId: 250 | 146
+        ) {
+            const coreStore = useCoreStore()
+            const factoryAddress = coreStore.getAddress(
+                Address.factoryRegistry,
+                chainId
+            )
+            const bridgeAddress = coreStore.getAddress(Address.bridge, chainId)
+            const account = getAccount(config)
+            if (
+                !factoryAddress ||
+                !bridgeAddress ||
+                !account.isConnected ||
+                account.chainId !== chainId
+            ) {
+                return
+            }
+
+            const factoryInterface = new Interface(factoryAbi)
+            const bridgeInterface = new Interface(bridgeAbi)
+
+            const selectorArray = proxys.map((h) =>
+                solidityPacked(
+                    ["bytes"],
+                    [
+                        factoryInterface.encodeFunctionData(
+                            "execute",
+                            [
+                                h.address,
+                                bridgeAddress,
+                                bridgeInterface.encodeFunctionData(
+                                    "sendPlayer",
+                                    [
+                                        h.playerId,
+                                        "",
+                                        "",
+                                        "",
+                                        0,
+                                        "",
+                                        "",
+                                        "",
+                                    ]
+                                ),
+                            ]
+                        ),
+                    ]
+                )
+            )
+
+            
+            await this.multicall(selectorArray, chainId, false, 1, BigInt(2e17), BigInt(11660000))
+            await sleep(2000)
+        },
         async executeSavedTransactions(
             proxys: ProxySilo[],
             fastCall: boolean,
@@ -1460,11 +1592,9 @@ export const useFactoryStore = defineStore({
                 Address.factoryRegistry,
                 chainId
             )
-            const itemAddress = coreStore.getAddress(Address.itemNFT, chainId)
             const account = getAccount(config)
             if (
                 !factoryAddress ||
-                !itemAddress ||
                 !account.isConnected ||
                 account.chainId !== chainId
             ) {
@@ -1602,7 +1732,7 @@ export const useFactoryStore = defineStore({
                 type: "legacy",
                 chainId,
             })
-            await waitForTransactionReceipt(config, { hash })
+            await waitForTransactionReceipt(config, { hash, chainId })
             await this.getBankItems(chainId)
         },
         async getRelevantItemsForProxies(
@@ -1681,7 +1811,8 @@ export const useFactoryStore = defineStore({
         async transferItemsToBank(
             relevantTokenIds: number[],
             proxys: ProxySilo[],
-            chainId: 250 | 146
+            chainId: 250 | 146,
+            overrideNeedsItem: boolean = false
         ) {
             const coreStore = useCoreStore()
             const itemAddress = coreStore.getAddress(Address.itemNFT, chainId)
@@ -1723,7 +1854,7 @@ export const useFactoryStore = defineStore({
 
                 for (const item of result.userItemNFTs
                     .filter((i) => relevantTokenIds.includes(i.tokenId))
-                    .filter((i) => !proxyNeedsItem(i, proxy))) {
+                    .filter((i) => overrideNeedsItem || !proxyNeedsItem(i, proxy))) {
                     let d = deposits.find((d) => d.proxy === proxy.address)
                     if (!d) {
                         d = {
