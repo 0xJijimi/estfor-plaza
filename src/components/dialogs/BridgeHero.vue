@@ -7,6 +7,10 @@
                 }}
             </h3>
 
+            <p class="text-center my-5">
+                This will transfer all items to the bank and then withdraw the heroes for bridging. N.B. The bank is not part of this and has to be manually withdrawn (use View Silos button after withdrawing everything from the bank).
+            </p>
+
             <button
                 type="button"
                 class="btn btn-primary mt-5 w-full"
@@ -18,12 +22,12 @@
             <button
                 type="button"
                 class="btn btn-primary mt-5 w-full"
-                @click="bridgeHeroes"
-                :disabled="loading || true"
+                @click="withdrawHeroes"
+                :disabled="loading"
             >
-                2. Bridge {{ heroesToBridge.length }} Hero{{
+                2. Withdraw {{ heroesToBridge.length }} Hero{{
                     heroesToBridge.length === 1 ? "" : "es"
-                }} (Disabled)
+                }}
             </button>
             <div
                 v-if="loading && factoryStore.currentTransactionNumber > 0"
@@ -103,10 +107,10 @@ const transferItems = async () => {
     }
 }
 
-const bridgeHeroes = async () => {
+const withdrawHeroes = async () => {
     loading.value = true
     try {
-        await factoryStore.bridgeHeroes(
+        await factoryStore.withdrawHeroes(
             heroesToBridge.value,
             props.chainId as 250 | 146
         )
@@ -114,20 +118,46 @@ const bridgeHeroes = async () => {
         app.addToast(
             `${heroesToBridge.value.length} hero${
                 heroesToBridge.value.length !== 1 ? "es" : ""
-            } bridged`,
+            } withdrawn`,
             "alert-success",
             5000
         )
         const dialog = document.getElementById(props.id) as HTMLDialogElement
-        dialog.close()
+        dialog.close()        
     } catch (e) {
         console.error(e)
         // user declined tx
     } finally {
-        // await factoryStore.getAllProxyStates(props.chainId as 250 | 146)
         loading.value = false
+        await factoryStore.getAllProxyStates(props.chainId as 250 | 146)
     }
 }
+
+// const bridgeHeroes = async () => {
+//     loading.value = true
+//     try {
+//         await factoryStore.bridgeHeroes(
+//             heroesToBridge.value,
+//             props.chainId as 250 | 146
+//         )
+
+//         app.addToast(
+//             `${heroesToBridge.value.length} hero${
+//                 heroesToBridge.value.length !== 1 ? "es" : ""
+//             } bridged`,
+//             "alert-success",
+//             5000
+//         )
+//         const dialog = document.getElementById(props.id) as HTMLDialogElement
+//         dialog.close()
+//     } catch (e) {
+//         console.error(e)
+//         // user declined tx
+//     } finally {
+//         // await factoryStore.getAllProxyStates(props.chainId as 250 | 146)
+//         loading.value = false
+//     }
+// }
 
 defineExpose({
     openDialog,

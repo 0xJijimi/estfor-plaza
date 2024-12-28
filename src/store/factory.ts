@@ -537,7 +537,7 @@ const getChunksForMulticall = async (
     chunks: number,
     value: bigint,
     chainId: 250 | 146,
-    gasLimit: bigint = BigInt(6660000)
+    gasLimit: bigint = BigInt(6000000)
 ) => {
     let attempts = 0
     let actualChunks = chunks
@@ -692,6 +692,45 @@ export const useFactoryStore = defineStore({
 
             await waitForTransactionReceipt(config, { hash })
         },
+        async withdrawHeroes(
+            proxys: ProxySilo[],
+            chainId: 250 | 146,
+        ) {
+            const coreStore = useCoreStore()
+            const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
+            const playerNFTAddress = coreStore.getAddress(
+                Address.estforPlayerNFT
+            )
+            const account = getAccount(config)
+
+            if (!factoryAddress || !playerNFTAddress || !account.isConnected || account.chainId !== chainId) {
+                return
+            }
+
+            const playerNFTInterface = new Interface(estforPlayerNFTAbi)
+            const factoryInterface = new Interface(factoryAbi)
+
+            const selectorArray = proxys.map((h) =>
+                solidityPacked(
+                    ["bytes"],
+                    [
+                        factoryInterface.encodeFunctionData("execute", [
+                            h.address,
+                            playerNFTAddress,
+                            playerNFTInterface.encodeFunctionData("safeTransferFrom", [
+                                h.address,
+                                account.address,
+                                h.playerId,
+                                1,
+                                solidityPacked(["bytes"], ["0x"]),
+                            ]),
+                        ]),
+                    ]
+                )
+            )
+
+            await this.multicall(selectorArray, chainId, false)
+        },
         async mintHeroes(heroes: any[], chainId: 250 | 146) {
             const coreStore = useCoreStore()
             const factoryAddress = coreStore.getAddress(
@@ -749,7 +788,7 @@ export const useFactoryStore = defineStore({
             fastCall: boolean,
             chunks = 10,
             value: bigint = BigInt(0),
-            gasLimit: bigint = BigInt(6660000)
+            gasLimit: bigint = BigInt(6000000)
         ) {
             const coreStore = useCoreStore()
             const factoryAddress = coreStore.getAddress(
@@ -799,6 +838,7 @@ export const useFactoryStore = defineStore({
                     if (latestHash) {
                         await waitForTransactionReceipt(config, {
                             hash: latestHash,
+                            chainId,
                         })
                     }
                 } else {
@@ -821,7 +861,7 @@ export const useFactoryStore = defineStore({
                             payload.value = value
                         }
                         const hash = await writeContract(config, payload)
-                        await waitForTransactionReceipt(config, { hash })
+                        await waitForTransactionReceipt(config, { hash, chainId })
                     }
                 }
             } catch (e) {
@@ -1870,7 +1910,7 @@ export const useFactoryStore = defineStore({
             const factoryInterface = new Interface(factoryAbi)
             const itemInterface = new Interface(itemNFTAbi)
 
-            const selectorArray = deposits.map((i) =>
+            const selectorArray = deposits.filter(i => i.items.length > 0).map((i) =>
                 solidityPacked(
                     ["bytes"],
                     [

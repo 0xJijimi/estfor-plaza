@@ -3,6 +3,11 @@
         <div class="modal-box bg-base-100 border-2 border-primary">
             <h3 class="font-bold text-lg text-center">Withdraw Items</h3>
 
+            <div class="flex justify-center gap-2">
+                <button class="btn btn-primary btn-sm mt-5" @click="selectAll">Select All</button>
+                <button class="btn btn-primary btn-sm mt-5" @click="selectNone">Select None</button>
+            </div>
+
             <div class="overflow-x-auto mt-5">
                 <table class="table md:table-md table-xs">
                     <thead>
@@ -110,6 +115,18 @@ const openDialog = (b: AggregatedItem[]) => {
 const itemsToWithdraw = computed(() => {
     return bankItems.value.filter((i) => i.amountToWithdraw > 0)
 })
+
+const selectAll = () => {
+    bankItems.value.forEach((i) => {
+        i.amountToWithdraw = Number(i.amount)
+    })
+}
+
+const selectNone = () => {
+    bankItems.value.forEach((i) => {
+        i.amountToWithdraw = 0
+    })
+}
 
 const withdrawItems = async () => {
     loading.value = true
