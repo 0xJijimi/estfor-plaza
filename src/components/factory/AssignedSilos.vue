@@ -147,7 +147,7 @@
                     </tbody>
                 </table>
             </div>
-            <div v-if="assignedSilosRef.length > 20" class="join mx-auto">
+            <div v-if="assignedSilosRef.length > pageSize" class="join mx-auto">
                 <button
                     :disabled="pageNumber === 0"
                     class="join-item btn btn-primary"
