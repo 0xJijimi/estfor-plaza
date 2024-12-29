@@ -41,6 +41,7 @@ export enum Address {
     itemNFT,
     brush,
     bridge,
+    multicall,
 }
 
 export interface AddressMap {
@@ -256,6 +257,10 @@ export const useCoreStore = defineStore({
                             name: Address.brush,
                             address:
                                 "0xE51EE9868C1f0d6cd968A8B8C8376Dc2991BFE44",
+                        },
+                        {
+                            name: Address.multicall,
+                            address: "0xcA11bde05977b3631167028862bE2a173976CA11",
                         },
                     ],
                 },

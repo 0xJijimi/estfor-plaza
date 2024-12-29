@@ -28,6 +28,7 @@ import {
     safeDecode,
 } from "./core"
 
+import estforPlayersAbi from "../abi/estforPlayer.json"
 import estforPlayerAbi from "../abi/estforPlayer.json"
 import itemNFTAbi from "../abi/itemNFT.json"
 import estforPlayerNFTAbi from "../abi/estforPlayerNFT.json"
@@ -730,6 +731,96 @@ export const useFactoryStore = defineStore({
             )
 
             await this.multicall(selectorArray, chainId, false)
+        },
+        async depositHeroes(heroes: { playerId: string, assignedSilo: string }[], chainId: 250 | 146) {
+            const coreStore = useCoreStore()
+            const playerNFTAddress = coreStore.getAddress(Address.estforPlayerNFT, chainId)
+            const factoryRegistryAddress = coreStore.getAddress(Address.factoryRegistry, chainId)
+            const playersAddress = coreStore.getAddress(Address.estforPlayers, chainId)
+            const account = getAccount(config)
+            if (!playerNFTAddress || !factoryRegistryAddress || !playersAddress || !account.isConnected || account.chainId !== chainId) {
+                return
+            }
+
+            const playerNFTInterface = new Interface(estforPlayerNFTAbi)
+            const factoryInterface = new Interface(factoryAbi)
+            const playersInterface = new Interface(estforPlayersAbi)
+
+            const delegateSilo = this.bank?.address
+            if (!delegateSilo) {
+                return
+            }
+
+            const isApproved = await readContract(config, {
+                address: playerNFTAddress as `0x${string}`,
+                abi: estforPlayerNFTAbi,
+                functionName: "isApprovedForAll",
+                args: [account.address, delegateSilo],
+                chainId,
+            })
+            if (!isApproved) {
+                const hash = await writeContract(config, {
+                    address: playerNFTAddress as `0x${string}`,
+                    abi: estforPlayerNFTAbi,
+                    functionName: "setApprovalForAll",
+                    args: [delegateSilo, true],
+                    type: "legacy",
+                    chainId,
+                })
+                await waitForTransactionReceipt(config, { hash, chainId })
+            }
+
+            const selectorArray = heroes.map((h) =>
+                factoryInterface.encodeFunctionData("execute", [
+                    delegateSilo,
+                    playerNFTAddress,
+                    playerNFTInterface.encodeFunctionData("safeTransferFrom", [
+                        account.address,
+                        h.assignedSilo,
+                        h.playerId,
+                        1,
+                        solidityPacked(["bytes"], ["0x"]),
+                    ]),
+                ])
+            )
+
+            await this.multicall(selectorArray, chainId, false)
+            
+            // now activate all heroes on each silo
+            const activateSelectorArray = heroes.map((h) =>
+                factoryInterface.encodeFunctionData("execute", [
+                    h.assignedSilo,
+                    playersAddress,
+                    playersInterface.encodeFunctionData("setActivePlayer", [h.playerId]),
+                ])
+            )
+            await this.multicall(activateSelectorArray, chainId, false)
+
+            await sleep(2000)
+            await this.getAllProxyStates(chainId)
+        },
+        async activateHeroes(heroes: { address: string, playerId: string }[], chainId: 250 | 146) {
+            const coreStore = useCoreStore()
+            const playersAddress = coreStore.getAddress(Address.estforPlayers, chainId)
+            const factoryAddress = coreStore.getAddress(Address.factoryRegistry, chainId)
+            const account = getAccount(config)
+
+            if (!playersAddress || !factoryAddress || !account.isConnected || account.chainId !== chainId) {
+                return
+            }
+
+            const playersInterface = new Interface(estforPlayersAbi)
+            const factoryInterface = new Interface(factoryAbi)
+            const selectorArray = heroes.map((h) =>
+                factoryInterface.encodeFunctionData("execute", [
+                    h.address,
+                    playersAddress,
+                    playersInterface.encodeFunctionData("setActivePlayer", [h.playerId]),
+                ])
+            )
+            await this.multicall(selectorArray, chainId, false)
+            await sleep(2000)
+            await this.getAllProxyStates(chainId)
         },
         async mintHeroes(heroes: any[], chainId: 250 | 146) {
             const coreStore = useCoreStore()

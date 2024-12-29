@@ -33,7 +33,7 @@
                             <tr>
                                 <th>Id</th>
                                 <th>Heroes</th>
-                                <th></th>
+                                <th class="flex justify-end"><button class="btn btn-primary btn-sm" @click="activateInactiveHeroes" :disabled="loading">Activate Inactive Heroes</button></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -445,6 +445,18 @@ const exportSilos = () => {
     document.body.appendChild(a)
     a.click()
     window.URL.revokeObjectURL(url)
+}
+
+const activateInactiveHeroes = async () => {
+    loading.value = true
+    const inactiveHeroes = allSilos.value.filter((s) => !s.allPlayers.some((p) => p.isActive)).map((s) => ({ address: s.address, playerId: s.allPlayers[0]?.tokenId })).filter((h) => h.playerId)
+    try {
+        await factoryStore.activateHeroes(inactiveHeroes, props.chainId)
+    } catch {
+        // user declined tx
+    } finally {
+        loading.value = false
+    }
 }
 
 defineExpose({

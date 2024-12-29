@@ -245,12 +245,12 @@ const viewSilos = () => {
 }
 
 watchAccount(config, {
-    onChange(account) {
+    onChange() {
         factoryAccount.value = getAccount(config)
         previousCount.value = 0
         refetch({
             offset: 0,
-            acc: account.address,
+            acc: factoryAccount.value.address,
         })
     },
 })

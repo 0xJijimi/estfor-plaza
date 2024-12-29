@@ -12,6 +12,9 @@
                 <span class="text-lg text-success">1</span> hero.
             </div>
             <div>
+                <button class="btn btn-primary mt-5 me-2" @click="depositHeroes">Deposit Heroes</button>
+            </div>
+            <div>
                 <div class="flex flex-col justify-start mt-5">
                     <label
                         class="form-control w-full"
@@ -113,6 +116,11 @@
             </div>
         </div>
     </div>
+    <DepositHeroes
+        ref="depositHeroesRef"
+        id="deposit_heroes_modal"
+        :chainId="props.chainId"
+    />
 </template>
 
 <script setup lang="ts">
@@ -122,6 +130,7 @@ import { computed, onMounted, ref } from "vue"
 import { getAvatars, getExactPlayers } from "../../utils/api"
 import { avatarBoostSkills } from "../../store/core"
 import AvatarSelect from "../inputs/AvatarSelect.vue"
+import DepositHeroes from "../dialogs/DepositHeroes.vue"
 
 const emit = defineEmits(["create-heroes"])
 
@@ -149,6 +158,12 @@ const quickAddHeroes = () => {
 }
 
 const emptySilos = computed(() => factoryStore.emptyProxys)
+
+const depositHeroesRef = ref<typeof DepositHeroes>()
+
+const depositHeroes = () => {
+    depositHeroesRef.value?.openDialog()
+}
 
 const mintHeroes = async () => {
     for (const hero of heroesToMint.value) {
