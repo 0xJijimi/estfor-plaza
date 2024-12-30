@@ -30,7 +30,7 @@
                     :disabled="loading"
                     @click.prevent="mintNFT"
                 >
-                    Mint Emerald Brooch ({{ mintPrice }} FTM)
+                    Mint Emerald Brooch ({{ mintPrice }} S)
                 </button>
                 <a
                     href="https://paintswap.finance/marketplace/fantom/collections/deif's-quality-brooches/nfts"

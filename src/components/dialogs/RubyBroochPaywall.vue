@@ -63,7 +63,7 @@
                     :disabled="loading || emeraldBrooch.balance < 1"
                     @click.prevent="mintNFT"
                 >
-                    Mint Ruby Brooch ({{ mintPrice }} FTM)
+                    Mint Ruby Brooch ({{ mintPrice }} S)
                 </button>
                 <a
                     href="https://paintswap.finance/marketplace/fantom/collections/deif's-quality-brooches/nfts"
