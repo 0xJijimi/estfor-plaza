@@ -38,7 +38,7 @@
                     Mint Emerald Brooch ({{ mintPrice }} S)
                 </button>
                 <a
-                    href="https://paintswap.finance/marketplace/fantom/collections/deif's-quality-brooches/nfts"
+                    href="https://paintswap.io/sonic/collections/deif's-quality-brooches/nfts"
                     target="_blank"
                     class="max-sm:hidden"
                     ><button type="button" class="btn btn-primary btn-lg">
