@@ -91,7 +91,10 @@ const fetchRetry = async (url: string) => {
     while (retries < 50) {
         try {
             const response = await fetch(url)
-            return response.json()
+            if (response.status === 200) {
+                return response.json()
+            }
+            await sleep(1000)
         } catch (e) {
             await sleep(1000)
         }

@@ -39,6 +39,7 @@ import brushAbi from "../abi/brush.json"
 import {
     PlayerSearchResult,
     SearchQueuedActionsResult,
+    UserItemNFTResult,
     getPlayersByOwner,
     getUserItemNFTs,
     searchQueuedActions,
@@ -1870,10 +1871,20 @@ export const useFactoryStore = defineStore({
             proxys: ProxySilo[],
             chainId: 250 | 146
         ) {
-            const itemResultPromises = proxys
-                .filter((p) => p.address !== this.bank?.address)
-                .map((p) => getUserItemNFTs(p.address, [], chainId))
-            const results = await Promise.all(itemResultPromises)
+            const chunks = 20
+            const itemChunks = Math.ceil(this.proxys.length / chunks)
+            const results: UserItemNFTResult[] = []
+
+            for (let i = 0; i < itemChunks; i++) {
+                const promises = await Promise.all(
+                    this.proxys
+                        .slice(i * chunks, (i + 1) * chunks)
+                        .map((p) => getUserItemNFTs(p.address, [], chainId))
+                )
+                results.push(...promises)
+                await sleep(200)
+            }
+
             const distinctItems: number[] = []
 
             for (const result of results.filter(
@@ -1966,10 +1977,19 @@ export const useFactoryStore = defineStore({
                 return
             }
 
-            const itemResultPromises = proxys
-                .filter((p) => p.address !== this.bank?.address)
-                .map((p) => getUserItemNFTs(p.address, [], chainId))
-            const results = await Promise.all(itemResultPromises)
+            const chunks = 20
+            const itemChunks = Math.ceil(this.proxys.length / chunks)
+            const results: UserItemNFTResult[] = []
+
+            for (let i = 0; i < itemChunks; i++) {
+                const promises = await Promise.all(
+                    this.proxys
+                        .slice(i * chunks, (i + 1) * chunks)
+                        .map((p) => getUserItemNFTs(p.address, [], chainId))
+                )
+                results.push(...promises)
+                await sleep(200)
+            }
 
             // match proxy on item result user address and work out the outputs from the decoded saved transaction
             const deposits: { items: UserItemNFT[]; proxy: string }[] = []
