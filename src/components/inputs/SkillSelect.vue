@@ -31,6 +31,7 @@ const options = [
     Skill.FLETCHING,
     Skill.THIEVING,
     Skill.COMBAT,
+    Skill.FARMING,
 ]
 
 const props = defineProps({

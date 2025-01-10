@@ -10,7 +10,7 @@
             <SkillSelect
                 class="mt-5"
                 v-model="skillId"
-                @update:model-value="actionId = 0"
+                @update:model-value="actionId = 0;actionChoiceOutputId = 0;missingItems = []"
             />
             <ActionInputSelect
                 v-if="
@@ -21,6 +21,7 @@
                 v-model="actionId"
                 :skill-id="skillId"
                 :heroes="heroesToAssign"
+                @update:model-value="actionChoiceOutputId = 0"
             />
             <ActionChoiceInputSelect
                 v-if="
@@ -31,6 +32,7 @@
                 v-model="actionChoiceOutputId"
                 :skill-id="skillId"
                 :heroes="heroesToAssign"
+                @update:model-value="actionId = 0"
             />
 
             <ItemSelect
@@ -540,7 +542,14 @@ const checkRequiredItems = async () => {
                                 min
                             )}`
                         )
+                    } else if (allItems.find((x) => x.tokenId === min)?.isFullModeOnly && !h.playerState.isFullMode) {
+                        missingItems.value.push(
+                            `${h.playerState.name} is trying to use ${getItemName(
+                                min
+                            )} but is not evolved`
+                        )
                     }
+
                     // find first item in the requiredItems array that the user has
                     rightHandItems.value.push(
                         filteredItems.find((x) =>
@@ -610,6 +619,12 @@ const checkCombatItems = async () => {
                                     item
                                 )}`
                             )
+                        } else if (allItems.find((x) => x.tokenId === item)?.isFullModeOnly && !h.playerState.isFullMode) {
+                            missingItems.value.push(
+                                `${h.playerState.name} is trying to use ${getItemName(
+                                    item
+                                )} but is not evolved`
+                            )
                         }
                     }
                 }
@@ -669,6 +684,12 @@ const checkActionChoiceRequiredItems = async () => {
                                 min
                             )} (${h.address})`
                         )
+                    } else if (allItems.find((x) => x.tokenId === min)?.isFullModeOnly && !h.playerState.isFullMode) {
+                        missingItems.value.push(
+                            `${h.playerState.name} is trying to use ${getItemName(
+                                min
+                            )} but is not evolved`
+                        )
                     }
                     // find first item in the requiredItems array that the user has
                     rightHandItems.value.push(
@@ -683,6 +704,27 @@ const checkActionChoiceRequiredItems = async () => {
     } finally {
         checking.value = false
     }
+}
+
+const checkEvolvedStatusForAction = async (heroes: ProxySilo[], actionId: number) => {
+    let success = true
+    const action = allActions.find((x) => x.actionId == actionId)
+    if (action?.info.isFullModeOnly && !heroes.some((h) => h.playerState.isFullMode)) {
+        missingItems.value.push("Only evolved heroes are allowed to do this action")
+        success = false
+    }
+    return success
+}
+
+const checkEvolvedStatusForActionChoice = async (heroes: ProxySilo[], actionChoiceOutputId: number) => {
+    let success = true
+    const actionChoiceId = skillStore.getActionChoiceInputsForSkill(skillId.value).findIndex((x) => x == actionChoiceOutputId)
+    const actionChoice = skillStore.getActionChoicesForSkill(skillId.value)[actionChoiceId]
+    if (actionChoice && actionChoice.isFullModeOnly && !heroes.some((h) => h.playerState.isFullMode)) {
+        missingItems.value.push("Only evolved heroes are allowed to do this action")
+        success = false
+    }
+    return success
 }
 
 const assignHeroes = async () => {
@@ -729,6 +771,9 @@ const assignHeroes = async () => {
                 } else {
                     rightHandItems.value.push(0)
                 }
+            }
+            if (!await checkEvolvedStatusForAction(heroesToAssign.value, actionId.value)) {
+                return
             }
             await factoryStore.assignActionToProxy(
                 heroesToAssign.value,
@@ -793,6 +838,9 @@ const assignHeroes = async () => {
                 } else {
                     rightHandItems.value.push(0)
                 }
+            }
+            if (!await checkEvolvedStatusForActionChoice(heroesToAssign.value, actionChoiceOutputId.value)) {
+                return
             }
             await factoryStore.assignActionToProxy(
                 heroesToAssign.value,

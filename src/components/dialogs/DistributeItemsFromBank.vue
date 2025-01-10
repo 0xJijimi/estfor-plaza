@@ -34,6 +34,29 @@
                 </select>
             </label>
 
+            <label class="form-control w-full mt-5">
+                <div class="label">
+                    <span class="label-text">Amount to distribute</span>
+                </div>
+                <div class="flex flex-row gap-2">
+                    <input
+                        type="number"
+                        dir="rtl"
+                        class="input input-bordered w-full bg-base-100-50 input-sm"
+                        v-model="helperAmount"
+                        min="0"
+                        :max="
+                            Math.floor(
+                                Number(
+                                    bankItems.find((i) => i.tokenId === item)?.amount || 0
+                                ) / heroes.length
+                            )
+                        "
+                    />
+                    <button class="btn btn-primary btn-sm" @click="setDistributeAmount">Set Amount</button>
+                </div>
+            </label>
+
             <div class="overflow-x-auto mt-5">
                 <table class="table md:table-md table-xs">
                     <thead>
@@ -114,6 +137,7 @@ const emits = defineEmits(["withdrawn"])
 const selectedHeroGroup = ref("")
 const heroes = ref<HeroWithAmount[]>([])
 const item = ref<number>(0)
+const helperAmount = ref<number>(0)
 const error = ref<string | null>(null)
 
 const factoryStore = useFactoryStore()
@@ -184,6 +208,12 @@ const withdrawItems = async () => {
     } finally {
         loading.value = false
     }
+}
+
+const setDistributeAmount = () => {
+    heroes.value.forEach((h) => {
+        h.amountToDistribute = helperAmount.value
+    })
 }
 
 defineExpose({

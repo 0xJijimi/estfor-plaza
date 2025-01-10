@@ -71,6 +71,6 @@ const minHeroXPForSkill = computed(() => {
 const options = computed(() => {
     return skillStore
         .getActionInputsForSkill(props.skillId)
-        .filter((s) => s.info.minXP <= minHeroXPForSkill.value)
+        .filter((s) => s.info.minXP <= minHeroXPForSkill.value && (s.info.actionChoiceRequired === false || s.info.skill === Skill.COMBAT) && s.info.isAvailable)
 })
 </script>

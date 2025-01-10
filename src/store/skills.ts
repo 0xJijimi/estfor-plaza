@@ -782,6 +782,8 @@ export const useSkillStore = defineStore({
                         return [...allActionChoicesForging]
                     case Skill.FLETCHING:
                         return [...allActionChoicesFletching]
+                    case Skill.FARMING:
+                        return [...allActionChoicesFarming]
                     default:
                         return []
                 }
