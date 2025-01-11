@@ -308,6 +308,7 @@ const exportHeroes = async () => {
             ranged: getLevel(h.rangedXP),
             magic: getLevel(h.magicXP),
             defence: getLevel(h.defenceXP),
+            farming: getLevel(h.farmingXP),
             isEvolved: h.isFullMode,
             questsCompleted: h.numFixedQuestsCompleted,
         }

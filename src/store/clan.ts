@@ -65,6 +65,9 @@ export const getDiceRolls = (player: Player, addPoint = false) => {
     diceRolls +=
         getDiceRollForRank(getLevel(player.forgingXP), player.isFullMode) +
         (addPoint ? 1 : 0)
+    diceRolls +=
+        getDiceRollForRank(getLevel(player.farmingXP), player.isFullMode) +
+        (addPoint ? 1 : 0)
     return diceRolls
 }
 
