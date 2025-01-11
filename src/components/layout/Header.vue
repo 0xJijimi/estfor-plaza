@@ -121,6 +121,15 @@ watch(() => broochStore.hasAccess(0), init)
                                                 Ranking</router-link
                                             >
                                         </li>
+                                        <li @click="removeFocus">
+                                            <router-link to="/vrf-actions" @click="showBrooch(0)"
+                                                >VRF Actions
+                                                <img
+                                                    src="/src/assets/emerald_brooch_icon.png"
+                                                    class="rounded-lg w-[20px] inline cursor-pointer"
+                                                    alt="Emerald Brooch"
+                                            /></router-link>
+                                        </li>
                                     </ul>
                                 </details>
                             </li>
@@ -224,6 +233,15 @@ watch(() => broochStore.hasAccess(0), init)
                                 <router-link to="/lotteries"
                                     >Wishing Well Ranking</router-link
                                 >
+                            </li>
+                            <li @click="removeFocus">
+                                <router-link to="/vrf-actions" @click="showBrooch(0)"
+                                    >VRF Actions
+                                    <img
+                                        src="/src/assets/emerald_brooch_icon.png"
+                                        class="rounded-lg w-[20px] inline cursor-pointer"
+                                        alt="Emerald Brooch"
+                                /></router-link>
                             </li>
                             <li @click="removeFocus">
                                 <router-link

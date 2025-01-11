@@ -279,8 +279,57 @@ export const petEnhancementTypeToName = {
     [PetEnhancementType.RANGED_AND_DEFENCE]: "Ranged and Defence",
 }
 
+const getExtraName = (tokenId: number): string => {
+    switch (Number(tokenId)) {
+        case EstforConstants.FROST_MIN_TIER1:
+        case EstforConstants.FROST_MIN_TIER2:
+        case EstforConstants.FROST_MIN_TIER3:
+        case EstforConstants.FROST_MIN_TIER4:
+        case EstforConstants.FROST_MIN_TIER5:
+            return "Frost Pet"
+        case EstforConstants.ONEKIN_MIN_TIER1:
+        case EstforConstants.ONEKIN_MIN_TIER2:
+        case EstforConstants.ONEKIN_MIN_TIER3:
+        case EstforConstants.ONEKIN_MIN_TIER4:
+        case EstforConstants.ONEKIN_MIN_TIER5:
+            return "1kin Pet"
+        case EstforConstants.OG_MIN_TIER1:
+        case EstforConstants.OG_MIN_TIER2:
+        case EstforConstants.OG_MIN_TIER3:
+        case EstforConstants.OG_MIN_TIER4:
+        case EstforConstants.OG_MIN_TIER5:
+            return "OG Pet"
+        case EstforConstants.DEFAULT_MIN_TIER1:
+        case EstforConstants.DEFAULT_MIN_TIER2:
+        case EstforConstants.DEFAULT_MIN_TIER3:
+        case EstforConstants.DEFAULT_MIN_TIER4:
+        case EstforConstants.DEFAULT_MIN_TIER5:
+            return "Genesis Pet"
+        case EstforConstants.CRYSTAL_MIN_TIER1:
+        case EstforConstants.CRYSTAL_MIN_TIER2:
+        case EstforConstants.CRYSTAL_MIN_TIER3:
+        case EstforConstants.CRYSTAL_MIN_TIER4:
+        case EstforConstants.CRYSTAL_MIN_TIER5:
+            return "Crystal Pet"
+        case EstforConstants.ANNIV1_MIN_TIER1:
+        case EstforConstants.ANNIV1_MIN_TIER2:
+        case EstforConstants.ANNIV1_MIN_TIER3:
+        case EstforConstants.ANNIV1_MIN_TIER4:
+        case EstforConstants.ANNIV1_MIN_TIER5:
+            return "Anniversary 1 Pet"
+        case EstforConstants.KRAGSTYR_MIN_TIER1:
+        case EstforConstants.KRAGSTYR_MIN_TIER2:
+        case EstforConstants.KRAGSTYR_MIN_TIER3:
+        case EstforConstants.KRAGSTYR_MIN_TIER4:
+        case EstforConstants.KRAGSTYR_MIN_TIER5:
+            return "Kragstyr Pet"
+        default:
+            return tokenId?.toString()
+    }
+}
+
 export const getItemName = (tokenId: number): string => {
-    return allItems.find((x) => x.tokenId === tokenId)?.name || ""
+    return allItems.find((x) => x.tokenId === tokenId)?.name || getExtraName(tokenId) || ""
 }
 
 const getMagicBag = (state: ItemState, magicXp: number, rightHand: number) => {

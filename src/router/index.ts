@@ -16,6 +16,7 @@ import WishContributions from "../components/clan-management/WishContributions.v
 import Factory from "../components/Factory.vue"
 import FactorySonic from "../components/FactorySonic.vue"
 import About from "../components/About.vue"
+import VRFActions from "../components/VRFActions.vue"
 // import BroochOwners from "../components/BroochOwners.vue"
 
 declare module "vue-router" {
@@ -57,6 +58,14 @@ const routes: Array<RouteRecordRaw> = [
             {
                 path: "lotteries",
                 component: LotteryRanking,
+            },
+            {
+                path: "vrf-actions",
+                component: VRFActions,
+                meta: {
+                    showItemSearch: true,
+                    requiresEmeraldBrooch: true,
+                },
             },
             {
                 path: "clan-battle",
