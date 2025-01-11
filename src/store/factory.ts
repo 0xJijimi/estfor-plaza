@@ -38,9 +38,9 @@ import epProxyAbi from "../abi/epProxy.json"
 import brushAbi from "../abi/brush.json"
 import {
     PlayerSearchResult,
-    SearchQueuedActionsResult,
     UserItemNFTResult,
-    getPlayersByOwner,
+    getMultiPlayersByOwner,
+    getMultiUserItemNFTs,
     getUserItemNFTs,
     searchQueuedActions,
 } from "../utils/api"
@@ -1119,37 +1119,20 @@ export const useFactoryStore = defineStore({
                 chainId: fantom.id,
             }
 
-            // do this in 20 player chunks
-            const chunks = 20
-            const playerChunks = Math.ceil(this.proxys.length / chunks)
-            const playerPromises: PlayerSearchResult[] = []
-
-            for (let i = 0; i < playerChunks; i++) {
-                const promises = await Promise.all(
-                    this.proxys
-                        .slice(i * chunks, (i + 1) * chunks)
-                        .map((p) => getPlayersByOwner(p.address, chainId))
-                )
-                playerPromises.push(...promises)
-                await sleep(200)
-            }
+            const playerPromises: PlayerSearchResult = await getMultiPlayersByOwner(this.proxys.map(p => p.address), chainId)
 
             const proxysWithPlayerId = this.proxys.map((p) => {
-                const result = playerPromises.find(
+                const result = playerPromises.players.filter(
                     (x) =>
-                        x.players?.some(
-                            (y) =>
-                                y.owner?.toLowerCase() ===
-                                p.address.toLowerCase()
-                        )
+                        x.owner?.toLowerCase() === p.address.toLowerCase()
                 )
                 return {
                     ...p,
                     playerId:
-                        result?.players?.find((x) => x.isActive)?.tokenId || "",
-                    allPlayers: result?.players || [],
+                        result?.find((x) => x.isActive)?.tokenId || "",
+                    allPlayers: result || [],
                     playerState:
-                        result?.players?.find((x) => x.isActive) ||
+                        result?.find((x) => x.isActive) ||
                         ({} as Player),
                 }
             })
@@ -1158,19 +1141,8 @@ export const useFactoryStore = defineStore({
                 .filter((p) => p.playerId !== "")
                 .map((p) => p.playerId)
             if (playerIdsToGet.length > 0) {
-                const queuedActionPromises: SearchQueuedActionsResult[] = []
-                const chunks = 20
-                const queueChunks = Math.ceil(playerIdsToGet.length / chunks)
+                const queuedActionsResult = await searchQueuedActions(playerIdsToGet, chainId)
 
-                for (let i = 0; i < queueChunks; i++) {
-                    const promises = await Promise.all(
-                        playerIdsToGet
-                            .slice(i * chunks, (i + 1) * chunks)
-                            .map((p) => searchQueuedActions(p, chainId))
-                    )
-                    queuedActionPromises.push(...promises)
-                    await sleep(200)
-                }
                 const proxyData = await multicall(config, {
                     contracts: proxysWithPlayerId.map(
                         (p) =>
@@ -1199,13 +1171,10 @@ export const useFactoryStore = defineStore({
 
                 this.proxys = proxysWithPlayerId.map((p, i) => ({
                     ...p,
-                    queuedActions: queuedActionPromises
+                    queuedActions: queuedActionsResult.queuedActions
                         .filter((x) =>
-                            x.queuedActions.find(
-                                (q) => q.playerId === p.playerId
-                            )
+                            x.playerId === p.playerId
                         )
-                        .map((x) => x.queuedActions)
                         .flat(),
                     savedTransactions: proxyData[i]
                         .result as SavedTransaction[],
@@ -1783,14 +1752,7 @@ export const useFactoryStore = defineStore({
             await this.updateQueuedActions(chainId)
         },
         async updateQueuedActions(chainId: 250 | 146) {
-            const queuedActionPromises = await Promise.all(
-                this.proxys
-                    .filter(
-                        (p) =>
-                            p.playerId !== "" && p.savedTransactions.length > 0
-                    )
-                    .map((p) => searchQueuedActions(p.playerId, chainId))
-            )
+            const queuedActionResult = await searchQueuedActions(this.proxys.map(p => p.playerId), chainId)
             for (const proxy of this.proxys) {
                 if (
                     proxy.playerId === "" ||
@@ -1799,13 +1761,10 @@ export const useFactoryStore = defineStore({
                     continue
                 }
                 proxy.queuedActions =
-                    queuedActionPromises
+                    queuedActionResult.queuedActions
                         .filter((x) =>
-                            x.queuedActions.find(
-                                (q) => q.playerId === proxy.playerId
-                            )
+                            x.playerId === proxy.playerId
                         )
-                        .map((x) => x.queuedActions)
                         .flat() || []
             }
         },
@@ -1871,29 +1830,13 @@ export const useFactoryStore = defineStore({
             proxys: ProxySilo[],
             chainId: 250 | 146
         ) {
-            const chunks = 20
-            const itemChunks = Math.ceil(this.proxys.length / chunks)
-            const results: UserItemNFTResult[] = []
-
-            for (let i = 0; i < itemChunks; i++) {
-                const promises = await Promise.all(
-                    this.proxys
-                        .slice(i * chunks, (i + 1) * chunks)
-                        .map((p) => getUserItemNFTs(p.address, [], chainId))
-                )
-                results.push(...promises)
-                await sleep(200)
-            }
+            const results: UserItemNFTResult = await getMultiUserItemNFTs(this.proxys.map(p => p.address), [], chainId)
 
             const distinctItems: number[] = []
 
-            for (const result of results.filter(
-                (r) => r.userItemNFTs.length > 0
-            )) {
-                for (const item of result.userItemNFTs) {
-                    if (!distinctItems.includes(item.tokenId)) {
-                        distinctItems.push(item.tokenId)
-                    }
+            for (const result of results.userItemNFTs) {
+                if (!distinctItems.includes(result.tokenId)) {
+                    distinctItems.push(result.tokenId)
                 }
             }
 
@@ -1977,33 +1920,14 @@ export const useFactoryStore = defineStore({
                 return
             }
 
-            const chunks = 20
-            const itemChunks = Math.ceil(this.proxys.length / chunks)
-            const results: UserItemNFTResult[] = []
-
-            for (let i = 0; i < itemChunks; i++) {
-                const promises = await Promise.all(
-                    this.proxys
-                        .slice(i * chunks, (i + 1) * chunks)
-                        .map((p) => getUserItemNFTs(p.address, [], chainId))
-                )
-                results.push(...promises)
-                await sleep(200)
-            }
+            const results: UserItemNFTResult = await getMultiUserItemNFTs(proxys.map(p => p.address), [], chainId)
 
             // match proxy on item result user address and work out the outputs from the decoded saved transaction
             const deposits: { items: UserItemNFT[]; proxy: string }[] = []
-            for (const result of results.filter(
-                (r) => r.userItemNFTs.length > 0
-            )) {
-                const proxy = proxys.find(
-                    (p) => p.address === result.userItemNFTs[0].user
-                )
-                if (!proxy) {
-                    continue
-                }
 
-                for (const item of result.userItemNFTs
+            for (const proxy of proxys) {
+                for (const item of results.userItemNFTs
+                    .filter(i => i.user === proxy.address)
                     .filter((i) => relevantTokenIds.includes(i.tokenId))
                     .filter((i) => overrideNeedsItem || !proxyNeedsItem(i, proxy))) {
                     let d = deposits.find((d) => d.proxy === proxy.address)

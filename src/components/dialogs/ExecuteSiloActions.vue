@@ -186,7 +186,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
 import { useFactoryStore } from "../../store/factory"
-import { getUserItemNFTs } from "../../utils/api"
+import { getMultiUserItemNFTs, getUserItemNFTs } from "../../utils/api"
 import { useAppStore } from "../../store/app"
 import { getItemName, starterItems } from "../../store/items"
 import { allItems } from "../../data/items"
@@ -348,16 +348,12 @@ const executeActionChoiceSavedTransactions = async () => {
     error.value = null
     stage.value = null
     try {
-        const userItemNFTPromises = await Promise.all(
-            silosWithActionChoicesOnly.value.map((s) =>
-                getUserItemNFTs(s.address, [], props.chainId as 250 | 146)
-            )
-        )
+        const userItemNFTsResult = await getMultiUserItemNFTs(silosWithActionChoicesOnly.value.map(p => p.address), [], props.chainId as 250 | 146)
 
         const itemsNeeded: NeededItem[] = []
         for (const proxy of silosWithActionChoicesOnly.value) {
-            const userItemNFTResult = userItemNFTPromises.find((u) =>
-                u.userItemNFTs.some((t) => t.user === proxy.address)
+            const userItemNFTResult = userItemNFTsResult.userItemNFTs.filter((u) =>
+                u.user === proxy.address
             )
             for (const action of proxy.queuedActions.filter(
                 (x) => x.choice !== null
@@ -389,7 +385,7 @@ const executeActionChoiceSavedTransactions = async () => {
                         // food
                         {
                             const ownedItem =
-                                userItemNFTResult?.userItemNFTs.find(
+                                userItemNFTResult?.find(
                                     (t) => t.tokenId === action.regenerateId
                                 )
                             if (
@@ -427,7 +423,7 @@ const executeActionChoiceSavedTransactions = async () => {
                         // consumables
                         for (const input of action.choice.inputTokenIds) {
                             const ownedItem =
-                                userItemNFTResult?.userItemNFTs.find(
+                                userItemNFTResult?.find(
                                     (t) => t.tokenId === input
                                 )
                             if (
@@ -465,7 +461,7 @@ const executeActionChoiceSavedTransactions = async () => {
                 } else {
                     let i = 0
                     for (const input of action.choice.inputTokenIds) {
-                        const ownedItem = userItemNFTResult?.userItemNFTs.find(
+                        const ownedItem = userItemNFTResult?.find(
                             (t) => t.tokenId === input
                         )
 

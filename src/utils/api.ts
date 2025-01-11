@@ -86,11 +86,17 @@ export interface AvatarSearchResult {
     avatars: Avatar[]
 }
 
-const fetchRetry = async (url: string) => {
+const fetchRetry = async (url: string, method: 'GET' | 'POST' = 'GET', body?: any) => {
     let retries = 0
     while (retries < 50) {
         try {
-            const response = await fetch(url)
+            const response = await fetch(url, {
+                method,
+                body,
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
             if (response.status === 200) {
                 return response.json()
             }
@@ -127,11 +133,65 @@ export const getUserItemNFTs = async (
     )
 }
 
+export const getMultiUserItemNFTs = async (
+    users: string[],
+    tokenIds: number[],
+    chainId: 250 | 146
+): Promise<UserItemNFTResult> => {
+    let numToSkip = 0    
+    let result: UserItemNFTResult = {
+        userItemNFTs: []
+    }
+    let localResult: UserItemNFTResult | null = null
+
+    while (!localResult ||localResult?.userItemNFTs.length === 100) {
+        localResult = await fetchRetry(
+            `${getBaseUrl(chainId)}/user-item-nfts/multi?${tokenIds
+                .map((x) => `tokenIds[]=${x}&numToSkip=${numToSkip}&numToFetch=1000`)
+                .join("&")}`,
+            'POST',
+            JSON.stringify({
+                userAddresses: users
+            })
+        )
+        numToSkip += 1000
+
+        if (localResult) {
+            result.userItemNFTs = [...result.userItemNFTs, ...localResult.userItemNFTs]
+        }
+    }
+    return result
+}
+
 export const getPlayers = async (
     searchTerm: string,
     chainId: 250 | 146
 ): Promise<PlayerSearchResult> => {
     return fetchRetry(`${getBaseUrl(chainId)}/players?name=${searchTerm}`)
+}
+
+export const getMultiPlayersByOwner = async (
+    addresses: string[],
+    chainId: 250 | 146
+): Promise<PlayerSearchResult> => {
+
+    let numToSkip = 0
+    let result: PlayerSearchResult = {
+        players: []
+    }
+    let localResult: PlayerSearchResult | null = null
+
+    while (!localResult ||localResult?.players.length === 100) {
+        localResult = await fetchRetry(`${getBaseUrl(chainId)}/players/multi?numToSkip=${numToSkip}&numToFetch=1000`, 'POST', JSON.stringify({
+            owners: addresses,
+        }))
+        numToSkip += 1000
+
+        if (localResult) {
+            result.players = [...result.players, ...localResult.players]
+        }
+    }
+    return result
 }
 
 export const getPlayersByOwner = async (
@@ -207,14 +267,32 @@ export const getClanByName = async (
 }
 
 export const searchQueuedActions = async (
-    playerId: string,
+    playerIds: string[],
     chainId: 250 | 146
 ): Promise<SearchQueuedActionsResult> => {
-    return fetchRetry(
-        `${getBaseUrl(
-            chainId
-        )}/queued-actions?playerId=${playerId}&isActive=true&orderDirection=asc`
-    )
+    let numToSkip = 0
+    let result: SearchQueuedActionsResult = {
+        queuedActions: []
+    }
+    let localResult: SearchQueuedActionsResult | null = null
+
+    while (!localResult || localResult?.queuedActions.length === 100) {
+        localResult = await fetchRetry(
+            `${getBaseUrl(
+                chainId
+            )}/queued-actions/multi?isActive=true&orderDirection=asc&numToSkip=${numToSkip}&numToFetch=1000`,
+            'POST',
+            JSON.stringify({
+                playerIds
+            })
+        )
+        numToSkip += 1000
+
+        if (localResult) {
+            result.queuedActions = [...result.queuedActions, ...localResult.queuedActions]
+        }
+    }
+    return result
 }
 
 export const getTerritories = async (

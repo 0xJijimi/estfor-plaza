@@ -16,7 +16,10 @@
                         <tr>
                             <th class="text-left">Action</th>
                             <th class="text-right">Inputs</th>
-                            <th class="text-right">Rewards</th>
+                            <th class="text-right">Rewards 
+                                <span v-if="actionType === InstantVRFActionType.FORGING"> (One reward per action)</span>
+                                <span v-if="actionType === InstantVRFActionType.GENERIC"> (Multiple rewards per action)</span>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
