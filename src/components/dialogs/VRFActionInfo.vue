@@ -17,8 +17,8 @@
                             <th class="text-left">Action</th>
                             <th class="text-right">Inputs</th>
                             <th class="text-right">Rewards 
-                                <span v-if="actionType === InstantVRFActionType.FORGING"> (One reward per action)</span>
-                                <span v-if="actionType === InstantVRFActionType.GENERIC"> (Multiple rewards per action)</span>
+                                <span v-if="actionType === InstantVRFActionType.FORGING"> (One reward per action - highest roll)</span>
+                                <span v-if="actionType === InstantVRFActionType.GENERIC"> (One reward per action - highest roll)</span>
                             </th>
                         </tr>
                     </thead>
