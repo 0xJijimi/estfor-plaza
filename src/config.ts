@@ -24,7 +24,7 @@ export const config = createConfig({
                 // http("https://fantom.blockpi.network/v1/rpc/public"),
                 http("https://rpc.ankr.com/fantom"),
             ],
-            { rank: { interval: 20_000 } }
+            { rank: { interval: 120_000 } }
         ),
         [sonic.id]: fallback(
             [
@@ -32,7 +32,7 @@ export const config = createConfig({
                 http("https://rpc.soniclabs.com"),
                 http("https://rpc.ankr.com/sonic_mainnet"),
             ],
-            { rank: { interval: 20_000 } }
+            { rank: { interval: 120_000 } }
         ),
     },
     connectors: [
