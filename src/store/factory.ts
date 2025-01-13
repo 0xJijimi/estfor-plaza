@@ -1752,7 +1752,7 @@ export const useFactoryStore = defineStore({
             await this.updateQueuedActions(chainId)
         },
         async updateQueuedActions(chainId: 250 | 146) {
-            const queuedActionResult = await searchQueuedActions(this.proxys.map(p => p.playerId), chainId)
+            const queuedActionResult = await searchQueuedActions(this.proxys.filter(p => p.playerId !== "").map(p => p.playerId), chainId)
             for (const proxy of this.proxys) {
                 if (
                     proxy.playerId === "" ||

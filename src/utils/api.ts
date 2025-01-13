@@ -148,11 +148,11 @@ export const getMultiUserItemNFTs = async (
         const chunk = users.slice(i, i + CHUNK_SIZE)
         let localResult: UserItemNFTResult | null = null        
         let numToSkip = 0
-        while (!localResult ||localResult?.userItemNFTs.length === 100) {
+        while (!localResult || localResult?.userItemNFTs.length === 1000) {
             localResult = await fetchRetry(
-                `${getBaseUrl(chainId)}/user-item-nfts/multi?${tokenIds
-                    .map((x) => `tokenIds[]=${x}&numToSkip=${numToSkip}&numToFetch=1000`)
-                    .join("&")}`,
+                `${getBaseUrl(chainId)}/user-item-nfts/multi?numToSkip=${numToSkip}&numToFetch=1000${tokenIds.length > 0 ? `&${tokenIds
+                    .map((x) => `tokenIds[]=${x}`)
+                    .join("&")}` : ""}`,
                 'POST',
                 JSON.stringify({
                     userAddresses: chunk
@@ -184,18 +184,14 @@ export const getMultiPlayersByOwner = async (
     }
 
     for (let i = 0; i < addresses.length; i += CHUNK_SIZE) {
-        let numToSkip = 0
         let localResult: PlayerSearchResult | null = null
         const chunk = addresses.slice(i, i + CHUNK_SIZE)        
-        while (!localResult ||localResult?.players.length === 100) {
-            localResult = await fetchRetry(`${getBaseUrl(chainId)}/players/multi?numToSkip=${numToSkip}&numToFetch=1000`, 'POST', JSON.stringify({
-                owners: chunk,
-            }))
-            numToSkip += 1000
+        localResult = await fetchRetry(`${getBaseUrl(chainId)}/players/multi?numToSkip=0&numToFetch=1000`, 'POST', JSON.stringify({
+            owners: chunk,
+        }))
 
-            if (localResult) {
-                result.players = [...result.players, ...localResult.players]
-            }
+        if (localResult) {
+            result.players = [...result.players, ...localResult.players]
         }
     }
     return result
@@ -283,23 +279,19 @@ export const searchQueuedActions = async (
 
     for (let i = 0; i < playerIds.length; i += CHUNK_SIZE) {
         let localResult: SearchQueuedActionsResult | null = null
-        let numToSkip = 0
         const chunk = playerIds.slice(i, i + CHUNK_SIZE)
-        while (!localResult || localResult?.queuedActions.length === 100) {
-            localResult = await fetchRetry(
-                `${getBaseUrl(
-                    chainId
-                )}/queued-actions/multi?isActive=true&orderDirection=asc&numToSkip=${numToSkip}&numToFetch=1000`,
-                'POST',
-                JSON.stringify({
-                    playerIds: chunk
-                })
-            )
-            numToSkip += 1000
+        localResult = await fetchRetry(
+            `${getBaseUrl(
+                chainId
+            )}/queued-actions/multi?isActive=true&orderDirection=asc&numToSkip=0&numToFetch=1000`,
+            'POST',
+            JSON.stringify({
+                playerIds: chunk
+            })
+        )
 
-            if (localResult) {
-                result.queuedActions = [...result.queuedActions, ...localResult.queuedActions]
-            }
+        if (localResult) {
+            result.queuedActions = [...result.queuedActions, ...localResult.queuedActions]
         }
     }
     return result
