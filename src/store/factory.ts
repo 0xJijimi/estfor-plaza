@@ -1722,7 +1722,7 @@ export const useFactoryStore = defineStore({
                     )
                 )
 
-                await this.multicall(selectorArray, chainId, fastCall, 40)
+                await this.multicall(selectorArray, chainId, fastCall, 10)
             } else {
                 // execute one by one
                 this.totalTransactionNumber = proxys.length
@@ -1968,7 +1968,7 @@ export const useFactoryStore = defineStore({
             )
 
             if (selectorArray.length > 0) {
-                await this.multicall(selectorArray, chainId, false, 50)
+                await this.multicall(selectorArray, chainId, false, 40)
             }
             await sleep(2000)
             await this.getBankItems(chainId)
