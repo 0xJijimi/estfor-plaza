@@ -267,6 +267,15 @@ export const actionChoiceNames = {
     [EstforConstants.ACTIONCHOICE_FIREMAKING_ASH]: "Ash from Ash",
     [EstforConstants.ACTIONCHOICE_FIREMAKING_ENCHANTED]: "Ash from Enchanted",
     [EstforConstants.ACTIONCHOICE_FIREMAKING_LIVING]: "Ash from Living",
+    [EstforConstants.ACTIONCHOICE_FIREMAKING_CHARCOAL_ASH_LOG]: "Charcoal Ash from Log",
+    [EstforConstants.ACTIONCHOICE_FIREMAKING_CHARCOAL_ENCHANTED_LOG]: "Charcoal Ash from Enchanted Log",
+    [EstforConstants.ACTIONCHOICE_FIREMAKING_CHARCOAL_LIVING_LOG]: "Charcoal Ash from Living Log",
+    [EstforConstants.ACTIONCHOICE_FIREMAKING_CHARCOAL_LOG]: "Charcoal Ash from Log",
+    [EstforConstants.ACTIONCHOICE_FIREMAKING_CHARCOAL_MAGICAL_LOG]: "Charcoal Ash from Magical Log",
+    [EstforConstants.ACTIONCHOICE_FIREMAKING_CHARCOAL_MAPLE_LOG]: "Charcoal Ash from Maple Log",
+    [EstforConstants.ACTIONCHOICE_FIREMAKING_CHARCOAL_OAK_LOG]: "Charcoal Ash from Oak Log",
+    [EstforConstants.ACTIONCHOICE_FIREMAKING_CHARCOAL_REDWOOD_LOG]: "Charcoal Ash from Redwood Log",
+    [EstforConstants.ACTIONCHOICE_FIREMAKING_CHARCOAL_WILLOW_LOG]: "Charcoal Ash from Willow Log",
 
     [EstforConstants.ACTIONCHOICE_SMITHING_BRONZE_BAR]: "Bronze Bar",
     [EstforConstants.ACTIONCHOICE_SMITHING_IRON_BAR]: "Iron Bar",
@@ -356,6 +365,24 @@ export const actionChoiceNames = {
         "Titanium Arrow Head",
     [EstforConstants.ACTIONCHOICE_SMITHING_ORICHALCUM_ARROW_HEAD]:
         "Orichalcum Arrow Head",
+    [EstforConstants.ACTIONCHOICE_SMITHING_ADAMA_CLEDYR_FRAGMENT]:
+        "Adamantite Cledyr Fragment",
+    [EstforConstants.ACTIONCHOICE_SMITHING_EFFYD_CLEDYR_FRAGMENT]:
+        "Effydd Cledyr Fragment",
+    [EstforConstants.ACTIONCHOICE_SMITHING_HAEARN_CLEDYR_FRAGMENT]:
+        "Hae'arn Cledyr Fragment",
+    [EstforConstants.ACTIONCHOICE_SMITHING_ITANUS_CLEDYR_FRAGMENT]:
+        "Itanus Cledyr Fragment",
+    [EstforConstants.ACTIONCHOICE_SMITHING_ITHRITH_CLEDYR_FRAGMENT]:
+        "Ithryth Cledyr Fragment",
+    [EstforConstants.ACTIONCHOICE_SMITHING_ORCALITH_CLEDYR_FRAGMENT]:
+        "Orcalith Cledyr Fragment",
+    [EstforConstants.ACTIONCHOICE_SMITHING_RHUN_CLEDYR_FRAGMENT]:
+        "Rhun Cledyr Fragment",
+    [EstforConstants.ACTIONCHOICE_SMITHING_RUNITE_NAIL]: "Runite Nail",
+    [EstforConstants.ACTIONCHOICE_SMITHING_ORICHALCUM_NAIL]:
+        "Orichalcum Nail",
+    [EstforConstants.ACTIONCHOICE_SMITHING_MITHRIL_NAIL]: "Mithril Nail",
 
     [EstforConstants.ACTIONCHOICE_COOKING_MINNUS]: "Cooked Minnus",
     [EstforConstants.ACTIONCHOICE_COOKING_BLEKK]: "Cooked Blekk",
@@ -551,6 +578,21 @@ export const actionChoiceNames = {
     [EstforConstants.ACTIONCHOICE_ALCHEMY_ENCHANTED_LOG]: "Enchanted Log",
     [EstforConstants.ACTIONCHOICE_ALCHEMY_LIVING_LOG]: "Living Log",
     [EstforConstants.ACTIONCHOICE_ALCHEMY_PAPER]: "Paper",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_HEALING_POTION_L]: "Healing Potion (L)",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_HEALING_POTION_M]: "Healing Potion (M)",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_HEALING_POTION_S]: "Healing Potion (S)",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_DEFENCE_BOOST_POTION_L]: "Defence Boost Potion (L)",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_DEFENCE_BOOST_POTION_S]: "Defence Boost Potion (S)",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_HEALTH_BOOST_POTION_L]: "Health Boost Potion (L)",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_HEALTH_BOOST_POTION_S]: "Health Boost Potion (S)",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_MAGIC_BOOST_POTION_L]: "Magic Boost Potion (L)",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_MAGIC_BOOST_POTION_S]: "Magic Boost Potion (S)",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_LUMELILA_TOXIN]: "Lumelila Toxin",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_FOOLS_BERRY_EXTRACT]: "Fools Berry Extract",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_MELEE_BOOST_POTION_L]: "Melee Boost Potion (L)",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_MELEE_BOOST_POTION_S]: "Melee Boost Potion (S)",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_RANGED_BOOST_POTION_L]: "Ranged Boost Potion (L)",
+    [EstforConstants.ACTIONCHOICE_ALCHEMY_RANGED_BOOST_POTION_S]: "Ranged Boost Potion (S)",    
 
     [EstforConstants.ACTIONCHOICE_FLETCHING_ARROW_SHAFT_FROM_LOG]:
         "Arrow Shaft from Log",
