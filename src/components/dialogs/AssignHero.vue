@@ -775,6 +775,12 @@ const assignHeroes = async () => {
             if (!await checkEvolvedStatusForAction(heroesToAssign.value, actionId.value)) {
                 return
             }
+            console.log(allActionChoiceIdsMagic[
+                                allActionChoicesMagic.findIndex(
+                                    (x) =>
+                                        x.skillDiffs[x.skills.findIndex((d) => d === Skill.MAGIC)] === equippedItems.value.magicBag
+                                )
+                            ])
             await factoryStore.assignActionToProxy(
                 heroesToAssign.value,
                 actionId.value,
