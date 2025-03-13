@@ -691,7 +691,7 @@ export const useItemStore = defineStore({
             }
         },
         getMagicActionChoicesForHeroes(state: ItemState) {
-            return (heroes: ProxySilo[]) => {
+            return (heroes: ProxySilo[], rightHand: number) => {
                 let minMagicXp = 0
                 for (const h of heroes) {
                     const { magicXP } = calculateExtraXPForHeroActionInput(
@@ -703,7 +703,7 @@ export const useItemStore = defineStore({
                     }
                 }
 
-                return getMagicBag(state, minMagicXp, 0)
+                return getMagicBag(state, minMagicXp, rightHand)
             }
         },
         getMagicActionChoicesForXP(state: ItemState) {

@@ -398,7 +398,7 @@ const quiverItems = computed(() =>
     itemStore.getRangedActionChoicesForHeroes(heroesToAssign.value)
 )
 const magicBagItems = computed(() =>
-    itemStore.getMagicActionChoicesForHeroes(heroesToAssign.value)
+    itemStore.getMagicActionChoicesForHeroes(heroesToAssign.value, equippedItems.value.rightHand || 0)
 )
 const foodItems = computed(() =>
     itemStore.getItemsForSlotAndHeroes(EquipPosition.FOOD, heroesToAssign.value)
@@ -789,9 +789,7 @@ const assignHeroes = async () => {
                           : allActionChoiceIdsMagic[
                                 allActionChoicesMagic.findIndex(
                                     (x) =>
-                                        x.skillDiffs.find(
-                                            (d) => d.skill === Skill.MAGIC
-                                        ) === equippedItems.value.magicBag
+                                        x.skillDiffs[x.skills.findIndex((d) => d === Skill.MAGIC)] === equippedItems.value.magicBag
                                 )
                             ] || 0
                     : 0,
