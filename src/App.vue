@@ -80,7 +80,7 @@ provide(ApolloClients, {
     position: fixed;
     height: 100%;
     width: 100%;
-    background-image: url("https://media.estfor.com/landscape/mining2.jpg");
+    background-image: url("https://media.estfor.com/landscape/mining.jpg");
     background-position: center;
     background-size: cover;
 }
