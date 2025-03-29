@@ -44,8 +44,12 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
       - run: npm i
-      - run: npm run build:scripts
-      - run: npm run build
+      - name: Build
+        env:
+          NODE_ENV: production
+        run: |
+          npm run build:scripts
+          npm run build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
