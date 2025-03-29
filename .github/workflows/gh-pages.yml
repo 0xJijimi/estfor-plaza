@@ -32,13 +32,9 @@ jobs:
         
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-
-      # Update references
-      - name: Git Submodule Update
-        run: |
-          git pull --recurse-submodules
-          git submodule update --remote --recursive
+        uses: actions/checkout@v4  
+        with:
+          submodules: true
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
