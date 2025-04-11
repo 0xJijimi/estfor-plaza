@@ -7,10 +7,6 @@
                 Welcome to the Factory floor! Here you can create silos for your
                 Estfor heroes and tell them to do things.
             </p>
-            <p class="alert alert-warning my-5">
-                This is the Sonic Factory. If you want to use the Fantom Factory, click the button below.                
-            </p>
-            <router-link to="/factory-fantom" class="btn btn-primary mb-5">Switch to Fantom Factory</router-link>
             <p v-if="!hasRubyBrooch" class="alert alert-warning my-5">
                 <img
                     src="/src/assets/ruby_brooch_icon.png"

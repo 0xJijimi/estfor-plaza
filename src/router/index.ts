@@ -13,7 +13,6 @@ import TerritoryBattleRankings from "../components/TerritoryBattleRankings.vue"
 import VaultBattleRankings from "../components/VaultBattleRankings.vue"
 import ClanManagement from "../components/ClanManagement.vue"
 import WishContributions from "../components/clan-management/WishContributions.vue"
-import Factory from "../components/Factory.vue"
 import FactorySonic from "../components/FactorySonic.vue"
 import About from "../components/About.vue"
 import VRFActions from "../components/VRFActions.vue"
@@ -102,10 +101,6 @@ const routes: Array<RouteRecordRaw> = [
                         props: true,
                     },
                 ],
-            },
-            {
-                path: "factory-fantom",
-                component: Factory,
             },
             {
                 path: "factory",
