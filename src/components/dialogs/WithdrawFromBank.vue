@@ -136,7 +136,7 @@ const withdrawItems = async () => {
                 tokenId: i.tokenId,
                 amount: i.amountToWithdraw.toString(),
             })),
-            props.chainId as 250 | 146
+            props.chainId as 146
         )
         app.addToast(
             `${itemsToWithdraw.value.length} item${

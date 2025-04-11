@@ -133,7 +133,7 @@ const loading = ref(factoryStore.initialised === false)
 const creating = ref(false)
 const silosToCreate = ref(5)
 const previousCount = ref(0)
-const chainId = ref<250 | 146>(146)
+const chainId = ref<146>(146)
 
 const viewSilosRef = ref<typeof ViewSilos>()
 

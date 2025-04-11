@@ -471,14 +471,13 @@ export const useCoreStore = defineStore({
         async getAllPlayerInfo(playerId: string) {
             this.playerId = playerId
 
-            const playerState = await getPlayerState(this.playerId, sonic.id)
+            const playerState = await getPlayerState(this.playerId)
             if (playerState.clanMember) {
                 this.playerState = playerState.clanMember.player
 
                 if (playerState.clanMember.clan) {
                     const clan = await getClanByName(
                         playerState.clanMember.clan.name,
-                        sonic.id
                     )
                     this.clanState = clan.clans[0]
                 }
@@ -486,7 +485,6 @@ export const useCoreStore = defineStore({
                 this.clanState = null
                 const soloPlayerState = await getSoloPlayerState(
                     this.playerId,
-                    sonic.id
                 )
                 this.playerState = soloPlayerState.player
             }
@@ -495,12 +493,10 @@ export const useCoreStore = defineStore({
                 const inventory = await getUserItemNFTs(
                     this.playerState.owner,
                     allFullAttireBonuses.flatMap((x) => x.itemTokenIds),
-                    sonic.id
                 )
                 try {
                     const pets = await getOwnedPets(
                         this.playerState.owner,
-                        sonic.id
                     )
                     this.pets = pets.pets
                 } catch {}
@@ -538,14 +534,14 @@ export const useCoreStore = defineStore({
 
             await this.getAllPlayerInfo(activePlayer as unknown as string)
 
-            const globalState = await getGlobalData(sonic.id)
+            const globalState = await getGlobalData()
             this.coreData = globalState.coreData
         },
         async refreshHeroRoster() {
             const p = []
             for (const hero of this.heroRoster) {
                 if (hero && hero.id) {
-                    p.push(getSoloPlayerState(hero.id, sonic.id))
+                    p.push(getSoloPlayerState(hero.id))
                 }
             }
             const heroes = await Promise.all(p)

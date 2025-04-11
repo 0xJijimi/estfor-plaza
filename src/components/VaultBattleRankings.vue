@@ -123,7 +123,6 @@
 import { computed, onMounted, ref } from "vue"
 import { useClanStore, calculateBattleChances } from "../store/clan"
 import { useCoreStore } from "../store/core"
-import { sonic } from "viem/chains"
 
 const clanStore = useClanStore()
 const coreStore = useCoreStore()
@@ -139,7 +138,7 @@ const loading = ref(false)
 const init = async () => {
     loading.value = true
     try {
-        await clanStore.getAllClanInfo(sonic.id)
+        await clanStore.getAllClanInfo()
 
         sortedVaults.value = [...clanStore.sortedVaults]
         if (attackerVaultCombatants.value.length > 0) {

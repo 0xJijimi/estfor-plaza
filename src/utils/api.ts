@@ -12,10 +12,8 @@ import {
 } from "@paintswap/estfor-definitions/types"
 import { sleep } from "./time"
 
-const getBaseUrl = (chainId: 250 | 146) => {
-    return chainId === 250
-        ? "https://api-fantom.estfor.com"
-        : "https://api.estfor.com"
+const getBaseUrl = () => {
+    return "https://api.estfor.com"
 }
 
 const CHUNK_SIZE = 500
@@ -112,24 +110,20 @@ const fetchRetry = async (url: string, method: 'GET' | 'POST' = 'GET', body?: an
 
 export const getPlayerState = async (
     playerId: string,
-    chainId: 250 | 146
 ): Promise<ClanMemberResult> => {
-    return fetchRetry(`${getBaseUrl(chainId)}/clan-members/${playerId}`)
+    return fetchRetry(`${getBaseUrl()}/clan-members/${playerId}`)
 }
 
-export const getGlobalData = async (
-    chainId: 250 | 146
-): Promise<CoreDataResult> => {
-    return fetchRetry(`${getBaseUrl(chainId)}/core-data`)
+export const getGlobalData = async (): Promise<CoreDataResult> => {
+    return fetchRetry(`${getBaseUrl()}/core-data`)
 }
 
 export const getUserItemNFTs = async (
     user: string,
     tokenIds: number[],
-    chainId: 250 | 146
 ): Promise<UserItemNFTResult> => {
     return fetchRetry(
-        `${getBaseUrl(chainId)}/user-item-nfts/${user}?${tokenIds
+        `${getBaseUrl()}/user-item-nfts/${user}?${tokenIds
             .map((x) => `tokenIds[]=${x}`)
             .join("&")}`
     )
@@ -138,7 +132,6 @@ export const getUserItemNFTs = async (
 export const getMultiUserItemNFTs = async (
     users: string[],
     tokenIds: number[],
-    chainId: 250 | 146
 ): Promise<UserItemNFTResult> => {
     let result: UserItemNFTResult = {
         userItemNFTs: []
@@ -150,7 +143,7 @@ export const getMultiUserItemNFTs = async (
         let numToSkip = 0
         while (!localResult || localResult?.userItemNFTs.length === 1000) {
             localResult = await fetchRetry(
-                `${getBaseUrl(chainId)}/user-item-nfts/multi?numToSkip=${numToSkip}&numToFetch=1000${tokenIds.length > 0 ? `&${tokenIds
+                `${getBaseUrl()}/user-item-nfts/multi?numToSkip=${numToSkip}&numToFetch=1000${tokenIds.length > 0 ? `&${tokenIds
                     .map((x) => `tokenIds[]=${x}`)
                     .join("&")}` : ""}`,
                 'POST',
@@ -170,14 +163,12 @@ export const getMultiUserItemNFTs = async (
 
 export const getPlayers = async (
     searchTerm: string,
-    chainId: 250 | 146
 ): Promise<PlayerSearchResult> => {
-    return fetchRetry(`${getBaseUrl(chainId)}/players?name=${searchTerm}`)
+    return fetchRetry(`${getBaseUrl()}/players?name=${searchTerm}`)
 }
 
 export const getMultiPlayersByOwner = async (
     addresses: string[],
-    chainId: 250 | 146
 ): Promise<PlayerSearchResult> => {    
     let result: PlayerSearchResult = {
         players: []
@@ -186,7 +177,7 @@ export const getMultiPlayersByOwner = async (
     for (let i = 0; i < addresses.length; i += CHUNK_SIZE) {
         let localResult: PlayerSearchResult | null = null
         const chunk = addresses.slice(i, i + CHUNK_SIZE)        
-        localResult = await fetchRetry(`${getBaseUrl(chainId)}/players/multi?numToSkip=0&numToFetch=1000`, 'POST', JSON.stringify({
+        localResult = await fetchRetry(`${getBaseUrl()}/players/multi?numToSkip=0&numToFetch=1000`, 'POST', JSON.stringify({
             owners: chunk,
         }))
 
@@ -199,25 +190,22 @@ export const getMultiPlayersByOwner = async (
 
 export const getPlayersByOwner = async (
     address: string,
-    chainId: 250 | 146
 ): Promise<PlayerSearchResult> => {
-    return fetchRetry(`${getBaseUrl(chainId)}/players?owner=${address}`)
+    return fetchRetry(`${getBaseUrl()}/players?owner=${address}`)
 }
 
 export const getExactPlayers = async (
     searchTerm: string,
-    chainId: 250 | 146
 ): Promise<PlayerSearchResult> => {
-    return fetchRetry(`${getBaseUrl(chainId)}/players?exactName=${searchTerm}`)
+    return fetchRetry(`${getBaseUrl()}/players?exactName=${searchTerm}`)
 }
 
 export const getPlayersByIds = async (
     ids: string[],
     numToSkip: number = 0,
-    chainId: 250 | 146
 ): Promise<PlayerSearchResult> => {
     return fetchRetry(
-        `${getBaseUrl(chainId)}/players?numToSkip=${numToSkip}&${ids
+        `${getBaseUrl()}/players?numToSkip=${numToSkip}&${ids
             .map((x) => `tokenIds[]=${x}`)
             .join("&")}`
     )
@@ -225,53 +213,46 @@ export const getPlayersByIds = async (
 
 export const getSoloPlayerState = async (
     playerId: string,
-    chainId: 250 | 146
 ): Promise<PlayerResult> => {
-    return fetchRetry(`${getBaseUrl(chainId)}/players/${playerId}`)
+    return fetchRetry(`${getBaseUrl()}/players/${playerId}`)
 }
 
 export const getLotteries = async (
     numToSkip: number,
-    chainId: 250 | 146
 ): Promise<LotteriesResult> => {
-    return fetchRetry(`${getBaseUrl(chainId)}/lotteries?numToSkip=${numToSkip}`)
+    return fetchRetry(`${getBaseUrl()}/lotteries?numToSkip=${numToSkip}`)
 }
 
 export const getRaffleEntries = async (
     numToSkip: number,
-    chainId: 250 | 146
 ): Promise<RaffleEntryResult> => {
     return fetchRetry(
-        `${getBaseUrl(chainId)}/raffle-entries?numToSkip=${numToSkip}`
+        `${getBaseUrl()}/raffle-entries?numToSkip=${numToSkip}`
     )
 }
 
 export const getClanMembers = async (
     clanId: string,
-    chainId: 250 | 146
 ): Promise<ClanMembersResult> => {
-    return fetchRetry(`${getBaseUrl(chainId)}/clan-members?clanId=${clanId}`)
+    return fetchRetry(`${getBaseUrl()}/clan-members?clanId=${clanId}`)
 }
 
 export const getClans = async (
     numToSkip: number,
-    chainId: 250 | 146
 ): Promise<ClansResult> => {
     return fetchRetry(
-        `${getBaseUrl(chainId)}/clans?numToSkip=${numToSkip}&onlyHasVaults=true`
+        `${getBaseUrl()}/clans?numToSkip=${numToSkip}&onlyHasVaults=true`
     )
 }
 
 export const getClanByName = async (
     name: string,
-    chainId: 250 | 146
 ): Promise<ClansResult> => {
-    return fetchRetry(`${getBaseUrl(chainId)}/clans?name=${name}`)
+    return fetchRetry(`${getBaseUrl()}/clans?name=${name}`)
 }
 
 export const searchQueuedActions = async (
     playerIds: string[],
-    chainId: 250 | 146
 ): Promise<SearchQueuedActionsResult> => {
     let result: SearchQueuedActionsResult = {
         queuedActions: []
@@ -281,9 +262,7 @@ export const searchQueuedActions = async (
         let localResult: SearchQueuedActionsResult | null = null
         const chunk = playerIds.slice(i, i + CHUNK_SIZE)
         localResult = await fetchRetry(
-            `${getBaseUrl(
-                chainId
-            )}/queued-actions/multi?isActive=true&orderDirection=asc&numToSkip=0&numToFetch=1000`,
+            `${getBaseUrl()}/queued-actions/multi?isActive=true&orderDirection=asc&numToSkip=0&numToFetch=1000`,
             'POST',
             JSON.stringify({
                 playerIds: chunk
@@ -297,32 +276,24 @@ export const searchQueuedActions = async (
     return result
 }
 
-export const getTerritories = async (
-    chainId: 250 | 146
-): Promise<TerritoriesResult> => {
-    return fetchRetry(`${getBaseUrl(chainId)}/territories`)
+export const getTerritories = async (): Promise<TerritoriesResult> => {
+    return fetchRetry(`${getBaseUrl()}/territories`)
 }
 
 export const getDonations = async (
     numToSkip: number,
-    chainId: 250 | 146
 ): Promise<DonationsResult> => {
     return fetchRetry(
-        `${getBaseUrl(
-            chainId
-        )}/donations?numToSkip=${numToSkip}&orderDirection=desc&orderBy=lastUpdatedTimestamp&useUsers=false`
+        `${getBaseUrl()}/donations?numToSkip=${numToSkip}&orderDirection=desc&orderBy=lastUpdatedTimestamp&useUsers=false`
     )
 }
 
-export const getAvatars = async (
-    chainId: 250 | 146
-): Promise<AvatarSearchResult> => {
-    return fetchRetry(`${getBaseUrl(chainId)}/avatars`)
+export const getAvatars = async (): Promise<AvatarSearchResult> => {
+    return fetchRetry(`${getBaseUrl()}/avatars`)
 }
 
 export const getOwnedPets = async (
     address: string,
-    chainId: 250 | 146
 ): Promise<PetsResult> => {
-    return fetchRetry(`${getBaseUrl(chainId)}/pets?owner=${address}`)
+    return fetchRetry(`${getBaseUrl()}/pets?owner=${address}`)
 }

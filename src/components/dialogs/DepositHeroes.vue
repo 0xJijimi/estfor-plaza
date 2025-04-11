@@ -115,7 +115,7 @@ const openDialog = async () => {
     heroes.value = []
 
     const account = getAccount(config)
-    const heroesResult = await getPlayersByOwner(account.address as string, props.chainId as 250 | 146)
+    const heroesResult = await getPlayersByOwner(account.address as string)
     heroes.value = heroesResult.players.map((p) => ({
         playerId: p.id,
         name: p.name,
@@ -145,7 +145,7 @@ const depositHeroes = async () => {
                     playerId: i.playerId,
                     assignedSilo: getAddress(i.assignedSilo),
                 })),
-            props.chainId as 250 | 146
+            props.chainId as 146
         )
         app.addToast(`Heroes deposited`, "alert-success", 5000)
         emits("deposited")

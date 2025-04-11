@@ -18,7 +18,6 @@ import {
 } from "@paintswap/estfor-definitions/types"
 import { defineStore } from "pinia"
 import { ZeroAddress, solidityPacked, Interface } from "ethers"
-import { fantom } from "viem/chains"
 
 import {
     Address,
@@ -538,7 +537,7 @@ const getChunksForMulticall = async (
     contract: Interface,
     chunks: number,
     value: bigint,
-    chainId: 250 | 146,
+    chainId: 146,
     gasLimit: bigint = BigInt(6000000)
 ) => {
     let attempts = 0
@@ -696,7 +695,7 @@ export const useFactoryStore = defineStore({
         },
         async withdrawHeroes(
             proxys: ProxySilo[],
-            chainId: 250 | 146,
+            chainId: 146,
         ) {
             const coreStore = useCoreStore()
             const factoryAddress = coreStore.getAddress(Address.factoryRegistry)
@@ -733,7 +732,7 @@ export const useFactoryStore = defineStore({
 
             await this.multicall(selectorArray, chainId, false)
         },
-        async depositHeroes(heroes: { playerId: string, assignedSilo: string }[], chainId: 250 | 146) {
+        async depositHeroes(heroes: { playerId: string, assignedSilo: string }[], chainId: 146) {
             const coreStore = useCoreStore()
             const playerNFTAddress = coreStore.getAddress(Address.estforPlayerNFT, chainId)
             const factoryRegistryAddress = coreStore.getAddress(Address.factoryRegistry, chainId)
@@ -800,7 +799,7 @@ export const useFactoryStore = defineStore({
             await sleep(2000)
             await this.getAllProxyStates(chainId)
         },
-        async activateHeroes(heroes: { address: string, playerId: string }[], chainId: 250 | 146) {
+        async activateHeroes(heroes: { address: string, playerId: string }[], chainId: 146) {
             const coreStore = useCoreStore()
             const playersAddress = coreStore.getAddress(Address.estforPlayers, chainId)
             const factoryAddress = coreStore.getAddress(Address.factoryRegistry, chainId)
@@ -823,7 +822,7 @@ export const useFactoryStore = defineStore({
             await sleep(2000)
             await this.getAllProxyStates(chainId)
         },
-        async mintHeroes(heroes: any[], chainId: 250 | 146) {
+        async mintHeroes(heroes: any[], chainId: 146) {
             const coreStore = useCoreStore()
             const factoryAddress = coreStore.getAddress(
                 Address.factoryRegistry,
@@ -876,7 +875,7 @@ export const useFactoryStore = defineStore({
         },
         async multicall(
             data: any[],
-            chainId: 250 | 146,
+            chainId: 146,
             fastCall: boolean,
             chunks = 10,
             value: bigint = BigInt(0),
@@ -966,7 +965,7 @@ export const useFactoryStore = defineStore({
         async approveBrush(
             proxys: ProxySilo[],
             amount: bigint,
-            chainId: 250 | 146
+            chainId: 146
         ) {
             const coreStore = useCoreStore()
             const factoryAddress = coreStore.getAddress(
@@ -1013,7 +1012,7 @@ export const useFactoryStore = defineStore({
         async sendBrush(
             proxys: ProxySilo[],
             amount: bigint,
-            chainId: 250 | 146
+            chainId: 146
         ) {
             const coreStore = useCoreStore()
             const brushAddress = coreStore.getAddress(Address.brush, chainId)
@@ -1047,7 +1046,7 @@ export const useFactoryStore = defineStore({
                 this.currentTransactionNumber = 0
             }
         },
-        async evolveHeroes(proxys: ProxySilo[], chainId: 250 | 146) {
+        async evolveHeroes(proxys: ProxySilo[], chainId: 146) {
             const coreStore = useCoreStore()
             const factoryAddress = coreStore.getAddress(
                 Address.factoryRegistry,
@@ -1095,7 +1094,7 @@ export const useFactoryStore = defineStore({
 
             await this.multicall(selectorArray, chainId, false)
         },
-        async getAllProxyStates(chainId: 250 | 146, proxys: ProxySilo[] = []) {
+        async getAllProxyStates(chainId: 146, proxys: ProxySilo[] = []) {
             const coreStore = useCoreStore()
             const playerAddress = coreStore.getAddress(
                 Address.estforPlayers,
@@ -1116,10 +1115,10 @@ export const useFactoryStore = defineStore({
 
             const proxyContract = {
                 abi: epProxyAbi,
-                chainId: fantom.id,
+                chainId: chainId,
             }
 
-            const playerPromises: PlayerSearchResult = await getMultiPlayersByOwner(this.proxys.map(p => p.address), chainId)
+            const playerPromises: PlayerSearchResult = await getMultiPlayersByOwner(this.proxys.map(p => p.address))
 
             const proxysWithPlayerId = this.proxys.map((p) => {
                 const result = playerPromises.players.filter(
@@ -1141,7 +1140,7 @@ export const useFactoryStore = defineStore({
                 .filter((p) => p.playerId !== "")
                 .map((p) => p.playerId)
             if (playerIdsToGet.length > 0) {
-                const queuedActionsResult = await searchQueuedActions(playerIdsToGet, chainId)
+                const queuedActionsResult = await searchQueuedActions(playerIdsToGet)
 
                 const proxyData = await multicall(config, {
                     contracts: proxysWithPlayerId.map(
@@ -1189,12 +1188,12 @@ export const useFactoryStore = defineStore({
                 }))
             }
 
-            await this.getBankItems(chainId)
+            await this.getBankItems()
             await this.getTransactionCharge(chainId)
             this.initialised = true
             this.initialisedAt = new Date()
         },
-        async getTransactionCharge(chainId: 250 | 146) {
+        async getTransactionCharge(chainId: 146) {
             const coreStore = useCoreStore()
             const factoryAddress = coreStore.getAddress(
                 Address.factoryRegistry,
@@ -1213,7 +1212,7 @@ export const useFactoryStore = defineStore({
             })
             this.transactionCharge = result as bigint
         },
-        async createProxy(proxyNumber: number, chainId: 250 | 146) {
+        async createProxy(proxyNumber: number, chainId: 146) {
             const coreStore = useCoreStore()
             const factoryAddress = coreStore.getAddress(
                 Address.factoryRegistry,
@@ -1336,7 +1335,7 @@ export const useFactoryStore = defineStore({
                 proxyToUpdate.queuedActions = queuedActions
             }
         },
-        async getProxys(chainId: 250 | 146, force = true) {
+        async getProxys(chainId: 146, force = true) {
             if (
                 !force &&
                 this.initialised &&
@@ -1413,7 +1412,7 @@ export const useFactoryStore = defineStore({
             combatStyle: CombatStyle,
             actionQueueStatus: ActionQueueStrategy,
             activate: boolean,
-            chainId: 250 | 146
+            chainId: 146
         ) {
             const coreStore = useCoreStore()
             const factoryAddress = coreStore.getAddress(
@@ -1529,7 +1528,7 @@ export const useFactoryStore = defineStore({
         },
         async transferItemsFromBankToProxys(
             itemsNeeded: NeededItem[],
-            chainId: 250 | 146
+            chainId: 146
         ) {
             const coreStore = useCoreStore()
             const factoryAddress = coreStore.getAddress(
@@ -1575,12 +1574,12 @@ export const useFactoryStore = defineStore({
 
                 await this.multicall(selectorArray, chainId, false, 40)
             }
-            await this.getBankItems(chainId)
+            await this.getBankItems()
         },
         async processActions(
             proxys: ProxySilo[],
             fastCall: boolean,
-            chainId: 250 | 146
+            chainId: 146
         ) {
             const coreStore = useCoreStore()
             const factoryAddress = coreStore.getAddress(
@@ -1625,12 +1624,12 @@ export const useFactoryStore = defineStore({
             await this.multicall(selectorArray, chainId, fastCall, 40)
 
             await sleep(2000)
-            await this.getBankItems(chainId)
-            await this.updateQueuedActions(chainId)
+            await this.getBankItems()
+            await this.updateQueuedActions()
         },
         async bridgeHeroes(
             proxys: ProxySilo[],
-            chainId: 250 | 146
+            chainId: 146
         ) {
             const coreStore = useCoreStore()
             const factoryAddress = coreStore.getAddress(
@@ -1686,7 +1685,7 @@ export const useFactoryStore = defineStore({
         async executeSavedTransactions(
             proxys: ProxySilo[],
             fastCall: boolean,
-            chainId: 250 | 146
+            chainId: 146
         ) {
             const coreStore = useCoreStore()
             const factoryAddress = coreStore.getAddress(
@@ -1748,11 +1747,11 @@ export const useFactoryStore = defineStore({
                 }
             }
             await sleep(2000)
-            await this.getBankItems(chainId)
-            await this.updateQueuedActions(chainId)
+            await this.getBankItems()
+            await this.updateQueuedActions()
         },
-        async updateQueuedActions(chainId: 250 | 146) {
-            const queuedActionResult = await searchQueuedActions(this.proxys.filter(p => p.playerId !== "").map(p => p.playerId), chainId)
+        async updateQueuedActions() {
+            const queuedActionResult = await searchQueuedActions(this.proxys.filter(p => p.playerId !== "").map(p => p.playerId))
             for (const proxy of this.proxys) {
                 if (
                     proxy.playerId === "" ||
@@ -1768,7 +1767,7 @@ export const useFactoryStore = defineStore({
                         .flat() || []
             }
         },
-        async withdrawItems(items: any[], chainId: 250 | 146) {
+        async withdrawItems(items: any[], chainId: 146) {
             const coreStore = useCoreStore()
             const itemAddress = coreStore.getAddress(Address.itemNFT, chainId)
             const factoryAddress = coreStore.getAddress(
@@ -1824,13 +1823,12 @@ export const useFactoryStore = defineStore({
                 chainId,
             })
             await waitForTransactionReceipt(config, { hash, chainId })
-            await this.getBankItems(chainId)
+            await this.getBankItems()
         },
         async getRelevantItemsForProxies(
             proxys: ProxySilo[],
-            chainId: 250 | 146
         ) {
-            const results: UserItemNFTResult = await getMultiUserItemNFTs(this.proxys.map(p => p.address), [], chainId)
+            const results: UserItemNFTResult = await getMultiUserItemNFTs(this.proxys.map(p => p.address), [])
 
             const distinctItems: number[] = []
 
@@ -1896,7 +1894,7 @@ export const useFactoryStore = defineStore({
         async transferItemsToBank(
             relevantTokenIds: number[],
             proxys: ProxySilo[],
-            chainId: 250 | 146,
+            chainId: 146,
             overrideNeedsItem: boolean = false
         ) {
             const coreStore = useCoreStore()
@@ -1920,7 +1918,7 @@ export const useFactoryStore = defineStore({
                 return
             }
 
-            const results: UserItemNFTResult = await getMultiUserItemNFTs(proxys.map(p => p.address), [], chainId)
+            const results: UserItemNFTResult = await getMultiUserItemNFTs(proxys.map(p => p.address), [])
 
             // match proxy on item result user address and work out the outputs from the decoded saved transaction
             const deposits: { items: UserItemNFT[]; proxy: string }[] = []
@@ -1971,13 +1969,13 @@ export const useFactoryStore = defineStore({
                 await this.multicall(selectorArray, chainId, false, 40)
             }
             await sleep(2000)
-            await this.getBankItems(chainId)
+            await this.getBankItems()
         },
         async transferItemsToAddress(
             siloAddress: string,
             toAddress: string,
             items: TransferUserItemNFT[],
-            chainId: 250 | 146
+            chainId: 146
         ) {
             const coreStore = useCoreStore()
             const itemAddress = coreStore.getAddress(Address.itemNFT, chainId)
@@ -2017,7 +2015,7 @@ export const useFactoryStore = defineStore({
                 chainId,
             })
             await waitForTransactionReceipt(config, { hash })
-            await this.getBankItems(chainId)
+            await this.getBankItems()
         },
         async distributeItems(
             items: {
@@ -2025,7 +2023,7 @@ export const useFactoryStore = defineStore({
                 tokenId: number
                 amount: string
             }[],
-            chainId: 250 | 146
+            chainId: 146
         ) {
             const coreStore = useCoreStore()
             const itemAddress = coreStore.getAddress(Address.itemNFT, chainId)
@@ -2071,14 +2069,13 @@ export const useFactoryStore = defineStore({
 
             await this.multicall(selectorArray, chainId, false, 40)
             await sleep(2000)
-            await this.getBankItems(chainId)
+            await this.getBankItems()
         },
-        async getBankItems(chainId: 250 | 146) {
+        async getBankItems() {
             if (this.bank) {
                 const result = await getUserItemNFTs(
                     this.bank.address,
                     [],
-                    chainId
                 )
                 this.bankItems = result.userItemNFTs || []
             }

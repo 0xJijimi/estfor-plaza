@@ -111,7 +111,7 @@ import {
 import { getLevel } from "../../store/core"
 
 const props = defineProps<{
-    chainId: 250 | 146
+    chainId: 146
 }>()
 
 const factoryStore = useFactoryStore()

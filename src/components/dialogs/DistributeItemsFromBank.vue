@@ -192,7 +192,7 @@ const withdrawItems = async () => {
                     tokenId: item.value,
                     amount: i.amountToDistribute.toString(),
                 })),
-            props.chainId as 250 | 146
+            props.chainId as 146
         )
         app.addToast(`Items distributed`, "alert-success", 5000)
         emits("withdrawn")

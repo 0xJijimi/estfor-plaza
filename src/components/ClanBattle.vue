@@ -328,7 +328,6 @@ import {
 import { getClanMembers } from "../utils/api"
 import { Clan, Player } from "@paintswap/estfor-definitions/types"
 import ClanSearch from "./inputs/ClanSearch.vue"
-import { sonic } from "viem/chains"
 
 const coreStore = useCoreStore()
 const clanStore = useClanStore()
@@ -423,7 +422,7 @@ const updateClanBRoster = () => {
 }
 
 const loadClanA = async (clan: Clan) => {
-    const clanMembersResult = await getClanMembers(clan.id, sonic.id)
+    const clanMembersResult = await getClanMembers(clan.id)
     clanAClan.value = clan
     clanA.value = clanMembersResult.clanMembers.map((x) => x.player)
     clanANameFixed.value = clanMembersResult.clanMembers[0]?.clan?.name || ""
@@ -431,7 +430,7 @@ const loadClanA = async (clan: Clan) => {
 }
 
 const loadClanB = async (clan: Clan) => {
-    const clanMembersResult = await getClanMembers(clan.id, sonic.id)
+    const clanMembersResult = await getClanMembers(clan.id)
     clanBClan.value = clan
     clanB.value = clanMembersResult.clanMembers.map((x) => x.player)
     clanBNameFixed.value = clanMembersResult.clanMembers[0]?.clan?.name || ""
@@ -516,7 +515,7 @@ const switchClanAWithB = () => {
 const init = async () => {
     loadingA.value = true
 
-    await clanStore.getAllClanInfo(sonic.id)
+    await clanStore.getAllClanInfo()
     if (coreStore.clanState) {
         await loadClanA(coreStore.clanState)
     }

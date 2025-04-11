@@ -96,7 +96,7 @@ import { allItems } from "../../data/items"
 import { AggregatedItem } from "../../store/models/factory.models"
 
 const props = defineProps<{
-    chainId: 250 | 146
+    chainId: 146
 }>()
 
 const factoryStore = useFactoryStore()

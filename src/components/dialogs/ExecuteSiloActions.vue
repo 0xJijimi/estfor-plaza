@@ -265,13 +265,13 @@ const executeSavedTransactions = async () => {
             await factoryStore.processActions(
                 silosWithEmptyQueuesOrActionInputOnly.value,
                 shouldFastCall.value,
-                props.chainId as 250 | 146
+                props.chainId as 146
             )
         } else {
             await factoryStore.executeSavedTransactions(
                 silosWithEmptyQueuesOrActionInputOnly.value,
                 shouldFastCall.value,
-                props.chainId as 250 | 146
+                props.chainId as 146
             )
         }
         app.addToast(
@@ -303,7 +303,6 @@ const goToTransferScreen = async () => {
     try {
         const result = await factoryStore.getRelevantItemsForProxies(
             silosToExecute.value,
-            props.chainId as 250 | 146
         )
         relevantTokens.value = result.distinctItems
             .map((t) => ({
@@ -330,7 +329,7 @@ const transferItemsToBank = async () => {
                 .filter((t) => t.selected)
                 .map((t) => t.tokenId),
             silosToExecute.value,
-            props.chainId as 250 | 146
+            props.chainId as 146
         )
         app.addToast(`Items transferred to Bank`, "alert-success", 5000)
         itemsTransferredToBank.value = true
@@ -348,7 +347,7 @@ const executeActionChoiceSavedTransactions = async () => {
     error.value = null
     stage.value = null
     try {
-        const userItemNFTsResult = await getMultiUserItemNFTs(silosWithActionChoicesOnly.value.map(p => p.address), [], props.chainId as 250 | 146)
+        const userItemNFTsResult = await getMultiUserItemNFTs(silosWithActionChoicesOnly.value.map(p => p.address), [])
 
         const itemsNeeded: NeededItem[] = []
         for (const proxy of silosWithActionChoicesOnly.value) {
@@ -520,7 +519,6 @@ const executeActionChoiceSavedTransactions = async () => {
             const itemResult = await getUserItemNFTs(
                 factoryStore.bank?.address,
                 [],
-                props.chainId as 250 | 146
             )
             const bankItems = itemResult.userItemNFTs
 
@@ -585,7 +583,7 @@ const executeActionChoiceSavedTransactions = async () => {
                     stage.value = "Transferring items to heroes (Part 1 of 2)"
                     await factoryStore.transferItemsFromBankToProxys(
                         itemsNeeded,
-                        props.chainId as 250 | 146
+                        props.chainId as 146
                     )
                 }
                 stage.value = "Executing actions (Part 2 of 2)"
@@ -594,13 +592,13 @@ const executeActionChoiceSavedTransactions = async () => {
                     await factoryStore.processActions(
                         silosWithActionChoicesOnly.value,
                         shouldFastCall.value,
-                        props.chainId as 250 | 146
+                        props.chainId as 146
                     )
                 } else {
                     await factoryStore.executeSavedTransactions(
                         silosWithActionChoicesOnly.value,
                         shouldFastCall.value,
-                        props.chainId as 250 | 146
+                        props.chainId as 146
                     )
                 }
                 stage.value = null
@@ -613,9 +611,7 @@ const executeActionChoiceSavedTransactions = async () => {
                     "alert-success",
                     5000
                 )
-                await factoryStore.updateQueuedActions(
-                    props.chainId as 250 | 146
-                )
+                await factoryStore.updateQueuedActions()
                 const dialog = document.getElementById(
                     props.id
                 ) as HTMLDialogElement

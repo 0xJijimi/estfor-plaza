@@ -513,7 +513,6 @@ const checkRequiredItems = async () => {
                     const userItemsResult = await getUserItemNFTs(
                         h.address,
                         [],
-                        props.chainId as 250 | 146
                     )
                     // filter out user items that are below minXP
                     const { extraXP } = calculateExtraXPForHeroActionInput(
@@ -585,7 +584,6 @@ const checkCombatItems = async () => {
                 const userItemsResult = await getUserItemNFTs(
                     h.address,
                     [],
-                    props.chainId as 250 | 146
                 )
                 // filter out user items that are below minXP
                 const { meleeXP, magicXP, rangedXP, defenceXP } =
@@ -656,7 +654,6 @@ const checkActionChoiceRequiredItems = async () => {
                     const userItemsResult = await getUserItemNFTs(
                         h.address,
                         [],
-                        props.chainId as 250 | 146
                     )
                     // filter out user items that are below minXP
                     const { extraXP } = calculateExtraXPForHeroActionInput(
@@ -818,7 +815,7 @@ const assignHeroes = async () => {
                     : CombatStyle.NONE,
                 queueStatus.value,
                 active.value,
-                props.chainId as 250 | 146
+                props.chainId as 146
             )
         } else if (
             skillId.value > 0 &&
@@ -864,7 +861,7 @@ const assignHeroes = async () => {
                 CombatStyle.NONE,
                 queueStatus.value,
                 active.value,
-                props.chainId as 250 | 146
+                props.chainId as 146
             )
         }
 

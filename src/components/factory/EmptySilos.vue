@@ -135,7 +135,7 @@ import DepositHeroes from "../dialogs/DepositHeroes.vue"
 const emit = defineEmits(["create-heroes"])
 
 const props = defineProps<{
-    chainId: 250 | 146
+    chainId: 146
 }>()
 
 const factoryStore = useFactoryStore()
@@ -172,7 +172,7 @@ const mintHeroes = async () => {
             hero.error = "Name cannot be empty"
             continue
         }
-        const exists = await getExactPlayers(hero.name.trim(), props.chainId)
+        const exists = await getExactPlayers(hero.name.trim())
         if (exists.players.length > 0) {
             hero.error = "Name not unique"
         }
@@ -205,7 +205,7 @@ const addHero = () => {
 }
 
 const init = async () => {
-    const avatarsResult = await getAvatars(props.chainId)
+    const avatarsResult = await getAvatars()
     avatars.value = avatarsResult.avatars
         .map((a) => {
             return {

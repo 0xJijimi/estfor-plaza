@@ -111,7 +111,6 @@
 import { onMounted, ref } from "vue"
 import { getLotteries, getRaffleEntries, getPlayersByIds } from "../utils/api"
 import { Lottery, RaffleEntry } from "@paintswap/estfor-definitions/types"
-import { sonic } from "viem/chains"
 
 interface LotteryRank {
     playerId: string
@@ -136,7 +135,7 @@ const init = async () => {
         let moreToFetch = true
         const lotteryResults = []
         while (moreToFetch) {
-            const results = await getLotteries(numToSkip, sonic.id)
+            const results = await getLotteries(numToSkip)
             lotteryResults.push(...results.lotteries)
             if (results.lotteries.length < 1000) {
                 moreToFetch = false
@@ -152,7 +151,7 @@ const init = async () => {
         let moreToFetch = true
         const raffleResults = []
         while (moreToFetch) {
-            const results = await getRaffleEntries(numToSkip, sonic.id)
+            const results = await getRaffleEntries(numToSkip)
             raffleResults.push(...results.raffleEntries)
             if (results.raffleEntries.length < 1000) {
                 moreToFetch = false
@@ -220,7 +219,6 @@ const init = async () => {
             ...topLosers.map((x) => x.playerId),
         ],
         0,
-        sonic.id
     )
     for (const p of playerResult.players) {
         const rank = topWinners.find((x) => x.playerId === p.id)

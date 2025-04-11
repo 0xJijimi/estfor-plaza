@@ -102,7 +102,7 @@ const approveBrush = async () => {
         await factoryStore.approveBrush(
             heroesToEvolve.value,
             BigInt(cost.value),
-            props.chainId as 250 | 146
+            props.chainId as 146
         )
         approved.value = true
     } catch {
@@ -119,7 +119,7 @@ const sendBrush = async () => {
         await factoryStore.sendBrush(
             heroesToEvolve.value,
             BigInt(cost.value),
-            props.chainId as 250 | 146
+            props.chainId as 146
         )
         sentBrush.value = true
     } catch {
@@ -135,7 +135,7 @@ const evolveHeroes = async () => {
     try {
         await factoryStore.evolveHeroes(
             heroesToEvolve.value,
-            props.chainId as 250 | 146
+            props.chainId as 146
         )
 
         app.addToast(

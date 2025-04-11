@@ -123,7 +123,7 @@
                             </td>
                             <td>
                                 <a
-                                    :href="`https://${props.chainId === 250 ? 'fantom.' : ''}estfor.com/journal/${silo.playerId}`"
+                                    :href="`https://estfor.com/journal/${silo.playerId}`"
                                     target="_blank"
                                     class="max-sm:hidden"
                                 >
@@ -185,7 +185,7 @@
                         tabindex="0"
                         class="dropdown-content z-[1] menu p-2 w-52 rounded-box shadow bg-base-100-50"
                     >
-                        <li v-if="props.chainId !== 250" >
+                        <li>
                             <button
                                 type="button"
                                 class="btn btn-primary btn-sm mb-2"
@@ -197,7 +197,7 @@
                                 }}
                             </button>
                         </li>
-                        <li v-if="props.chainId !== 250" >
+                        <li>
                             <button
                                 type="button"
                                 class="btn btn-primary btn-sm"
@@ -209,18 +209,6 @@
                                 }}
                             </button>
                         </li>
-                        <li v-if="props.chainId === 250" >
-                            <button
-                                type="button"
-                                class="btn btn-primary btn-sm"
-                                @click="bridgeHeroes"
-                                :disabled="executing || !selectedSilosWithoutBank.length || selectedSilosWithoutBank.some(x => x.queuedActions.length > 0)"
-                            >
-                                Bridge {{ selectedSilosWithoutBank.length }} Hero{{
-                                    selectedSilosWithoutBank.length !== 1 ? "es" : ""
-                                }}
-                            </button>
-                        </li>
                     </ul>
                 </div>
 
@@ -228,9 +216,9 @@
                     type="button"
                     class="btn btn-primary mt-5 grow"
                     @click="openExecuteTransactions"
-                    :disabled="!selectedSilos.length || (props.chainId === 250 && !selectedSilos.some(x => x.queuedActions.length > 0))"
+                    :disabled="!selectedSilos.length"
                 >
-                    {{ props.chainId === 250 ? 'Finish Actions for' : 'Execute Actions for' }} {{ selectedSilos.length }} Hero{{
+                    Execute Actions for {{ selectedSilos.length }} Hero{{
                         selectedSilos.length !== 1 ? "es" : ""
                     }}
                 </button>
@@ -252,11 +240,6 @@
         id="execute_actions_modal"
         :chainId="props.chainId"
     />
-    <BridgeHero
-        ref="bridgeHeroRef"
-        id="bridge_hero_modal"
-        :chainId="props.chainId"
-    />
 </template>
 
 <script setup lang="ts">
@@ -273,10 +256,9 @@ import ExecuteSiloActions from "../dialogs/ExecuteSiloActions.vue"
 import AssignedHeroGroupSelect from "../inputs/AssignedHeroGroupSelect.vue"
 import AssignedHeroSkillSelect from "../inputs/AssignedHeroSkillSelect.vue"
 import EvolveHero from "../dialogs/EvolveHero.vue"
-import BridgeHero from "../dialogs/BridgeHero.vue"
 
 const props = defineProps<{
-    chainId: 250 | 146
+    chainId: 146
 }>()
 
 const factoryStore = useFactoryStore()
@@ -291,7 +273,6 @@ const selectedSkillGroup = ref(Skill.NONE)
 const assignHeroRef = ref<typeof AssignHero>()
 const executeActionsRef = ref<typeof ExecuteSiloActions>()
 const evolveHeroRef = ref<typeof EvolveHero>()
-const bridgeHeroRef = ref<typeof BridgeHero>()
 
 const assignedSilos = computed(() => {
     const assignedProxys = factoryStore.assignedProxys
@@ -413,8 +394,6 @@ const selectedSilos = computed(() =>
     assignedSilosRef.value.filter((s) => s.selected)
 )
 
-const selectedSilosWithoutBank = computed(() => selectedSilos.value.filter(x => x.address !== factoryStore.bank?.address))
-
 const openExecuteTransactions = () => {
     executeActionsRef.value?.openDialog(selectedSilos.value)
 }
@@ -432,15 +411,6 @@ const evolveHeroes = () => {
         )
     )
 }
-
-const bridgeHeroes = () => {
-    bridgeHeroRef.value?.openDialog(
-        assignedSilosRef.value.filter(
-            (x) => x.selected && x.address !== factoryStore.bank?.address
-        )
-    )
-}
-
 
 const calculateTimeLeft = (queuedAction: QueuedAction) => {
     const startTime = parseInt(queuedAction.startTime)

@@ -290,7 +290,7 @@ import {
 } from "../../store/models/factory.models"
 
 const props = defineProps<{
-    chainId: 250 | 146
+    chainId: 146
 }>()
 
 const factoryStore = useFactoryStore()
@@ -331,7 +331,6 @@ const showSilo = async (index: number) => {
             const itemResult = await getUserItemNFTs(
                 selectedSilo.value.address,
                 [],
-                props.chainId
             )
             selectedSiloItems.value = itemResult.userItemNFTs.map((i) => {
                 return {

@@ -41,7 +41,6 @@ import { ref, onMounted } from "vue"
 import { useCoreStore } from "../store/core"
 import { useRoute } from "vue-router"
 import { ClanMember, getClanMembers } from "../utils/api"
-import { sonic } from "viem/chains"
 
 const route = useRoute()
 const core = useCoreStore()
@@ -54,7 +53,6 @@ const init = async () => {
         if (core.clanState) {
             const membersResult = await getClanMembers(
                 core.clanState.id,
-                sonic.id
             )
             clanMembers.value = membersResult.clanMembers
         }
