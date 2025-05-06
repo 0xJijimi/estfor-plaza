@@ -11,7 +11,7 @@
                             <th class="w-[80px]">
                                 <input
                                     type="checkbox"
-                                    class="checkbox checkbox-primary"
+                                    class="checkbox checkbox-primary card"
                                     v-model="selectAll"
                                     @change="selectAllSilos"
                                 />
@@ -29,7 +29,7 @@
                             <td>
                                 <input
                                     type="checkbox"
-                                    class="checkbox checkbox-primary"
+                                    class="checkbox checkbox-primary card"
                                     v-model="silo.selected"
                                 />
                             </td>
