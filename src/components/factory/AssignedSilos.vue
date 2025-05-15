@@ -82,7 +82,7 @@
                                 />
                             </td>
                             <td>
-                                {{ silo.playerState.name }}
+                                {{ silo.playerState.name + ' / ' + silo.class }}
                             </td>
                             <td>
                                 {{ decodeTransaction(silo.savedTransactions) }}
@@ -256,6 +256,7 @@ import ExecuteSiloActions from "../dialogs/ExecuteSiloActions.vue"
 import AssignedHeroGroupSelect from "../inputs/AssignedHeroGroupSelect.vue"
 import AssignedHeroSkillSelect from "../inputs/AssignedHeroSkillSelect.vue"
 import EvolveHero from "../dialogs/EvolveHero.vue"
+import { getHeroClass } from "../../utils/player"
 
 const props = defineProps<{
     chainId: 146
@@ -332,7 +333,7 @@ const assignedSilos = computed(() => {
     return assignedProxys
 })
 const assignedSilosRef = ref(
-    assignedSilos.value.map((s) => ({ ...s, selected: false }))
+    assignedSilos.value.map((s) => ({ ...s, selected: false, class: getHeroClass(s.playerState) }))
 )
 
 const pagedAssignedSilos = computed(() => {
@@ -423,10 +424,20 @@ const calculateTimeLeft = (queuedAction: QueuedAction) => {
 watch(
     () => assignedSilos.value,
     () => {
-        assignedSilosRef.value = assignedSilos.value.map((s) => ({
+        const newSilos = assignedSilos.value.map((s) => ({
             ...s,
             selected: false,
+            class: getHeroClass(s.playerState)
         }))
+        newSilos.sort((a, b) => {
+            if (a.class > b.class) {
+                return -1
+            } else if (a.class < b.class) {
+                return 1
+            }
+            return 0
+        })
+        assignedSilosRef.value = newSilos
     },
     { deep: true }
 )
