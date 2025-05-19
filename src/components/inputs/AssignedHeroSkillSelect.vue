@@ -42,6 +42,10 @@ const props = defineProps({
         type: String,
         default: "",
     },
+    showAll: {
+        type: Boolean,
+        default: false,
+    },
 })
 
 const value = computed({
@@ -56,17 +60,17 @@ const value = computed({
 const options = computed(() => {
     return [
         Skill.NONE,
-        ...props.heroes.map((h) => {
-            const decoded = safeDecode(
-                h.savedTransactions[0].data,
-                "startActions"
-            )
-            const actionId = decoded?.[1]?.[0]?.[1] || BigInt(0)
-            const action = allActions.find(
-                (a) => a.actionId === Number(actionId)
-            )
+        ...(!props.showAll ? props.heroes.map((h) => {
+        const decoded = safeDecode(
+            h.savedTransactions[0].data,
+            "startActions"
+        )
+        const actionId = decoded?.[1]?.[0]?.[1] || BigInt(0)
+        const action = allActions.find(
+            (a) => a.actionId === Number(actionId)
+        )
             return action?.info.skill || Skill.NONE
-        }),
+        }) : allActions.map((a) => a.info.skill)),
         ...props.heroes
             .map((h) => {
                 return h.queuedActions.map((q) => q.skill)

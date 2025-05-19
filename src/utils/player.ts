@@ -1,4 +1,4 @@
-import { ActionInput, Player, RandomReward } from "@paintswap/estfor-definitions/types"
+import { ActionInput, Player, RandomReward, Skill } from "@paintswap/estfor-definitions/types"
 import { getLevel } from "../store/core"
 
 export const calculateChance = (
@@ -17,7 +17,7 @@ export const calculateChance = (
     )
 }
 
-export const getHeroClass = (playerState: Player) => {
+export const getHeroClass = (playerState: Player, skill: Skill = Skill.NONE) => {
     const alchemyLevel = getLevel(playerState.alchemyXP)
     const meleeLevel = getLevel(playerState.meleeXP)
     const rangedLevel = getLevel(playerState.rangedXP)
@@ -34,6 +34,44 @@ export const getHeroClass = (playerState: Player) => {
     const fletchingLevel = getLevel(playerState.fletchingXP)
     const thievingLevel = getLevel(playerState.thievingXP)
     const firemakingLevel = getLevel(playerState.firemakingXP)
+
+    if (skill !== Skill.NONE) {
+        if (skill === Skill.ALCHEMY) {
+            return `Alchemist (${alchemyLevel})`
+        } else if (skill === Skill.MELEE) {
+            return `Warrior (${meleeLevel})`
+        } else if (skill === Skill.RANGED) {
+            return `Archer (${rangedLevel})`
+        } else if (skill === Skill.MAGIC) {
+            return `Mage (${magicLevel})`
+        } else if (skill === Skill.DEFENCE) {
+            return `Defender (${defenceLevel})`
+        } else if (skill === Skill.FARMING) {
+            return `Farmer (${farmingLevel})`
+        } else if (skill === Skill.FISHING) {
+            return `Fisherman (${fishingLevel})`
+        } else if (skill === Skill.FORGING) {
+            return `Forger (${forgeLevel})`
+        } else if (skill === Skill.CRAFTING) {
+            return `Crafter (${craftingLevel})`
+        } else if (skill === Skill.WOODCUTTING) {
+            return `Lumberjack (${woodcuttingLevel})`
+        } else if (skill === Skill.MINING) {
+            return `Miner (${miningLevel})`
+        } else if (skill === Skill.COOKING) {
+            return `Cook (${cookingLevel})`
+        } else if (skill === Skill.SMITHING) {
+            return `Blacksmith (${smithingLevel})`
+        } else if (skill === Skill.FLETCHING) {
+            return `Fletcher (${fletchingLevel})`
+        } else if (skill === Skill.THIEVING) {
+            return `Thief (${thievingLevel})`
+        } else if (skill === Skill.FIREMAKING) {
+            return `Firemaker (${firemakingLevel})`
+        } else if (skill === Skill.COMBAT) {
+            return `Combat (${meleeLevel}/${rangedLevel}/${magicLevel}/${defenceLevel})`
+        }
+    }
 
     const highestLevel = Math.max(alchemyLevel, meleeLevel, rangedLevel, magicLevel, defenceLevel, farmingLevel, fishingLevel, forgeLevel, craftingLevel, woodcuttingLevel, miningLevel, cookingLevel, smithingLevel, fletchingLevel, thievingLevel, firemakingLevel)
     

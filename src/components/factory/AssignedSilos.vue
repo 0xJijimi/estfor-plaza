@@ -36,12 +36,6 @@
                             v-model="searchValue"
                         />
                     </div>
-                    <AssignedHeroSkillSelect
-                        class="ms-2"
-                        v-model="selectedSkillGroup"
-                        :heroes="factoryStore.assignedProxys"
-                        @update:modelValue="pageNumber = 0"
-                    />
                     <AssignedHeroGroupSelect
                         class="ms-2"
                         v-model="selectedHeroGroup"
@@ -50,6 +44,38 @@
                     />
                 </div>
             </div>
+            
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <input
+                        id="hideHeroNames"
+                        type="checkbox"
+                        class="checkbox checkbox-primary card"
+                        v-model="hideHeroNames"
+                    />
+                    <label for="hideHeroNames" class="ml-2 text-xs">Hide Hero Names</label>
+                </div>
+            
+                <div class="flex items-center justify-end">
+                    <label for="matchAction" class="mr-2 text-xs">Match Running Action</label>
+                    <input
+                        id="matchAction"
+                        type="checkbox"
+                        class="checkbox checkbox-primary card"
+                        v-model="matchAction"
+                    />
+                    <AssignedHeroSkillSelect
+                        class="ms-2"
+                        v-model="selectedSkillGroup"
+                        :heroes="factoryStore.assignedProxys"
+                        @update:modelValue="pageNumber = 0"
+                        :show-all="!matchAction"
+                    />
+                </div>
+            </div>
+
+            <hr class="my-2 border-primary" />
+
             <div class="overflow-x-auto">
                 <table class="table md:table-md table-xs">
                     <thead>
@@ -82,7 +108,7 @@
                                 />
                             </td>
                             <td>
-                                {{ silo.playerState.name + ' / ' + silo.class }}
+                                {{ hideHeroNames ? silo.class : silo.playerState.name + ' / ' + silo.class }}
                             </td>
                             <td>
                                 {{ decodeTransaction(silo.savedTransactions) }}
@@ -270,7 +296,8 @@ const selectAll = ref(false)
 const searchValue = ref("")
 const selectedHeroGroup = ref("")
 const selectedSkillGroup = ref(Skill.NONE)
-
+const matchAction = ref(true)
+const hideHeroNames = ref(true)
 const assignHeroRef = ref<typeof AssignHero>()
 const executeActionsRef = ref<typeof ExecuteSiloActions>()
 const evolveHeroRef = ref<typeof EvolveHero>()
@@ -311,13 +338,18 @@ const assignedSilos = computed(() => {
                     .includes(selectedHeroGroup.value)
         )
         .filter(
-            (s) =>
-                selectedSkillGroup.value === Skill.NONE ||
-                decodeSkillFromTransaction(s.savedTransactions) ===
-                    selectedSkillGroup.value ||
-                s.queuedActions
-                    .map((a) => a.skill)
-                    .includes(selectedSkillGroup.value)
+            (s) => {
+                if (matchAction.value) {
+                    return selectedSkillGroup.value === Skill.NONE ||
+                    decodeSkillFromTransaction(s.savedTransactions) ===
+                        selectedSkillGroup.value ||
+                    s.queuedActions
+                            .map((a) => a.skill)
+                            .includes(selectedSkillGroup.value)
+                } else {
+                    return true
+                }
+            }
         )
     assignedProxys.sort((a, b) => {
         const aDecoded = decodeTransaction(a.savedTransactions)
@@ -333,7 +365,7 @@ const assignedSilos = computed(() => {
     return assignedProxys
 })
 const assignedSilosRef = ref(
-    assignedSilos.value.map((s) => ({ ...s, selected: false, class: getHeroClass(s.playerState) }))
+    assignedSilos.value.map((s) => ({ ...s, selected: false, class: getHeroClass(s.playerState, selectedSkillGroup.value) }))
 )
 
 const pagedAssignedSilos = computed(() => {
@@ -421,13 +453,11 @@ const calculateTimeLeft = (queuedAction: QueuedAction) => {
     return timeLeft > 0 ? `${Math.round(timeLeft / 1000 / 60 / 60)}h` : "Ready"
 }
 
-watch(
-    () => assignedSilos.value,
-    () => {
-        const newSilos = assignedSilos.value.map((s) => ({
+const resortSilos = () => {
+    const newSilos = assignedSilos.value.map((s) => ({
             ...s,
             selected: false,
-            class: getHeroClass(s.playerState)
+            class: getHeroClass(s.playerState, selectedSkillGroup.value)
         }))
         newSilos.sort((a, b) => {
             if (a.class > b.class) {
@@ -438,6 +468,19 @@ watch(
             return 0
         })
         assignedSilosRef.value = newSilos
+}
+
+watch (
+    () => selectedSkillGroup.value,
+    () => {
+        resortSilos()
+    }
+)
+
+watch(
+    () => assignedSilos.value,
+    () => {
+        resortSilos()
     },
     { deep: true }
 )
