@@ -9,6 +9,7 @@ import {
     RaffleEntry,
     Territory,
     UserItemNFT,
+    PlayerQuest,
 } from "@paintswap/estfor-definitions/types"
 import { sleep } from "./time"
 
@@ -84,6 +85,10 @@ export interface Avatar {
 
 export interface AvatarSearchResult {
     avatars: Avatar[]
+}
+
+export interface PlayerQuestsResult {
+    playerQuests: PlayerQuest[]
 }
 
 const fetchRetry = async (url: string, method: 'GET' | 'POST' = 'GET', body?: any) => {
@@ -296,4 +301,10 @@ export const getOwnedPets = async (
     address: string,
 ): Promise<PetsResult> => {
     return fetchRetry(`${getBaseUrl()}/pets?owner=${address}`)
+}
+
+export const getPlayerQuests = async (
+    playerId: string,
+): Promise<PlayerQuestsResult> => {
+    return fetchRetry(`${getBaseUrl()}/player-quests?playerId=${playerId}`)
 }

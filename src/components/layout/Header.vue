@@ -8,15 +8,27 @@ import { useRoute } from "vue-router"
 import { useBroochStore } from "../../store/brooch"
 import { config } from "../../config"
 import { allItems } from "../../data/items"
+import { useAppStore } from "../../store/app"
+import Changelog from "../dialogs/Changelog.vue"
 
 const itemStore = useItemStore()
 const broochStore = useBroochStore()
+const appStore = useAppStore()
 
 const route = useRoute()
 const broochTimeout = ref<number>(0)
 
 const donateRef = ref<typeof Donate>()
 const rubyUpgradeRef = ref<typeof RubyBroochPaywall>()
+const changelogRef = ref<typeof Changelog>()
+
+const lastChecked = ref(localStorage.getItem('lastChecked'))
+
+const onNotificationClick = () => {
+    localStorage.setItem('lastChecked', appStore.version)
+    lastChecked.value = appStore.version
+    changelogRef.value?.openDialog()
+}
 
 const showBrooch = (tokenId: number) => {
     let hasBrooch = false
@@ -298,6 +310,11 @@ watch(() => broochStore.hasAccess(0), init)
                     <path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" clip-rule="evenodd" />
                 </svg>
             </button> -->
+            <div v-if="lastChecked !== appStore.version" class="mr-2">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-primary cursor-pointer" :class="{ 'animate-pulse': lastChecked !== appStore.version }" @click="onNotificationClick">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                </svg>
+            </div>
             <div
                 v-if="route.meta.showItemSearch"
                 class="join max-lg:hidden items-center mr-2"
@@ -308,7 +325,7 @@ watch(() => broochStore.hasAccess(0), init)
                     viewBox="0 0 24 24"
                     stroke-width="1.5"
                     stroke="currentColor"
-                    class="w-6 h-6 mr-2 text-primary"
+                    class="w-6 h-6 mr-2 text-secondary"
                 >
                     <path
                         stroke-linecap="round"
@@ -336,6 +353,7 @@ watch(() => broochStore.hasAccess(0), init)
     </nav>
     <Donate ref="donateRef" />
     <RubyBroochPaywall ref="rubyUpgradeRef" />
+    <Changelog ref="changelogRef" id="changelog-modal" />
 </template>
 
 <style scoped>
@@ -353,5 +371,24 @@ watch(() => broochStore.hasAccess(0), init)
 
 .navbar-end {
     min-width: 280px;
+}
+
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        color: var(--primary);
+    }
+    50% {
+        transform: scale(1.1);
+        color: #fff;
+    }
+    100% {
+        transform: scale(1);
+        color: var(--primary);
+    }
 }
 </style>

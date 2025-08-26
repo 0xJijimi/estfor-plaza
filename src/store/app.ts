@@ -12,6 +12,7 @@ export interface AppState {
     toasts: Toast[]
     id: number
     loadingRoute: boolean
+    version: string
 }
 
 export const useAppStore = defineStore({
@@ -22,6 +23,7 @@ export const useAppStore = defineStore({
             toasts: [],
             id: 0,
             loadingRoute: false,
+            version: "0.0.2",
         }) as AppState,
     getters: {},
     actions: {

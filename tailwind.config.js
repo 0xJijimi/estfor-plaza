@@ -14,7 +14,12 @@ export default {
     themes: [{
       dark: {
         ...require("daisyui/src/theming/themes")["[data-theme=dark]"],
+        "--primary": "#214850",
+        "--secondary": "#44b3a8",
         primary: "#214850",
+        ".text-primary": {
+          color: "var(--primary)",
+        },
         "base-content": "#fff",
         ".bg-base-100": {
           background: "#214850",
