@@ -211,6 +211,9 @@ export const monsterNames = {
     [EstforConstants.ACTION_COMBAT_MONTANITE_FIRE_TITAN]:
         "Montanite Fire Titan",
     [EstforConstants.ACTION_COMBAT_MONTANITE_ICE_TITAN]: "Montanite Ice Titan",
+    [EstforConstants.ACTION_COMBAT_NIGHTMARE_GROG_TOAD]: "Nightmare Grog Toad",
+    [EstforConstants.ACTION_COMBAT_NIGHTMARE_NATUOW]: "Nightmare Natuow",
+    [EstforConstants.ACTION_COMBAT_NIGHTMARE_UFFINCH]: "Nightmare Uffinch",
 }
 
 export const monsterImageMap = {
@@ -246,6 +249,9 @@ export const monsterImageMap = {
         "monster_24_b8lwohyf.jpg",
     [EstforConstants.ACTION_COMBAT_MONTANITE_ICE_TITAN]:
         "monster_30_fwn42nli.jpg",
+    [EstforConstants.ACTION_COMBAT_NIGHTMARE_GROG_TOAD]: "monster_hell_02.jpg",
+    [EstforConstants.ACTION_COMBAT_NIGHTMARE_NATUOW]: "monster_hell_01.jpg",
+    [EstforConstants.ACTION_COMBAT_NIGHTMARE_UFFINCH]: "monster_hell_03.jpg",
 }
 
 export const useMonsterStore = defineStore({
